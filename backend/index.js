@@ -44,6 +44,11 @@ app.use(
 
 app.use(bodyParser.json());
 
+//Test
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Backend is running" });
+});
+
 // Use routes
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
