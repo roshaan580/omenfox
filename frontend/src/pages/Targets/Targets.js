@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
-import { REACT_APP_API_URL } from "../../env";
+import { REACT_APP_API_URL } from "../../config";
 import { authenticatedFetch } from "../../utils/axiosConfig";
 import Sidebar from "../../components/Sidebar";
 import { FaPlusCircle } from "react-icons/fa";

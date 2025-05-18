@@ -7,6 +7,8 @@
 
 # Environment files
 env.js
+.env.local
+.env
 
 # IDE files
 .vscode/
@@ -23,3 +25,4 @@ yarn-error.log*
 
 # Coverage folder (if using Jest for tests)
 /coverage/
+

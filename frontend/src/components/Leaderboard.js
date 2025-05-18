@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { GoTrophy } from "react-icons/go";
-import { FaUser, FaExclamationTriangle } from "react-icons/fa";
-import { REACT_APP_API_URL } from "../env";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { REACT_APP_API_URL } from "../config";
 
 const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);

@@ -1,10 +1,5 @@
-import { REACT_APP_API_URL } from "../../../env";
+import { REACT_APP_API_URL } from "../../../config";
 
-/**
- * Fetches transportation records for the logged-in user
- * @param {string} employeeId - Optional ID to filter by specific employee
- * @returns {Promise<Array>} Array of transportation records
- */
 export const fetchTransportationRecords = async (employeeId) => {
   try {
     // Parse user object from localStorage

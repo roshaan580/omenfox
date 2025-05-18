@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { REACT_APP_API_URL } from "../env";
+import { REACT_APP_API_URL } from "../config";
 
-/**
- * Helper function to verify token validity
- * @returns {boolean} - True if the token is valid, false otherwise
- */
 const verifyToken = async () => {
   try {
     const token = localStorage.getItem("token");

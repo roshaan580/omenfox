@@ -1,5 +1,5 @@
 import axios from "axios";
-import { REACT_APP_API_URL } from "../env";
+import { REACT_APP_API_URL } from "../config";
 
 // Create a custom axios instance
 const api = axios.create({

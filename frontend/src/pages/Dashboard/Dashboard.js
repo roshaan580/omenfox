@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../env";
+import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../config";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Sidebar from "../../components/Sidebar";

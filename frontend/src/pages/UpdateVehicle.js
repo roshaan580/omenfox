@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { REACT_APP_API_URL } from "../env";
+import { REACT_APP_API_URL } from "../config";
 
 const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
   const [vehicleName, setVehicleName] = useState("");

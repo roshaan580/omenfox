@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../env";
+import { JWT_ADMIN_SECRET } from "../../config";
 import Sidebar from "../../components/Sidebar";
 
 // Import components

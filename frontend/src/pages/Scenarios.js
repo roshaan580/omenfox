@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Row, Col, Button, Modal, Form } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
-import { REACT_APP_API_URL } from "../env";
+import { REACT_APP_API_URL } from "../config";
 import { authenticatedFetch } from "../utils/axiosConfig";
 import Sidebar from "../components/Sidebar";
 import { FaPlusCircle, FaTrash, FaEdit } from "react-icons/fa";

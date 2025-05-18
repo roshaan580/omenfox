@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
-import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../env";
+import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import { isYearlyRecordEditable, formatDecimal } from "../utils/dateUtils";
 
 const TransportEmissions = (tab) => {

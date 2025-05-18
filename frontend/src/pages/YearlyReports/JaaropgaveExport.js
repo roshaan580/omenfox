@@ -10,7 +10,7 @@ import {
   Tab,
 } from "react-bootstrap";
 import { authenticatedFetch } from "../../utils/axiosConfig";
-import { REACT_APP_API_URL } from "../../env";
+import { REACT_APP_API_URL } from "../../config";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 

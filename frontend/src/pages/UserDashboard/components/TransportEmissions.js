@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
-import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../../../env";
+import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../../../config";
 import {
   isYearlyRecordEditable,
   formatDecimal,

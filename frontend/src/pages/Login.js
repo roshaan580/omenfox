@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { REACT_APP_API_URL } from "../env";
+import { REACT_APP_API_URL } from "../config";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("ethan.williams@example.com");

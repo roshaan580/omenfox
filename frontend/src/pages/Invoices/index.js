@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { REACT_APP_API_URL } from "../../env";
+import { REACT_APP_API_URL } from "../../config";
 import Sidebar from "../../components/Sidebar";
 
 const InvoicesPage = () => {

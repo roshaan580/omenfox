@@ -1,4 +1,4 @@
-import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../../env";
+import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../../config";
 
 // Function to get userId from multiple locations
 export const getUserId = (userData) => {

@@ -10,7 +10,7 @@ import {
   ButtonGroup,
 } from "react-bootstrap";
 import { Line, Bar, Pie } from "react-chartjs-2";
-import { REACT_APP_API_URL } from "../env";
+import { REACT_APP_API_URL } from "../config";
 import { authenticatedFetch } from "../utils/axiosConfig";
 import Sidebar from "../components/Sidebar";
 import EmployeeSelect from "../components/EmployeeSelect";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../../../../env";
+import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../../../../config";
 
 /**
  * Modal component for adding or editing transport emission records

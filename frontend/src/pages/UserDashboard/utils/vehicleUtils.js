@@ -1,9 +1,5 @@
-import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../../env";
+import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../../config";
 
-/**
- * Fetches user vehicles
- * @returns {Promise<Array>} Array of vehicles
- */
 export const fetchVehicles = async () => {
   try {
     // Get the user ID from localStorage

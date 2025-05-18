@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modal, Button, Form, Card, Row, Col } from "react-bootstrap";
-import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../env";
+import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import DynamicSelect from "../components/DynamicSelect";
 import LocationPicker from "../components/LocationPicker";
 import { isRecordEditable, formatDecimal } from "../utils/dateUtils";

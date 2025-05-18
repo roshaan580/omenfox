@@ -1,5 +1,5 @@
 import axios from "axios";
-import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../../env";
+import { REACT_APP_API_URL, JWT_ADMIN_SECRET } from "../../../config";
 
 /**
  * Fetches emission resources for the logged-in user
