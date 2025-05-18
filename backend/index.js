@@ -83,15 +83,17 @@ mongoose.connection.once("open", () => {
 });
 
 mongoose
-  .connect(dotEnv.MONGO_URI)
+  .connect(dotEnv.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
-    console.log("Database connected");
-    // Start the server only after successful connection
-    app.listen(dotEnv.PORT || 5000, () => {
-      console.log(`Server is running on port ${dotEnv.PORT || 5000}`);
+    const PORT = dotEnv.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`✅ Server is running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("Database connection error:", err);
-    process.exit(1); // Exit the process if connection fails
+    console.error("❌ Database connection error:", err);
+    process.exit(1);
   });
