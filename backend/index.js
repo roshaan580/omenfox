@@ -44,7 +44,7 @@ app.use(
 
 app.use(bodyParser.json());
 
-//Test
+//Testing
 app.get("/", (req, res) => {
   res.status(200).json({ status: "ok", message: "Backend is running" });
 });
