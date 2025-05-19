@@ -402,6 +402,11 @@ const CompanyPage = () => {
     </div>
   ) : (
     <div className={`dashboard-container bg-${theme}`}>
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
       <Sidebar
         userData={userData}
         theme={theme}

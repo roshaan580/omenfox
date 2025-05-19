@@ -176,6 +176,13 @@ const VehiclePage = () => {
         <div className="container mt-4">
           <h1 className="mb-4">Vehicles</h1>
 
+          {/* Add error message display */}
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
+
           {/* Vehicle Listing Table */}
           <div className="d-flex justify-content-between align-items-center gap-2 mb-3 flex-wrap">
             <p className="mb-0">Total: {vehicles.length}</p>

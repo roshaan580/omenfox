@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { GoTrophy } from "react-icons/go";
@@ -11,7 +11,7 @@ const Leaderboard = () => {
   const [error, setError] = useState(null);
   const [month, setMonth] = useState(null);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [theme] = useState(localStorage.getItem("theme") || "light");
 
   const months = [
     { value: 1, label: "January" },
@@ -34,11 +34,8 @@ const Leaderboard = () => {
     years.push(i);
   }
 
-  useEffect(() => {
-    fetchEmissionsData();
-  }, [month, year]);
-
-  const fetchEmissionsData = async () => {
+  // Move fetchEmissionsData inside useCallback
+  const fetchEmissionsData = useCallback(async () => {
     setLoading(true);
     try {
       // Create date filters for API requests
@@ -92,7 +89,11 @@ const Leaderboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [month, year]); // Add dependencies used inside the callback
+
+  useEffect(() => {
+    fetchEmissionsData();
+  }, [fetchEmissionsData]); // Add fetchEmissionsData as a dependency
 
   // Calculate leaderboard data from emissions
   const calculateLeaderboard = (emissions, dateFilter) => {
