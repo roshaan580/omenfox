@@ -1,12 +1,3 @@
-/**
- * Date utility functions for the application
- */
-
-/**
- * Checks if a date is from the current year
- * @param {string|Date} date - The date to check (Date object or ISO string)
- * @returns {boolean} - True if the date is from the current year, false otherwise
- */
 export const isCurrentYear = (date) => {
   if (!date) return false;
 
