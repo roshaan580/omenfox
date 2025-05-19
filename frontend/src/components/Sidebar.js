@@ -304,40 +304,31 @@ const EmployeeMenu = memo(
     isActive,
     handleNavigation,
   }) => {
-    // Create custom event dispatchers - these don't depend on props so they're stable
-    const dispatchCustomEvent = useCallback(
-      (eventName) => (e) => {
-        e.stopPropagation();
-        window.dispatchEvent(new CustomEvent(eventName));
-      },
-      []
-    );
+    // Modal openers: dispatch custom events directly
+    const openTransportModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openTransportModal"));
+    }, []);
 
-    // Define all event handlers using the stable dispatchCustomEvent function
-    const openTransportModal = useCallback(
-      () => dispatchCustomEvent("openTransportModal"),
-      [dispatchCustomEvent]
-    );
+    const openWorkTransportModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openWorkTransportModal"));
+    }, []);
 
-    const openWorkTransportModal = useCallback(
-      () => dispatchCustomEvent("openWorkTransportModal"),
-      [dispatchCustomEvent]
-    );
+    const openVehicleModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openVehicleModal"));
+    }, []);
 
-    const openVehicleModal = useCallback(
-      () => dispatchCustomEvent("openVehicleModal"),
-      [dispatchCustomEvent]
-    );
+    const openOtherResourceModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openOtherResourceModal"));
+    }, []);
 
-    const openOtherResourceModal = useCallback(
-      () => dispatchCustomEvent("openOtherResourceModal"),
-      [dispatchCustomEvent]
-    );
-
-    const openProfileModal = useCallback(
-      () => dispatchCustomEvent("openProfileModal"),
-      [dispatchCustomEvent]
-    );
+    const openProfileModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openProfileModal"));
+    }, []);
 
     // This toggles the travel menu - we now include toggleExpand in dependencies
     const handleToggleTravelMenu = useCallback(() => {
