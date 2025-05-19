@@ -194,6 +194,42 @@ const DashboardPage = () => {
     return <TransportEmissions activeTab={activeTab} />;
   }, [activeTab]);
 
+  // Listen for custom modal open events dispatched from Sidebar
+  useEffect(() => {
+    const openTransportModal = () => setIsTransportationModalVisible(true);
+    const openWorkTransportModal = () =>
+      setIsWorkTransportationModalVisible(true);
+    const openVehicleModal = () => setIsRegModel(true);
+    const openOtherResourceModal = () => setIsOtherResourcesModalVisible(true);
+    const openProfileModal = () => setIsProfileModalVisible(true);
+
+    window.addEventListener("openTransportModal", openTransportModal);
+    window.addEventListener("openWorkTransportModal", openWorkTransportModal);
+    window.addEventListener("openVehicleModal", openVehicleModal);
+    window.addEventListener("openOtherResourceModal", openOtherResourceModal);
+    window.addEventListener("openProfileModal", openProfileModal);
+
+    return () => {
+      window.removeEventListener("openTransportModal", openTransportModal);
+      window.removeEventListener(
+        "openWorkTransportModal",
+        openWorkTransportModal
+      );
+      window.removeEventListener("openVehicleModal", openVehicleModal);
+      window.removeEventListener(
+        "openOtherResourceModal",
+        openOtherResourceModal
+      );
+      window.removeEventListener("openProfileModal", openProfileModal);
+    };
+  }, [
+    setIsTransportationModalVisible,
+    setIsWorkTransportationModalVisible,
+    setIsRegModel,
+    setIsOtherResourcesModalVisible,
+    setIsProfileModalVisible,
+  ]);
+
   return (
     <div className={`dashboard-container bg-${theme}`}>
       <Sidebar
