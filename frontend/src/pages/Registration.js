@@ -149,7 +149,11 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
             {!isModelVisible && !isAdmin && (
               <div className="text-center mb-4">
                 <img
-                  src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
+                  src={
+                    theme === "dark"
+                      ? "../../public/logo-white.png"
+                      : "../../public/logo-black.png"
+                  }
                   alt="Logo"
                   width={150}
                   height={84}
