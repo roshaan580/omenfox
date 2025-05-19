@@ -1,6 +1,7 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "omenfox",
+  "version": "1.0.0",
+  "homepage": "https://omenfox.vercel.app",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
