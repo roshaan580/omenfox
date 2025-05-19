@@ -4,8 +4,8 @@ import { FaBars, FaShippingFast, FaCog, FaBuilding } from "react-icons/fa";
 import { MdTravelExplore } from "react-icons/md";
 import { BsCloudHaze2Fill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import LogoWhite from "../../public/images/logo-white.png";
-import LogoBlack from "../../public/images/logo-black.png";
+import LogoWhite from "../assets/logo-white.png";
+import LogoBlack from "../assets/logo-black.png";
 
 // Reusable MenuItem Component
 const MenuItem = ({ icon, title, isExpanded, isSidebarOpen, onToggle }) => {
