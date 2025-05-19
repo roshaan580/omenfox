@@ -654,7 +654,7 @@ a {
 }
 
 .dark-theme .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%);
+  filter: invert(1) grayscale(100%) brightness(200%) !important;
 }
 
 /* Modal form controls in dark theme */
@@ -846,8 +846,7 @@ a {
 
 /* Modal close button hover effect */
 .dark-theme .modal-content .btn-close:hover {
-  opacity: 0.75;
-  filter: invert(1) grayscale(100%) brightness(200%);
+  filter: none !important;
 }
 
 /* Modal size utilities */
