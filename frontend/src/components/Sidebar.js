@@ -515,14 +515,14 @@ const Sidebar = ({
           <div className="sidebar-header-logo">
             {theme === "light" ? (
               <img
-                src="../../public/logo-black.png"
+                src="../assets/logo-black.png"
                 alt="Logo"
                 width={128}
                 height={71.41}
               />
             ) : (
               <img
-                src="../../public/logo-white.png"
+                src="../assets/logo-white.png"
                 alt="Logo"
                 width={128}
                 height={71.41}

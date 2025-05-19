@@ -93,8 +93,8 @@ const LoginPage = () => {
                 <img
                   src={
                     theme === "dark"
-                      ? "../../public/logo-white.png"
-                      : "../../public/logo-black.png"
+                      ? "../assets/logo-white.png"
+                      : "../assets/logo-black.png"
                   }
                   alt="Logo"
                   width={150}
