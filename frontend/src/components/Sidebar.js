@@ -4,6 +4,8 @@ import { FaBars, FaShippingFast, FaCog, FaBuilding } from "react-icons/fa";
 import { MdTravelExplore } from "react-icons/md";
 import { BsCloudHaze2Fill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import LogoWhite from "../../public/images/logo-white.png";
+import LogoBlack from "../../public/images/logo-black.png";
 
 // Reusable MenuItem Component
 const MenuItem = ({ icon, title, isExpanded, isSidebarOpen, onToggle }) => {
@@ -514,19 +516,9 @@ const Sidebar = ({
         >
           <div className="sidebar-header-logo">
             {theme === "light" ? (
-              <img
-                src="../assets/logo-black.png"
-                alt="Logo"
-                width={128}
-                height={71.41}
-              />
+              <img src={LogoBlack} alt="Logo" width={128} height={71.41} />
             ) : (
-              <img
-                src="../assets/logo-white.png"
-                alt="Logo"
-                width={128}
-                height={71.41}
-              />
+              <img src={LogoWhite} alt="Logo" width={128} height={71.41} />
             )}
           </div>
         </div>

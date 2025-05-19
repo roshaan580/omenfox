@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { REACT_APP_API_URL } from "../config";
+import LogoWhite from "../../public/images/logo-white.png";
+import LogoBlack from "../../public/images/logo-black.png";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("ethan.williams@example.com");
@@ -91,11 +93,7 @@ const LoginPage = () => {
             <div className="card-body">
               <div className="text-center mb-4">
                 <img
-                  src={
-                    theme === "dark"
-                      ? "../assets/logo-white.png"
-                      : "../assets/logo-black.png"
-                  }
+                  src={theme === "dark" ? LogoWhite : LogoBlack}
                   alt="Logo"
                   width={150}
                   height={84}

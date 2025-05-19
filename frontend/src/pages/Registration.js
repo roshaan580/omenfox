@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
+import LogoWhite from "../../public/images/logo-white.png";
+import LogoBlack from "../../public/images/logo-black.png";
 
 const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
   const [firstName, setFirstName] = useState(userData?.firstName || "");
@@ -149,11 +151,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
             {!isModelVisible && !isAdmin && (
               <div className="text-center mb-4">
                 <img
-                  src={
-                    theme === "dark"
-                      ? "../assets/logo-white.png"
-                      : "../assets/logo-black.png"
-                  }
+                  src={theme === "dark" ? LogoWhite : LogoBlack}
                   alt="Logo"
                   width={150}
                   height={84}
