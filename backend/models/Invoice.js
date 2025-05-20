@@ -2,15 +2,7 @@ const mongoose = require("mongoose");
 
 const invoiceSchema = new mongoose.Schema(
   {
-    fileName: {
-      type: String,
-      required: true,
-    },
     originalName: {
-      type: String,
-      required: true,
-    },
-    filePath: {
       type: String,
       required: true,
     },
