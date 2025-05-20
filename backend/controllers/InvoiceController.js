@@ -5,11 +5,23 @@ const axios = require("axios");
 const multer = require("multer");
 const { createWorker } = require("tesseract.js");
 const PDFParser = require("pdf-parse");
-const os = require("os");
-const tmp = require("tmp");
 
 // Configure multer for file uploads
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "../uploads/invoices");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, "invoice-" + uniqueSuffix + ext);
+  },
+});
+
 const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
@@ -26,10 +38,11 @@ const upload = multer({
   },
 });
 
-// Extract text from PDF file (from buffer)
-async function extractTextFromPDFBuffer(buffer) {
+// Extract text from PDF file
+async function extractTextFromPDF(filePath) {
+  const dataBuffer = fs.readFileSync(filePath);
   try {
-    const data = await PDFParser(buffer);
+    const data = await PDFParser(dataBuffer);
     return data.text;
   } catch (error) {
     console.error("Error parsing PDF:", error);
@@ -42,22 +55,16 @@ async function extractTextFromPDFBuffer(buffer) {
   }
 }
 
-// Extract text from image using OCR (from buffer)
-async function extractTextFromImageBuffer(buffer, mimetype) {
-  // tesseract.js requires a file path, so we write to /tmp
-  const ext = mimetype.split("/")[1] || "png";
-  const tmpFile = tmp.fileSync({ postfix: `.${ext}` });
-  fs.writeFileSync(tmpFile.name, buffer);
+// Extract text from image using OCR
+async function extractTextFromImage(filePath) {
   const worker = await createWorker();
   try {
     await worker.loadLanguage("eng");
     await worker.initialize("eng");
-    const { data } = await worker.recognize(tmpFile.name);
+    const { data } = await worker.recognize(filePath);
     await worker.terminate();
-    tmpFile.removeCallback();
     return data.text;
   } catch (error) {
-    tmpFile.removeCallback();
     console.error("Error performing OCR:", error);
     throw new Error(
       `OCR processing failed: ${
@@ -678,12 +685,9 @@ exports.uploadInvoice = async (req, res) => {
         let extractedText = "";
         try {
           if (req.file.mimetype === "application/pdf") {
-            extractedText = await extractTextFromPDFBuffer(req.file.buffer);
+            extractedText = await extractTextFromPDF(req.file.path);
           } else if (req.file.mimetype.startsWith("image/")) {
-            extractedText = await extractTextFromImageBuffer(
-              req.file.buffer,
-              req.file.mimetype
-            );
+            extractedText = await extractTextFromImage(req.file.path);
           }
         } catch (extractionError) {
           console.error("Text extraction error:", extractionError);
@@ -781,9 +785,11 @@ exports.uploadInvoice = async (req, res) => {
           }
         }
 
-        // Create invoice record in database (no filePath, no fileName)
+        // Create invoice record in database
         const invoice = new Invoice({
+          fileName: req.file.filename,
           originalName: req.file.originalname,
+          filePath: req.file.path,
           fileType: req.file.mimetype,
           fileSize: req.file.size,
           invoiceDate,
@@ -809,6 +815,7 @@ exports.uploadInvoice = async (req, res) => {
           message: "Invoice uploaded and processed successfully",
           invoice: {
             id: invoice._id,
+            fileName: invoice.fileName,
             originalName: invoice.originalName,
             invoiceDate: invoice.invoiceDate,
             invoiceNumber: invoice.invoiceNumber,
@@ -827,6 +834,14 @@ exports.uploadInvoice = async (req, res) => {
         });
       } catch (error) {
         console.error("Processing error:", error);
+        // Remove the uploaded file if processing fails
+        if (fs.existsSync(req.file.path)) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (unlinkError) {
+            console.error("Error removing file:", unlinkError);
+          }
+        }
         res.status(500).json({
           success: false,
           message: error.message || "Failed to process invoice",
@@ -854,6 +869,7 @@ exports.getInvoices = async (req, res) => {
       count: invoices.length,
       data: invoices.map((invoice) => ({
         id: invoice._id,
+        fileName: invoice.fileName,
         originalName: invoice.originalName,
         invoiceDate: invoice.invoiceDate,
         invoiceNumber: invoice.invoiceNumber,
@@ -897,6 +913,7 @@ exports.getInvoice = async (req, res) => {
       success: true,
       data: {
         id: invoice._id,
+        fileName: invoice.fileName,
         originalName: invoice.originalName,
         invoiceDate: invoice.invoiceDate,
         invoiceNumber: invoice.invoiceNumber,
@@ -967,6 +984,11 @@ exports.deleteInvoice = async (req, res) => {
         success: false,
         message: "Invoice not found",
       });
+    }
+
+    // Remove file from storage
+    if (fs.existsSync(invoice.filePath)) {
+      fs.unlinkSync(invoice.filePath);
     }
 
     // Remove from database
