@@ -31,8 +31,7 @@ const taskRoutes = require("./routes/taskRoutes");
 const energyEmissionRoutes = require("./routes/energyEmissions");
 const transportEmissionRoutes = require("./routes/transportEmission");
 
-// Middleware
-// Setup CORS properly for credentials
+// Middlewares
 app.use(
   cors({
     origin: dotEnv.CORS_ORIGIN || "http://localhost:3001", // Use the configured origin or default to localhost:3001
