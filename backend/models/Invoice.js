@@ -12,7 +12,7 @@ const invoiceSchema = new mongoose.Schema(
     },
     filePath: {
       type: String,
-      required: true,
+      required: false,
     },
     fileUrl: {
       type: String,
