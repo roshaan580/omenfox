@@ -32,15 +32,9 @@ const energyEmissionRoutes = require("./routes/energyEmissions");
 const transportEmissionRoutes = require("./routes/transportEmission");
 
 // Middlewares
-const allowedOrigins = [
-  "https://www.omenfoxfactory.app",
-  "https://omenfoxfactory.app",
-  "http://localhost:3000",
-];
-
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: dotEnv.CORS_ORIGIN || "http://localhost:3001", // Use the configured origin or default to localhost:3001
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // Allow cookies and authentication headers
     allowedHeaders: ["Content-Type", "Authorization"],

@@ -5,23 +5,11 @@ const axios = require("axios");
 const multer = require("multer");
 const { createWorker } = require("tesseract.js");
 const PDFParser = require("pdf-parse");
+const { createClient } = require("@supabase/supabase-js");
+require("dotenv").config(); // Load environment variables from .env
 
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../uploads/invoices");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, "invoice-" + uniqueSuffix + ext);
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
@@ -38,11 +26,17 @@ const upload = multer({
   },
 });
 
-// Extract text from PDF file
-async function extractTextFromPDF(filePath) {
-  const dataBuffer = fs.readFileSync(filePath);
+// Initialize Supabase client
+// Make sure SUPABASE_URL and SUPABASE_KEY are set in your .env and production environment
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
+// Extract text from PDF file (now accepts buffer)
+async function extractTextFromPDF(fileBuffer) {
   try {
-    const data = await PDFParser(dataBuffer);
+    const data = await PDFParser(fileBuffer);
     return data.text;
   } catch (error) {
     console.error("Error parsing PDF:", error);
@@ -55,13 +49,13 @@ async function extractTextFromPDF(filePath) {
   }
 }
 
-// Extract text from image using OCR
-async function extractTextFromImage(filePath) {
+// Extract text from image using OCR (now accepts buffer)
+async function extractTextFromImage(fileBuffer) {
   const worker = await createWorker();
   try {
     await worker.loadLanguage("eng");
     await worker.initialize("eng");
-    const { data } = await worker.recognize(filePath);
+    const { data } = await worker.recognize(fileBuffer);
     await worker.terminate();
     return data.text;
   } catch (error) {
@@ -685,9 +679,9 @@ exports.uploadInvoice = async (req, res) => {
         let extractedText = "";
         try {
           if (req.file.mimetype === "application/pdf") {
-            extractedText = await extractTextFromPDF(req.file.path);
+            extractedText = await extractTextFromPDF(req.file.buffer);
           } else if (req.file.mimetype.startsWith("image/")) {
-            extractedText = await extractTextFromImage(req.file.path);
+            extractedText = await extractTextFromImage(req.file.buffer);
           }
         } catch (extractionError) {
           console.error("Text extraction error:", extractionError);
@@ -697,6 +691,27 @@ exports.uploadInvoice = async (req, res) => {
               extractionError.message || "Failed to extract text from the file",
           });
         }
+
+        // Upload file to Supabase Storage
+        const uniqueFileName = `${Date.now()}-${req.file.originalname}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("invoices")
+          .upload(uniqueFileName, req.file.buffer, {
+            contentType: req.file.mimetype,
+            upsert: false,
+          });
+        if (uploadError) {
+          console.error("Supabase upload error:", uploadError);
+          return res.status(500).json({
+            success: false,
+            message: "Failed to upload file to storage",
+          });
+        }
+        // Get public URL
+        const { data: publicUrlData } = supabase.storage
+          .from("invoices")
+          .getPublicUrl(uniqueFileName);
+        const fileUrl = publicUrlData.publicUrl;
 
         // Extract metadata from the invoice text
         let metadata;
@@ -787,9 +802,10 @@ exports.uploadInvoice = async (req, res) => {
 
         // Create invoice record in database
         const invoice = new Invoice({
-          fileName: req.file.filename,
+          fileName: req.file.originalname, // No disk filename, use original
           originalName: req.file.originalname,
-          filePath: req.file.path,
+          filePath: "", // No file path since not stored
+          fileUrl: fileUrl, // Supabase public URL
           fileType: req.file.mimetype,
           fileSize: req.file.size,
           invoiceDate,
@@ -817,6 +833,7 @@ exports.uploadInvoice = async (req, res) => {
             id: invoice._id,
             fileName: invoice.fileName,
             originalName: invoice.originalName,
+            fileUrl: invoice.fileUrl,
             invoiceDate: invoice.invoiceDate,
             invoiceNumber: invoice.invoiceNumber,
             provider: invoice.provider,
@@ -834,14 +851,6 @@ exports.uploadInvoice = async (req, res) => {
         });
       } catch (error) {
         console.error("Processing error:", error);
-        // Remove the uploaded file if processing fails
-        if (fs.existsSync(req.file.path)) {
-          try {
-            fs.unlinkSync(req.file.path);
-          } catch (unlinkError) {
-            console.error("Error removing file:", unlinkError);
-          }
-        }
         res.status(500).json({
           success: false,
           message: error.message || "Failed to process invoice",
@@ -984,11 +993,6 @@ exports.deleteInvoice = async (req, res) => {
         success: false,
         message: "Invoice not found",
       });
-    }
-
-    // Remove file from storage
-    if (fs.existsSync(invoice.filePath)) {
-      fs.unlinkSync(invoice.filePath);
     }
 
     // Remove from database
