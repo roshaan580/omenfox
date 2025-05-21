@@ -21,6 +21,8 @@ const InvoicesPage = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [error, setError] = useState(null);
   const [processingStage, setProcessingStage] = useState("");
+  const [isViewingInvoice, setIsViewingInvoice] = useState(false);
+  const [isDownloadingInvoice, setIsDownloadingInvoice] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -265,6 +267,7 @@ const InvoicesPage = () => {
   };
 
   const handleViewInvoice = async (invoice) => {
+    setIsViewingInvoice(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
@@ -295,6 +298,8 @@ const InvoicesPage = () => {
     } catch (error) {
       console.error("Error fetching invoice details:", error);
       setError("Failed to fetch invoice details");
+    } finally {
+      setIsViewingInvoice(false);
     }
   };
 
@@ -329,6 +334,7 @@ const InvoicesPage = () => {
   };
 
   const downloadInvoice = async (invoice) => {
+    setIsDownloadingInvoice(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -365,6 +371,8 @@ const InvoicesPage = () => {
     } catch (error) {
       console.error("Error downloading invoice:", error);
       setError("Failed to download invoice");
+    } finally {
+      setIsDownloadingInvoice(false);
     }
   };
 
@@ -760,7 +768,7 @@ const InvoicesPage = () => {
       </div>
 
       {/* Invoice Details Modal */}
-      {showModal && selectedInvoice && (
+      {showModal && (
         <div className="modal-overlay">
           <div
             className="modal mw-100 w-100 show d-block custom-scrollbar"
@@ -777,189 +785,220 @@ const InvoicesPage = () => {
                   ></button>
                 </div>
                 <div className="modal-body">
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <h6>Basic Information</h6>
-                        <table className="table">
-                          <tbody>
-                            <tr>
-                              <th>File Name</th>
-                              <td>
-                                {selectedInvoice.originalName ||
-                                  selectedInvoice.fileName}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th>Invoice Number</th>
-                              <td>{selectedInvoice.invoiceNumber}</td>
-                            </tr>
-                            <tr>
-                              <th>Invoice Date</th>
-                              <td>{formatDate(selectedInvoice.invoiceDate)}</td>
-                            </tr>
-                            <tr>
-                              <th>Upload Date</th>
-                              <td>{formatDate(selectedInvoice.uploadDate)}</td>
-                            </tr>
-                            <tr>
-                              <th>Provider</th>
-                              <td>{selectedInvoice.provider}</td>
-                            </tr>
-                            <tr>
-                              <th>Type</th>
-                              <td>
-                                {selectedInvoice.emissionTypes ? (
-                                  selectedInvoice.emissionTypes.map(
-                                    (type, index) => (
+                  {isViewingInvoice || !selectedInvoice ? (
+                    <div className="text-center py-5">
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <div className="mt-2">Loading invoice details...</div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <div className="mb-3">
+                            <h6>Basic Information</h6>
+                            <table className="table">
+                              <tbody>
+                                <tr>
+                                  <th>File Name</th>
+                                  <td>
+                                    {selectedInvoice.originalName ||
+                                      selectedInvoice.fileName}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>Invoice Number</th>
+                                  <td>{selectedInvoice.invoiceNumber}</td>
+                                </tr>
+                                <tr>
+                                  <th>Invoice Date</th>
+                                  <td>
+                                    {formatDate(selectedInvoice.invoiceDate)}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>Upload Date</th>
+                                  <td>
+                                    {formatDate(selectedInvoice.uploadDate)}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>Provider</th>
+                                  <td>{selectedInvoice.provider}</td>
+                                </tr>
+                                <tr>
+                                  <th>Type</th>
+                                  <td>
+                                    {selectedInvoice.emissionTypes ? (
+                                      selectedInvoice.emissionTypes.map(
+                                        (type, index) => (
+                                          <span
+                                            key={index}
+                                            className={`badge ${getInvoiceTypeBadgeClass(
+                                              type
+                                            )} me-1`}
+                                          >
+                                            {getInvoiceTypeLabel(type)}
+                                          </span>
+                                        )
+                                      )
+                                    ) : (
                                       <span
-                                        key={index}
                                         className={`badge ${getInvoiceTypeBadgeClass(
-                                          type
-                                        )} me-1`}
+                                          selectedInvoice.type
+                                        )}`}
                                       >
-                                        {getInvoiceTypeLabel(type)}
+                                        {getInvoiceTypeLabel(
+                                          selectedInvoice.type
+                                        )}
                                       </span>
-                                    )
-                                  )
-                                ) : (
-                                  <span
-                                    className={`badge ${getInvoiceTypeBadgeClass(
-                                      selectedInvoice.type
-                                    )}`}
-                                  >
-                                    {getInvoiceTypeLabel(selectedInvoice.type)}
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                            {selectedInvoice.consumption && (
-                              <tr>
-                                <th>Consumption</th>
-                                <td>
-                                  {selectedInvoice.consumption}{" "}
-                                  {selectedInvoice.consumptionUnit}
-                                </td>
-                              </tr>
-                            )}
-                            {selectedInvoice.emissionFactor && (
-                              <tr>
-                                <th>Emission Factor</th>
-                                <td>{selectedInvoice.emissionFactor}</td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <h6>CO₂ Emissions</h6>
-                        <div className="text-center py-3">
-                          <div
-                            className="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                            style={{
-                              width: "120px",
-                              height: "120px",
-                              backgroundColor:
-                                theme === "light" ? "#e9ecef" : "#343a40",
-                              border: `3px solid ${
-                                selectedInvoice.co2Emissions < 50
-                                  ? "#28a745"
-                                  : selectedInvoice.co2Emissions < 100
-                                  ? "#ffc107"
-                                  : "#dc3545"
-                              }`,
-                            }}
-                          >
-                            <div>
-                              <h3 className="mb-0">
-                                {selectedInvoice.co2Emissions}
-                              </h3>
-                              <small>kg CO₂</small>
-                            </div>
-                          </div>
-
-                          {/* Display per-type emissions if available */}
-                          {selectedInvoice.emissionBreakdown && (
-                            <div className="mt-4">
-                              <h6>Emissions Breakdown</h6>
-                              <table className="table table-sm">
-                                <thead>
+                                    )}
+                                  </td>
+                                </tr>
+                                {selectedInvoice.consumption && (
                                   <tr>
-                                    <th>Type</th>
-                                    <th>Emissions</th>
+                                    <th>Consumption</th>
+                                    <td>
+                                      {selectedInvoice.consumption}{" "}
+                                      {selectedInvoice.consumptionUnit}
+                                    </td>
                                   </tr>
-                                </thead>
-                                <tbody>
-                                  {Object.entries(
-                                    selectedInvoice.emissionBreakdown
-                                  ).map(([type, value], index) => (
-                                    <tr key={index}>
-                                      <td>
-                                        <span
-                                          className={`badge ${getInvoiceTypeBadgeClass(
-                                            type
-                                          )}`}
-                                        >
-                                          {getInvoiceTypeLabel(type)}
-                                        </span>
-                                      </td>
-                                      <td>{value} kg CO₂</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
+                                )}
+                                {selectedInvoice.emissionFactor && (
+                                  <tr>
+                                    <th>Emission Factor</th>
+                                    <td>{selectedInvoice.emissionFactor}</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* AI Analysis Section */}
-                  {selectedInvoice.aiAnalysis && (
-                    <div className="row mt-3">
-                      <div className="col-12">
-                        <h6>AI Analysis</h6>
-                        <div className="border rounded p-3">
-                          <div className="d-flex align-items-center mb-2">
-                            <i className="fas fa-robot me-2 text-primary"></i>
-                            <span className="fw-bold">
-                              CO₂ Emissions Analysis
-                            </span>
-                          </div>
-                          <div
-                            className={`p-2 rounded ${
-                              theme === "light" ? "bg-light" : "bg-dark"
-                            }`}
-                            style={{ maxHeight: "200px", overflow: "auto" }}
-                          >
-                            <pre
-                              className="m-0"
-                              style={{
-                                whiteSpace: "pre-wrap",
-                                fontSize: "0.9rem",
-                                color:
-                                  theme === "light" ? "#212529" : "#e9ecef",
-                              }}
-                            >
-                              {selectedInvoice.aiAnalysis}
-                            </pre>
+                        <div className="col-md-6">
+                          <div className="mb-3">
+                            <h6>CO₂ Emissions</h6>
+                            <div className="text-center py-3">
+                              <div
+                                className="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style={{
+                                  width: "120px",
+                                  height: "120px",
+                                  backgroundColor:
+                                    theme === "light" ? "#e9ecef" : "#343a40",
+                                  border: `3px solid ${
+                                    selectedInvoice.co2Emissions < 50
+                                      ? "#28a745"
+                                      : selectedInvoice.co2Emissions < 100
+                                      ? "#ffc107"
+                                      : "#dc3545"
+                                  }`,
+                                }}
+                              >
+                                <div>
+                                  <h3 className="mb-0">
+                                    {selectedInvoice.co2Emissions}
+                                  </h3>
+                                  <small>kg CO₂</small>
+                                </div>
+                              </div>
+
+                              {/* Display per-type emissions if available */}
+                              {selectedInvoice.emissionBreakdown && (
+                                <div className="mt-4">
+                                  <h6>Emissions Breakdown</h6>
+                                  <table className="table table-sm">
+                                    <thead>
+                                      <tr>
+                                        <th>Type</th>
+                                        <th>Emissions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {Object.entries(
+                                        selectedInvoice.emissionBreakdown
+                                      ).map(([type, value], index) => (
+                                        <tr key={index}>
+                                          <td>
+                                            <span
+                                              className={`badge ${getInvoiceTypeBadgeClass(
+                                                type
+                                              )}`}
+                                            >
+                                              {getInvoiceTypeLabel(type)}
+                                            </span>
+                                          </td>
+                                          <td>{value} kg CO₂</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+
+                      {/* AI Analysis Section */}
+                      {selectedInvoice.aiAnalysis && (
+                        <div className="row mt-3">
+                          <div className="col-12">
+                            <h6>AI Analysis</h6>
+                            <div className="border rounded p-3">
+                              <div className="d-flex align-items-center mb-2">
+                                <i className="fas fa-robot me-2 text-primary"></i>
+                                <span className="fw-bold">
+                                  CO₂ Emissions Analysis
+                                </span>
+                              </div>
+                              <div
+                                className={`p-2 rounded ${
+                                  theme === "light" ? "bg-light" : "bg-dark"
+                                }`}
+                                style={{ maxHeight: "200px", overflow: "auto" }}
+                              >
+                                <pre
+                                  className="m-0"
+                                  style={{
+                                    whiteSpace: "pre-wrap",
+                                    fontSize: "0.9rem",
+                                    color:
+                                      theme === "light" ? "#212529" : "#e9ecef",
+                                  }}
+                                >
+                                  {selectedInvoice.aiAnalysis}
+                                </pre>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="modal-footer">
                   <button
                     className="btn btn-outline-secondary"
                     onClick={() => downloadInvoice(selectedInvoice)}
+                    disabled={isDownloadingInvoice}
                   >
-                    <i className="fas fa-download me-2"></i>
-                    Download Invoice
+                    {isDownloadingInvoice ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
+                        Downloading...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-download me-2"></i>
+                        Download Invoice
+                      </>
+                    )}
                   </button>
                   <button
                     className="btn btn-outline-danger me-auto"
