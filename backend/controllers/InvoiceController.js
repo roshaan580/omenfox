@@ -963,16 +963,29 @@ exports.downloadInvoice = async (req, res) => {
       });
     }
 
-    if (!fs.existsSync(invoice.filePath)) {
+    // Serve the file from Supabase Storage using the public URL
+    if (!invoice.fileUrl) {
       return res.status(404).json({
         success: false,
-        message: "Invoice file not found",
+        message: "Invoice file not found in storage",
       });
     }
 
-    res.download(invoice.filePath, invoice.originalName);
+    // Proxy the file from Supabase Storage
+    const fileResponse = await axios.get(invoice.fileUrl, {
+      responseType: "stream",
+    });
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=\"${invoice.originalName || invoice.fileName}\"`
+    );
+    res.setHeader(
+      "Content-Type",
+      invoice.fileType || "application/octet-stream"
+    );
+    fileResponse.data.pipe(res);
   } catch (error) {
-    console.error("Error downloading invoice:", error);
+    console.error("Error downloading invoice from Supabase:", error);
     res.status(500).json({
       success: false,
       message: "Failed to download invoice",
@@ -995,12 +1008,32 @@ exports.deleteInvoice = async (req, res) => {
       });
     }
 
+    // Remove file from Supabase Storage if present
+    if (invoice.fileName) {
+      // The file was uploaded as uniqueFileName = `${Date.now()}-${originalname}`
+      // So, try to extract the actual storage file name from fileUrl or fileName
+      let storageFileName = invoice.fileUrl
+        ? invoice.fileUrl.split("/invoices/")[1]
+        : invoice.fileName;
+      if (storageFileName) {
+        const { error: removeError } = await supabase.storage
+          .from("invoices")
+          .remove([storageFileName]);
+        if (removeError) {
+          console.error(
+            "Error deleting file from Supabase Storage:",
+            removeError
+          );
+        }
+      }
+    }
+
     // Remove from database
     await Invoice.findByIdAndDelete(invoice._id);
 
     res.status(200).json({
       success: true,
-      message: "Invoice deleted successfully",
+      message: "Invoice and file deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting invoice:", error);
