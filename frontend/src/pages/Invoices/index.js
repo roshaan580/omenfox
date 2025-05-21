@@ -412,6 +412,36 @@ const InvoicesPage = () => {
 
   return (
     <div className={`dashboard-container bg-${theme}`}>
+      {/* Full-screen overlay spinner for viewing invoice */}
+      {isViewingInvoice && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div className="text-center">
+            <div
+              className="spinner-border text-light"
+              style={{ width: "3rem", height: "3rem" }}
+              role="status"
+            >
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <div className="mt-3 text-light fs-5">
+              Loading invoice details...
+            </div>
+          </div>
+        </div>
+      )}
       <Sidebar
         userData={userData}
         theme={theme}
