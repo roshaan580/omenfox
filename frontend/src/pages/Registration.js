@@ -28,6 +28,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
   const [password, setPassword] = useState(userData?.password || ""); // Password input (optional for editing)
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [isLoading, setIsLoading] = useState(false); // State for toggling password visibility
+  const [error, setError] = useState(null);
 
   // Get theme from localStorage or use light as default
   const theme = localStorage.getItem("theme") || "light";
@@ -55,8 +56,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Prepare the data object
+    setError(null);
     const data = {
       firstName,
       lastName,
@@ -77,78 +77,46 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
         companyCar: carType,
       },
       email,
-      password, // Include password in the data object for registration
+      password,
     };
-
     try {
-      setIsLoading(true); // Set loading state
-
+      setIsLoading(true);
       const url = isModelVisible
-        ? `${REACT_APP_API_URL}/employees/${userData?._id}` // For edit mode, include the user ID in the URL
-        : `${REACT_APP_API_URL}/employees`; // For registration, no user ID is needed
-
+        ? `${REACT_APP_API_URL}/employees/${userData?._id}`
+        : `${REACT_APP_API_URL}/employees`;
       const response = await fetch(url, {
-        method: isModelVisible ? "PUT" : "POST", // Use PUT for updating and POST for creating new
+        method: isModelVisible ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`, // Include token for authentication
+          Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`,
         },
-        body: JSON.stringify(data), // Convert data to JSON format
+        body: JSON.stringify(data),
       });
-
-      // Check if the response was successful
       if (response.ok) {
-        console.log(
-          isModelVisible
-            ? "Profile updated successfully!"
-            : "Registration successful!"
-        );
         const data = await response.json();
         localStorage.setItem("token", data?.employee?.jwtToken);
         localStorage.setItem("userObj", JSON.stringify(data?.employee));
         window.location.reload();
       } else {
-        const errorData = await response.json(); // Parse the error response data
-        console.error(
-          isModelVisible ? "Profile update failed!" : "Registration failed!",
-          errorData
+        const errorData = await response.json();
+        setError(
+          errorData?.message ||
+            (isModelVisible ? "Profile update failed!" : "Registration failed!")
         );
       }
     } catch (error) {
-      // Log detailed error information
-      console.error("Error during registration/update", error);
-      alert("An error occurred. Please try again later.");
+      setError("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      {!isModelVisible && !isAdmin ? (
-        <div className="headingTitle">
-          <h4
-            style={{
-              textAlign: "center",
-              fontFamily: "Arial, sans-serif",
-              color: "#fff",
-              background: "linear-gradient(to right, #198754, #20c997)",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              textTransform: "uppercase",
-              letterSpacing: "1.5px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              display: "inline-block",
-              animation: "slideIn 1s ease-out",
-            }}
-          >
-            <i className="fas fa-user-plus" style={{ marginRight: "5px" }}></i>{" "}
-            Employee Registration
-          </h4>
-        </div>
-      ) : null}
-      <div className={`${userData ? "" : "container py-5"}`}>
-        <div className={`${userData ? "" : "row justify-content-center"} `}>
-          <div className={`${userData ? "" : "col-md-8"}`}>
-            {!isModelVisible && !isAdmin && (
+    <div className="container py-5 min-vh-100 d-flex flex-column justify-content-center">
+      <div className="row justify-content-center">
+        <div className="col-xl-6 col-lg-8 col-md-10">
+          <div className="card">
+            <div className="card-body">
               <div className="text-center mb-4">
                 <img
                   src={theme === "dark" ? LogoWhite : LogoBlack}
@@ -157,15 +125,16 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                   height={84}
                   className="mb-3"
                 />
+                <h2 className="card-title">
+                  {isModelVisible ? "Edit Profile" : "Employee Registration"}
+                </h2>
               </div>
-            )}
-            <div className="container">
-              <form
-                onSubmit={handleSubmit}
-                className={`${
-                  !isModelVisible && !isAdmin ? "border p-4 rounded" : ""
-                }`}
-              >
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+              <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-6 mb-3">
                     <label className="form-label">First Name</label>
@@ -188,7 +157,6 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                     />
                   </div>
                 </div>
-                {/* Email and Password fields */}
                 <div className="row">
                   <div className="col-6 mb-3">
                     <label className="form-label">Email</label>
@@ -200,32 +168,27 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                       required
                     />
                   </div>
-                  {/* {!isModelVisible && ( */}
                   <div className="col-6 mb-3 position-relative">
                     <label className="form-label">Password</label>
                     <input
-                      type={showPassword ? "text" : "password"} // Toggle between text and password
+                      type={showPassword ? "text" : "password"}
                       className="form-control"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
                     />
-                    {/* Eye Icon to toggle password visibility */}
-                    <div
-                      className="position-absolute"
-                      style={{
-                        top: "69%",
-                        right: "24px",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="cursorPointer position-absolute top-62 end-0 translate-middle-y me-3"
                     >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </div>
+                      {showPassword ? (
+                        <FaEyeSlash size={15} />
+                      ) : (
+                        <FaEye size={15} />
+                      )}
+                    </span>
                   </div>
-                  {/* )} */}
                 </div>
                 <div className="row">
                   <div className="col-6 mb-4">
@@ -283,48 +246,42 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                     <option value={true}>Company</option>
                   </select>
                 </div>
-                {!isModelVisible && !isAdmin ? (
-                  <div className="row text-center mt-3">
-                    <span className="text-muted">
-                      Already have an account?
-                      <Link
-                        to="/"
-                        className="btn btn-link text-success"
-                        style={{ fontSize: "16px" }}
-                      >
+                {!isModelVisible && !isAdmin && (
+                  <div className="text-center mt-3">
+                    <p>
+                      Already have an account?{" "}
+                      <Link to="/" className="regButton">
                         Login
                       </Link>
-                    </span>
+                    </p>
                   </div>
-                ) : null}
-                <div className="row">
-                  <div className="col-12 mt-3 mb-3 d-flex justify-content-center">
-                    <button
-                      className="btn btn-success w-50"
-                      type="submit"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <div
-                          className="spinner-border spinner-border-sm text-light"
-                          role="status"
-                        >
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                      ) : isModelVisible ? (
-                        "Update Profile"
-                      ) : (
-                        "Register"
-                      )}
-                    </button>
-                  </div>
+                )}
+                <div className="d-flex justify-content-center mt-3 mb-3">
+                  <button
+                    className="btn btn-success w-50"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="spinner-border spinner-border-sm text-light"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    ) : isModelVisible ? (
+                      "Update Profile"
+                    ) : (
+                      "Register"
+                    )}
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

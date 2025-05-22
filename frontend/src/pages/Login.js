@@ -86,7 +86,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container py-5">
+    <div className="container py-5 min-vh-100 d-flex flex-column justify-content-center">
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div className="card">
