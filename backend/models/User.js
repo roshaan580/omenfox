@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
         return jwt.sign(
           { userId: this._id, role: this.role },
           process.env.JWT_ADMIN_SECRET,
-          { expiresIn: "1h" }
+          { expiresIn: "15d" }
         );
       },
     },
@@ -57,7 +57,7 @@ userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     { userId: this._id, role: this.role },
     process.env.JWT_ADMIN_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "15d" }
   );
   return token;
 };

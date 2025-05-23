@@ -31,7 +31,7 @@ const employeeSchema = new mongoose.Schema(
         return jwt.sign(
           { userId: this._id, role: this.role },
           process.env.JWT_EMPLOYEE_SECRET,
-          { expiresIn: "1h" }
+          { expiresIn: "15d" }
         );
       },
     },

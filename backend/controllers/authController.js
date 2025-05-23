@@ -34,7 +34,7 @@ exports.register = async (req, res) => {
     const jwtToken = jwt.sign(
       { id: user._id, role: user.role },
       dotEnv.JWT_ADMIN_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "15d" }
     );
 
     res.status(201).json({
@@ -75,7 +75,7 @@ exports.login = async (req, res) => {
       const jwtToken = jwt.sign(
         { id: user._id, role: user.role },
         dotEnv.JWT_ADMIN_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "15d" }
       );
 
       console.log("Admin login successful:", user.email);
@@ -108,7 +108,7 @@ exports.login = async (req, res) => {
       const jwtToken = jwt.sign(
         { id: employee._id, role: "employee" },
         dotEnv.JWT_ADMIN_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "15d" }
       );
 
       console.log("Employee login successful:", employee.email);
@@ -159,7 +159,7 @@ exports.login = async (req, res) => {
 //     const token = jwt.sign(
 //       { id: user._id, role: user.role },
 //       dotEnv.JWT_ADMIN_SECRET,
-//       { expiresIn: "1h" }
+//       { expiresIn: "15d" }
 //     );
 
 //     res.status(200).json({
