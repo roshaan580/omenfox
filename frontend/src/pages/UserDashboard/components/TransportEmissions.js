@@ -277,28 +277,32 @@ const TransportEmissions = ({ activeTab }) => {
                         <td>{formatDecimal(record.weight)}</td>
                         <td>{formatDecimal(record.emissionFactor)}</td>
                         <td>
-                          {isYearlyRecordEditable(record) ? (
-                            <>
-                              <button
-                                className="btn btn-info btn-sm me-2"
-                                onClick={() => handleEdit(record)}
-                                disabled={isLoading}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => confirmDelete(record)}
-                                disabled={isLoading}
-                              >
-                                Delete
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-muted small">
-                              Locked (previous year)
-                            </span>
-                          )}
+                          <div className="d-flex gap-2 justify-content-center">
+                            {isYearlyRecordEditable(record) ? (
+                              <>
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => handleEdit(record)}
+                                  disabled={isLoading}
+                                >
+                                  <i className="fas fa-edit"></i>
+                                </Button>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => confirmDelete(record)}
+                                  disabled={isLoading}
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </Button>
+                              </>
+                            ) : (
+                              <span className="text-muted small">
+                                Locked (previous year)
+                              </span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))

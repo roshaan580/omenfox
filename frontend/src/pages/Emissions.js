@@ -522,7 +522,7 @@ const EmissionPage = () => {
 
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container-fluid mt-4">
-          <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
+          <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
             <h1>Emission Records</h1>
             <div>
               <Button

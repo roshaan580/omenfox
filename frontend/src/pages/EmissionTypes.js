@@ -14,6 +14,7 @@ const EmissionTypesPage = () => {
   const [currentEmissionType, setCurrentEmissionType] = useState({
     name: "",
     conversionFactor: "",
+    gwp: "1",
   });
   const [editEmissionTypeId, setEditEmissionTypeId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +108,7 @@ const EmissionTypesPage = () => {
   }, []);
 
   const handleAddEmissionType = () => {
-    setCurrentEmissionType({ name: "", conversionFactor: "" });
+    setCurrentEmissionType({ name: "", conversionFactor: "", gwp: "1" });
     setShowAddModal(true);
   };
 
@@ -235,6 +236,7 @@ const EmissionTypesPage = () => {
                   <th>#</th>
                   <th>Name</th>
                   <th>Conversion Factor</th>
+                  <th>GWP</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -245,6 +247,7 @@ const EmissionTypesPage = () => {
                         <td>{index + 1}</td>
                         <td>{type.name}</td>
                         <td>{type.conversionFactor}</td>
+                        <td>{type.gwp}</td>
                         <td className="text-center">
                           <div className="d-flex flex-wrap align-items-center justify-content-center gap-2">
                             <button
@@ -305,6 +308,22 @@ const EmissionTypesPage = () => {
                     required
                   />
                 </Form.Group>
+                <Form.Group controlId="gwp" className="mb-3">
+                  <Form.Label>Global Warming Potential (GWP)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="gwp"
+                    value={currentEmissionType.gwp}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                  <Form.Text className="text-muted">
+                    The relative measure of how much heat a greenhouse gas traps
+                    in the atmosphere.
+                  </Form.Text>
+                </Form.Group>
                 <div className="d-flex justify-content-end">
                   <Button variant="primary" type="submit">
                     Save Emission Type
@@ -344,6 +363,22 @@ const EmissionTypesPage = () => {
                     onChange={handleChange}
                     required
                   />
+                </Form.Group>
+                <Form.Group controlId="gwp" className="mb-3">
+                  <Form.Label>Global Warming Potential (GWP)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="gwp"
+                    value={currentEmissionType.gwp}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                  <Form.Text className="text-muted">
+                    The relative measure of how much heat a greenhouse gas traps
+                    in the atmosphere.
+                  </Form.Text>
                 </Form.Group>
                 <div className="d-flex justify-content-end">
                   <Button variant="primary" type="submit">

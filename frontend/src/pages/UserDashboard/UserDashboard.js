@@ -5,14 +5,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Components
 import Sidebar from "../../components/Sidebar";
 import TransportTable from "./components/TransportTable";
-import WorkTransportTable from "./components/WorkTransportTable";
 import ResourcesTable from "./components/ResourcesTable";
 import VehiclesTable from "./components/VehiclesTable";
 import TransportEmissions from "./components/TransportEmissions";
 
 // Modals
 import TransportationModal from "./components/modals/TransportationModal";
-import WorkTransportationModal from "./components/modals/WorkTransportationModal";
 import ResourceModal from "./components/modals/ResourceModal";
 import UpdateResourceModal from "./components/modals/UpdateResourceModal";
 import ProfileModal from "./components/modals/ProfileModal";
@@ -47,12 +45,8 @@ const DashboardPage = () => {
   // Destructure state from hooks for convenience
   const {
     employeeTransListing,
-    workTransportationData,
-    transport,
     employeeTransportationData,
-    employeeWorkTransportationData,
     setEmployeeTransportationData,
-    setEmployeeWorkTransportationData,
     filterTransportationData,
   } = transportData;
 
@@ -79,7 +73,6 @@ const DashboardPage = () => {
     filterType,
     isSidebarOpen,
     isTransportationModalVisible,
-    isWorkTransportationModalVisible,
     isOtherResourcesModalVisible,
     isUpdateResourceModalVisible,
     isProfileModalVisible,
@@ -88,7 +81,6 @@ const DashboardPage = () => {
     setFilterType,
     setIsSidebarOpen,
     setIsTransportationModalVisible,
-    setIsWorkTransportationModalVisible,
     setIsOtherResourcesModalVisible,
     setIsUpdateResourceModalVisible,
     setIsProfileModalVisible,
@@ -164,18 +156,6 @@ const DashboardPage = () => {
     [setEmployeeTransportationData]
   );
 
-  // Handle work transportation form changes
-  const handleWorkTransportationChange = useCallback(
-    (e) => {
-      const { name, value } = e.target;
-      setEmployeeWorkTransportationData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    },
-    [setEmployeeWorkTransportationData]
-  );
-
   // Handle profile update
   const handleProfileUpdate = useCallback((updatedData) => {
     localStorage.setItem("userObj", JSON.stringify(updatedData));
@@ -193,42 +173,6 @@ const DashboardPage = () => {
   const renderTransportEmissions = useCallback(() => {
     return <TransportEmissions activeTab={activeTab} />;
   }, [activeTab]);
-
-  // Listen for custom modal open events dispatched from Sidebar
-  useEffect(() => {
-    const openTransportModal = () => setIsTransportationModalVisible(true);
-    const openWorkTransportModal = () =>
-      setIsWorkTransportationModalVisible(true);
-    const openVehicleModal = () => setIsRegModel(true);
-    const openOtherResourceModal = () => setIsOtherResourcesModalVisible(true);
-    const openProfileModal = () => setIsProfileModalVisible(true);
-
-    window.addEventListener("openTransportModal", openTransportModal);
-    window.addEventListener("openWorkTransportModal", openWorkTransportModal);
-    window.addEventListener("openVehicleModal", openVehicleModal);
-    window.addEventListener("openOtherResourceModal", openOtherResourceModal);
-    window.addEventListener("openProfileModal", openProfileModal);
-
-    return () => {
-      window.removeEventListener("openTransportModal", openTransportModal);
-      window.removeEventListener(
-        "openWorkTransportModal",
-        openWorkTransportModal
-      );
-      window.removeEventListener("openVehicleModal", openVehicleModal);
-      window.removeEventListener(
-        "openOtherResourceModal",
-        openOtherResourceModal
-      );
-      window.removeEventListener("openProfileModal", openProfileModal);
-    };
-  }, [
-    setIsTransportationModalVisible,
-    setIsWorkTransportationModalVisible,
-    setIsRegModel,
-    setIsOtherResourcesModalVisible,
-    setIsProfileModalVisible,
-  ]);
 
   return (
     <div className={`dashboard-container bg-${theme}`}>
@@ -253,16 +197,6 @@ const DashboardPage = () => {
                   onClick={() => setActiveTab("transport")}
                 >
                   <i className="fas fa-car me-1"></i> Transport
-                </button>
-              </li>
-              <li className="nav-item tab-item">
-                <button
-                  className={`nav-link ${
-                    activeTab === "workTransport" ? "active" : ""
-                  }`}
-                  onClick={() => setActiveTab("workTransport")}
-                >
-                  <i className="fas fa-building me-1"></i> Work Transport
                 </button>
               </li>
               <li className="nav-item tab-item">
@@ -318,30 +252,6 @@ const DashboardPage = () => {
               </div>
 
               <TransportTable records={employeeTransListing} />
-            </div>
-          )}
-
-          {/* Work Transport Tab */}
-          {activeTab === "workTransport" && (
-            <div className="container-fluid mt-4 px-3">
-              <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h4 className="text-success mb-0">
-                  Work Transportation Records
-                </h4>
-                <div>
-                  <select
-                    className="form-select"
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    aria-label="Filter records"
-                  >
-                    <option value="self">Show My Records</option>
-                    <option value="global">Show All Records (Global)</option>
-                  </select>
-                </div>
-              </div>
-
-              <WorkTransportTable records={workTransportationData} />
             </div>
           )}
 
@@ -404,24 +314,6 @@ const DashboardPage = () => {
 
               // Finally apply the filter to update the UI
               filterTransportationData(filterType, "transport");
-            }}
-          />
-
-          <WorkTransportationModal
-            visible={isWorkTransportationModalVisible}
-            onClose={() => setIsWorkTransportationModalVisible(false)}
-            formData={employeeWorkTransportationData}
-            onChange={handleWorkTransportationChange}
-            transportOptions={transport}
-            onSubmitSuccess={async () => {
-              // First close the modal
-              setIsWorkTransportationModalVisible(false);
-
-              // Then reload the data from the server to get the latest records
-              await transportData.loadWorkTransportationData();
-
-              // Finally apply the filter to update the UI
-              filterTransportationData(filterType, "workTransport");
             }}
           />
 

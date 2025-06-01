@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { CiLogout } from "react-icons/ci";
 import { FaBars, FaShippingFast, FaCog, FaBuilding } from "react-icons/fa";
-import { MdTravelExplore } from "react-icons/md";
+import { MdManageAccounts, MdTravelExplore } from "react-icons/md";
 import { BsCloudHaze2Fill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import LogoWhite from "../assets/logo-white.png";
-import LogoBlack from "../assets/logo-black.png";
 
 // Reusable MenuItem Component
 const MenuItem = ({ icon, title, isExpanded, isSidebarOpen, onToggle }) => {
@@ -140,7 +138,7 @@ const GreenhouseEmissionsMenu = ({
             isActive={isActive("/energy-emissions")}
             onClick={handleNavigation("/energy-emissions", true)}
           >
-            Energy Emissions
+            Energy & Gas Emissions
           </NavLinkItem>
           <NavLinkItem
             to="/scenarios"
@@ -227,8 +225,55 @@ const FreightTransportsMenu = ({
   );
 };
 
-// Admin Others Menu
-const OthersMenu = ({
+// Admin Management Menu
+const ManagementMenu = ({
+  isSidebarOpen,
+  expandedItem,
+  toggleExpand,
+  isActive,
+  handleNavigation,
+}) => {
+  return (
+    <div className="nav-group mb-1">
+      <MenuItem
+        icon={<MdManageAccounts size={22} />}
+        title="Management"
+        isExpanded={expandedItem === "management"}
+        isSidebarOpen={isSidebarOpen}
+        onToggle={() => toggleExpand("management")}
+      />
+
+      {isSidebarOpen && expandedItem === "management" && (
+        <div className="submenu">
+          <NavLinkItem
+            to="/companies"
+            isActive={isActive("/companies")}
+            onClick={handleNavigation("/companies", true)}
+          >
+            Companies
+          </NavLinkItem>
+          <NavLinkItem
+            to="/employees"
+            isActive={isActive("/employees")}
+            onClick={handleNavigation("/employees", true)}
+          >
+            Employees
+          </NavLinkItem>
+          <NavLinkItem
+            to="/vehicles"
+            isActive={isActive("/vehicles")}
+            onClick={handleNavigation("/vehicles", true)}
+          >
+            Vehicles
+          </NavLinkItem>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Admin Features Menu
+const FeaturesMenu = ({
   isSidebarOpen,
   expandedItem,
   toggleExpand,
@@ -239,35 +284,14 @@ const OthersMenu = ({
     <div className="nav-group mb-1">
       <MenuItem
         icon={<FaCog size={22} />}
-        title="Others"
-        isExpanded={expandedItem === "others"}
+        title="Features"
+        isExpanded={expandedItem === "features"}
         isSidebarOpen={isSidebarOpen}
-        onToggle={() => toggleExpand("others")}
+        onToggle={() => toggleExpand("features")}
       />
 
-      {isSidebarOpen && expandedItem === "others" && (
+      {isSidebarOpen && expandedItem === "features" && (
         <div className="submenu">
-          <NavLinkItem
-            to="/companies"
-            isActive={isActive("/companies")}
-            onClick={handleNavigation("/companies", true)}
-          >
-            Company Locations
-          </NavLinkItem>
-          <NavLinkItem
-            to="/employees"
-            isActive={isActive("/employees")}
-            onClick={handleNavigation("/employees", true)}
-          >
-            Employees
-          </NavLinkItem>
-          <NavLinkItem
-            to="/yearly-reports"
-            isActive={isActive("/yearly-reports")}
-            onClick={handleNavigation("/yearly-reports", true)}
-          >
-            Yearly Reports
-          </NavLinkItem>
           <NavLinkItem
             to="/invoices"
             isActive={isActive("/invoices")}
@@ -281,13 +305,6 @@ const OthersMenu = ({
             onClick={handleNavigation("/license-plate", true)}
           >
             License Plate CO₂
-          </NavLinkItem>
-          <NavLinkItem
-            to="/dashboard"
-            isActive={isActive("/dashboard")}
-            onClick={handleNavigation("/dashboard", true)}
-          >
-            Dashboard
           </NavLinkItem>
         </div>
       )}
@@ -304,31 +321,35 @@ const EmployeeMenu = memo(
     isActive,
     handleNavigation,
   }) => {
-    // Modal openers: dispatch custom events directly
-    const openTransportModal = useCallback((e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("openTransportModal"));
-    }, []);
+    // Create custom event dispatchers - these don't depend on props so they're stable
+    const dispatchCustomEvent = useCallback(
+      (eventName) => (e) => {
+        e.stopPropagation();
+        window.dispatchEvent(new CustomEvent(eventName));
+      },
+      []
+    );
 
-    const openWorkTransportModal = useCallback((e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("openWorkTransportModal"));
-    }, []);
+    // Define all event handlers using the stable dispatchCustomEvent function
+    const openTransportModal = useCallback(
+      () => dispatchCustomEvent("openTransportModal"),
+      [dispatchCustomEvent]
+    );
 
-    const openVehicleModal = useCallback((e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("openVehicleModal"));
-    }, []);
+    const openVehicleModal = useCallback(
+      () => dispatchCustomEvent("openVehicleModal"),
+      [dispatchCustomEvent]
+    );
 
-    const openOtherResourceModal = useCallback((e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("openOtherResourceModal"));
-    }, []);
+    const openOtherResourceModal = useCallback(
+      () => dispatchCustomEvent("openOtherResourceModal"),
+      [dispatchCustomEvent]
+    );
 
-    const openProfileModal = useCallback((e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("openProfileModal"));
-    }, []);
+    const openProfileModal = useCallback(
+      () => dispatchCustomEvent("openProfileModal"),
+      [dispatchCustomEvent]
+    );
 
     // This toggles the travel menu - we now include toggleExpand in dependencies
     const handleToggleTravelMenu = useCallback(() => {
@@ -358,10 +379,6 @@ const EmployeeMenu = memo(
             <ButtonItem onClick={openTransportModal}>
               <i className="fas fa-car me-2"></i>
               Add New Transport
-            </ButtonItem>
-            <ButtonItem onClick={openWorkTransportModal}>
-              <i className="fas fa-truck me-2"></i>
-              Add New Work Transport
             </ButtonItem>
             <ButtonItem onClick={openVehicleModal}>
               <i className="fas fa-plus-circle me-2"></i>
@@ -505,17 +522,31 @@ const Sidebar = ({
             isSidebarOpen ? "" : "d-none"
           }`}
         >
-          <div className="sidebar-header-logo">
+          <div
+            className="sidebar-header-logo"
+            onClick={() => navigate(isAdmin ? "/dashboard" : "/user-dashboard")}
+            style={{ cursor: "pointer" }}
+          >
             {theme === "light" ? (
-              <img src={LogoBlack} alt="Logo" width={128} height={71.41} />
+              <img
+                src="/logo-black.png"
+                alt="Logo"
+                width={128}
+                height={71.41}
+              />
             ) : (
-              <img src={LogoWhite} alt="Logo" width={128} height={71.41} />
+              <img
+                src="/logo-white.png"
+                alt="Logo"
+                width={128}
+                height={71.41}
+              />
             )}
           </div>
         </div>
       </div>
     ),
-    [isSidebarOpen, theme, handleSidebarToggle]
+    [isSidebarOpen, theme, handleSidebarToggle, navigate, isAdmin]
   );
 
   // Sidebar footer with theme toggle and logout - memoized
@@ -604,7 +635,14 @@ const Sidebar = ({
                   expandedItem={expandedItem}
                   toggleExpand={toggleExpand}
                 />
-                <OthersMenu
+                <ManagementMenu
+                  isSidebarOpen={isSidebarOpen}
+                  expandedItem={expandedItem}
+                  toggleExpand={toggleExpand}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
+                <FeaturesMenu
                   isSidebarOpen={isSidebarOpen}
                   expandedItem={expandedItem}
                   toggleExpand={toggleExpand}

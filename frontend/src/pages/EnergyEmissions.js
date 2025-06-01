@@ -92,7 +92,7 @@ const EnergyEmissions = () => {
     const fetchEnergyEmissions = async () => {
       setLoading(true);
       try {
-        console.log("Fetching energy emissions...");
+        console.log("Fetching energy & gas emissions...");
         console.log("API URL:", `${REACT_APP_API_URL}/energy-emissions`);
 
         const response = await fetch(`${REACT_APP_API_URL}/energy-emissions`, {
@@ -110,7 +110,7 @@ const EnergyEmissions = () => {
             response.statusText
           );
           throw new Error(
-            `Failed to fetch energy emissions: ${response.status}`
+            `Failed to fetch Energy & Gas Emissions: ${response.status}`
           );
         }
 
@@ -150,7 +150,7 @@ const EnergyEmissions = () => {
         setEnergyRecords(parsedData);
         setError(null);
       } catch (error) {
-        console.error("Error fetching energy emissions:", error);
+        console.error("Error fetching energy & gas emissions:", error);
         setError(error.message);
       } finally {
         setLoading(false);

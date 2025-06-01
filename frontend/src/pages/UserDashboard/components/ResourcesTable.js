@@ -1,6 +1,7 @@
 import React from "react";
 import { formatDecimal } from "../../../utils/dateUtils";
 import { isRecordEditable } from "../../../utils/dateUtils";
+import { Button } from "react-bootstrap";
 
 /**
  * Table component for displaying resource records
@@ -36,18 +37,20 @@ const ResourcesTable = ({ resources = [], onEdit, onDelete }) => {
                   <div className="d-flex gap-2">
                     {isRecordEditable(resource) ? (
                       <>
-                        <button
-                          className="btn btn-info btn-sm"
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
                           onClick={() => onEdit(resource)}
                         >
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
+                          <i className="fas fa-edit"></i>
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
                           onClick={() => onDelete(resource._id)}
                         >
-                          Delete
-                        </button>
+                          <i className="fas fa-trash"></i>
+                        </Button>
                       </>
                     ) : (
                       <span className="text-muted small">

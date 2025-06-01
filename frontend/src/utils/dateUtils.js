@@ -14,6 +14,13 @@ export const isCurrentYear = (date) => {
   return dateYear === currentYear;
 };
 
+/**
+ * Checks if a record is editable based on its date
+ * This function specifically checks if the record is from the current year
+ * @param {Object} record - The record to check
+ * @param {string} dateField - The name of the date field in the record (default: 'date')
+ * @returns {boolean} - True if the record is editable, false otherwise
+ */
 export const isRecordEditable = (record, dateField = "date") => {
   if (!record || !record[dateField]) return false;
 

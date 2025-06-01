@@ -35,7 +35,7 @@ const transportEmissionRoutes = require("./routes/transportEmission");
 const allowedOrigins = [
   "https://www.omenfoxfactory.app",
   "https://omenfoxfactory.app",
-  "http://localhost:3000",
+  "http://localhost:3001",
 ];
 
 app.use(

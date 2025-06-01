@@ -3,9 +3,16 @@ import { Modal, Button, Form } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import { isYearlyRecordEditable, formatDecimal } from "../utils/dateUtils";
+import Sidebar from "../components/Sidebar";
+import { useNavigate } from "react-router-dom";
+import { authenticatedFetch } from "../utils/axiosConfig";
 
-const TransportEmissions = (tab) => {
-  console.log(tab);
+const TransportEmissions = () => {
+  const navigate = useNavigate();
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [userData, setUserData] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   // Safely get and parse user data
   const userObj = localStorage.getItem("userObj");
   let user = null;
@@ -14,7 +21,8 @@ const TransportEmissions = (tab) => {
   try {
     if (userObj) {
       user = JSON.parse(userObj);
-      userId = user._id || "";
+      // For admin users, use the id field, for other users use _id
+      userId = user.id || user._id || "";
     }
   } catch (error) {
     console.error("Error parsing user data:", error);
@@ -36,6 +44,49 @@ const TransportEmissions = (tab) => {
   const [deleteRecordId, setDeleteRecordId] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication and set user data
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/");
+          return;
+        }
+
+        try {
+          const response = await authenticatedFetch(
+            `${REACT_APP_API_URL}/auth/validate-token`,
+            {
+              method: "GET",
+            }
+          );
+          if (response.ok) {
+            // Set the user data
+            const userObj = JSON.parse(localStorage.getItem("userObj"));
+            setUserData(userObj);
+          } else {
+            localStorage.removeItem("token");
+            localStorage.removeItem("userObj");
+            localStorage.removeItem("userData");
+            navigate("/");
+          }
+        } catch (error) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userObj");
+          localStorage.removeItem("userData");
+          navigate("/");
+        }
+      } catch (error) {
+        navigate("/");
+      }
+    };
+
+    checkAuth();
+    // Apply theme from localStorage
+    document.body.className = `${theme}-theme`;
+  }, [navigate, theme]);
 
   const handleAdd = () => {
     if (!userId) {
@@ -97,7 +148,7 @@ const TransportEmissions = (tab) => {
     };
 
     fetchTransportEmissions();
-  }, [userId]); // Depend on userId
+  }, [userId]);
 
   const handleEdit = (record) => {
     if (!userId) {
@@ -109,8 +160,8 @@ const TransportEmissions = (tab) => {
       ...record,
       userId: userId,
     });
-    setShowModal(true);
     setIsEdit(true);
+    setShowModal(true);
     setError("");
   };
 
@@ -176,7 +227,7 @@ const TransportEmissions = (tab) => {
   };
 
   // Submit new or updated record
-  const handleSubmit = async (e, isUpdate = isEdit) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!userId) {
@@ -185,18 +236,18 @@ const TransportEmissions = (tab) => {
     }
 
     console.log(
-      isUpdate ? "Updating record..." : "Adding new record...",
+      isEdit ? "Updating record..." : "Adding new record...",
       currentRecord
     );
 
     try {
       setIsLoading(true);
 
-      const url = isUpdate
+      const url = isEdit
         ? `${REACT_APP_API_URL}/transport-emissions/${currentRecord._id}`
         : `${REACT_APP_API_URL}/transport-emissions`;
 
-      const method = isUpdate ? "PUT" : "POST";
+      const method = isEdit ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -221,27 +272,34 @@ const TransportEmissions = (tab) => {
       const responseData = await response.json();
       console.log(
         `Transport Records record ${
-          isUpdate ? "updated" : "added"
+          isEdit ? "updated" : "added"
         } successfully!`,
         responseData
       );
 
-      // Update state instead of reloading
-      if (isUpdate) {
+      // Update state with the new/updated record from the response
+      if (isEdit) {
         setTransportRecords((prev) =>
           prev.map((record) =>
-            record._id === currentRecord._id ? responseData : record
+            record._id === currentRecord._id
+              ? responseData.transportEmission
+              : record
           )
         );
       } else {
-        setTransportRecords((prev) => [...prev, responseData]);
+        // For new records, add the new record from the response to the beginning of the array
+        setTransportRecords((prev) => [
+          responseData.transportEmission,
+          ...prev,
+        ]);
       }
 
       setShowModal(false);
+      setError("");
     } catch (error) {
-      console.error(`Error ${isUpdate ? "updating" : "adding"} record:`, error);
+      console.error(`Error ${isEdit ? "updating" : "adding"} record:`, error);
       setError(
-        `Failed to ${isUpdate ? "update" : "add"} record: ${error.message}`
+        `Failed to ${isEdit ? "update" : "add"} record: ${error.message}`
       );
     } finally {
       setIsLoading(false);
@@ -270,29 +328,41 @@ const TransportEmissions = (tab) => {
     </div>
   );
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userObj");
+    localStorage.removeItem("userData");
+    navigate("/");
+  };
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.body.className = `${newTheme}-theme`;
+  };
+
   return (
-    <>
-      {/* <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <div className="container-fluid">
-                    <div className="card-header d-flex align-items-center">
-                        <i className="fas fa-bus fa-2x me-3"></i>
-                        <h4 className="card-title mb-0">Transport Emission Records</h4>
-                    </div>
-                    <button className="btn btn-outline-success" onClick={() => navigate("/dashboard")}>
-                        <FaHome className="me-2" /> Home
-                    </button>
-                </div>
-            </nav> */}
-      {tab.activeTab === "TransportEmissions" && (
-        <div className="container py-5">
+    <div className={`dashboard-container bg-${theme}`}>
+      <Sidebar
+        userData={userData}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        handleLogout={handleLogout}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
+
+      <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
+        <div className="container mt-4">
+          <h1 className="mb-4">Transport Emissions</h1>
+
           {error && renderError()}
 
           <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-            <h4 className="text-left text-success mb-0">
-              Monthly Transport Emissions
-            </h4>
+            <p className="mb-0">Total: {transportRecords.length}</p>
             <button
-              className="btn btn-success"
+              className="btn btn-outline-success d-flex align-items-center px-4 py-1 rounded-3 shadow-sm hover-shadow"
               onClick={handleAdd}
               disabled={!userId || isLoading}
             >
@@ -329,28 +399,32 @@ const TransportEmissions = (tab) => {
                         <td>{formatDecimal(record.weight)}</td>
                         <td>{formatDecimal(record.emissionFactor)}</td>
                         <td>
-                          {isYearlyRecordEditable(record) ? (
-                            <>
-                              <button
-                                className="btn btn-info btn-sm me-2"
-                                onClick={() => handleEdit(record)}
-                                disabled={isLoading}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => confirmDelete(record)}
-                                disabled={isLoading}
-                              >
-                                Delete
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-muted small">
-                              Locked (previous year)
-                            </span>
-                          )}
+                          <div className="d-flex gap-2 justify-content-center">
+                            {isYearlyRecordEditable(record) ? (
+                              <>
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => handleEdit(record)}
+                                  disabled={isLoading}
+                                >
+                                  <i className="fas fa-edit"></i>
+                                </Button>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => confirmDelete(record)}
+                                  disabled={isLoading}
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </Button>
+                              </>
+                            ) : (
+                              <span className="text-muted small">
+                                Locked (previous year)
+                              </span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -367,141 +441,159 @@ const TransportEmissions = (tab) => {
               </table>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Add/Edit Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {currentRecord._id ? "Edit" : "Add"} Transport Emission Record
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            {error && renderError()}
+          {/* Add/Edit Modal */}
+          <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {isEdit ? "Edit" : "Add"} Transport Emission Record
+              </Modal.Title>
+            </Modal.Header>
+            <Form onSubmit={handleSubmit}>
+              <Modal.Body>
+                {error && renderError()}
 
-            <Form.Group className="mb-3">
-              <Form.Label>Month</Form.Label>
-              <Form.Control
-                as="select"
-                value={currentRecord.month}
-                onChange={(e) => handleInputChange(e, "month")}
-                required
-              >
-                <option value="">Select Month</option>
-                {[
-                  "January",
-                  "February",
-                  "March",
-                  "April",
-                  "May",
-                  "June",
-                  "July",
-                  "August",
-                  "September",
-                  "October",
-                  "November",
-                  "December",
-                ].map((month, index) => (
-                  <option key={index} value={month}>
-                    {month}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Month</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={currentRecord.month}
+                    onChange={(e) => handleInputChange(e, "month")}
+                    required
+                  >
+                    <option value="">Select Month</option>
+                    {[
+                      "January",
+                      "February",
+                      "March",
+                      "April",
+                      "May",
+                      "June",
+                      "July",
+                      "August",
+                      "September",
+                      "October",
+                      "November",
+                      "December",
+                    ].map((month, index) => (
+                      <option key={index} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Year</Form.Label>
-              <Form.Control
-                type="number"
-                value={currentRecord.year}
-                onChange={(e) => handleInputChange(e, "year")}
-                placeholder="Enter Year"
-              />
-            </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Year</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={currentRecord.year}
+                    onChange={(e) => handleInputChange(e, "year")}
+                    placeholder="Enter Year"
+                    required
+                  />
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Transport Mode</Form.Label>
-              <Form.Control
-                as="select"
-                value={currentRecord.transportMode}
-                onChange={(e) => handleInputChange(e, "transportMode")}
-              >
-                <option value="">Select Mode</option>
-                {["Truck", "Train", "Ship", "Airplane"].map((mode, index) => (
-                  <option key={index} value={mode}>
-                    {mode}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Transport Mode</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={currentRecord.transportMode}
+                    onChange={(e) => handleInputChange(e, "transportMode")}
+                    required
+                  >
+                    <option value="">Select Mode</option>
+                    {["Truck", "Train", "Ship", "Airplane"].map(
+                      (mode, index) => (
+                        <option key={index} value={mode}>
+                          {mode}
+                        </option>
+                      )
+                    )}
+                  </Form.Control>
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Distance (km)</Form.Label>
-              <Form.Control
-                type="number"
-                value={currentRecord.distance}
-                onChange={(e) => handleInputChange(e, "distance")}
-                placeholder="Enter Distance"
-              />
-            </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Distance (km)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={currentRecord.distance}
+                    onChange={(e) => handleInputChange(e, "distance")}
+                    placeholder="Enter Distance"
+                    required
+                  />
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Weight (tons)</Form.Label>
-              <Form.Control
-                type="number"
-                value={currentRecord.weight}
-                onChange={(e) => handleInputChange(e, "weight")}
-                placeholder="Enter Weight"
-              />
-            </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Weight (tons)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={currentRecord.weight}
+                    onChange={(e) => handleInputChange(e, "weight")}
+                    placeholder="Enter Weight"
+                    required
+                  />
+                </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Emission Factor (kg CO₂/ton-km)</Form.Label>
-              <Form.Control
-                type="number"
-                value={currentRecord.emissionFactor}
-                onChange={(e) => handleInputChange(e, "emissionFactor")}
-                placeholder="Enter Emission Factor"
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="success" type="submit">
-              {isEdit ? "Update" : "Save"}{" "}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+                <Form.Group className="mb-3">
+                  <Form.Label>Emission Factor (kg CO₂/ton-km)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={currentRecord.emissionFactor}
+                    onChange={(e) => handleInputChange(e, "emissionFactor")}
+                    placeholder="Enter Emission Factor"
+                    required
+                  />
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                  Cancel
+                </Button>
+                <Button variant="success" type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      {isEdit ? "Updating..." : "Saving..."}
+                    </>
+                  ) : (
+                    <>{isEdit ? "Update" : "Save"}</>
+                  )}
+                </Button>
+              </Modal.Footer>
+            </Form>
+          </Modal>
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        show={showDeleteConfirm}
-        onHide={() => setShowDeleteConfirm(false)}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to delete this Transport Emission record?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDeleteConfirm(false)}
+          {/* Delete Confirmation Modal */}
+          <Modal
+            show={showDeleteConfirm}
+            onHide={() => setShowDeleteConfirm(false)}
           >
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Delete
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Delete</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to delete this Transport Emission record?
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleDelete}>
+                Delete
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
+      </div>
+    </div>
   );
 };
 
