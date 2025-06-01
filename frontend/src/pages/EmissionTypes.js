@@ -75,12 +75,12 @@ const EmissionTypesPage = () => {
       try {
         console.log("Fetching emission types...");
         console.log("API URL:", `${REACT_APP_API_URL}/emission-types`);
-
+        const token = localStorage.getItem("token");
         const response = await fetch(`${REACT_APP_API_URL}/emission-types`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -120,9 +120,10 @@ const EmissionTypesPage = () => {
 
   const handleDeleteEmissionType = async (id) => {
     try {
+      const token = localStorage.getItem("token");
       await axios.delete(`${REACT_APP_API_URL}/emission-types/${id}`, {
         headers: {
-          Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setEmissionTypes(emissionTypes.filter((type) => type._id !== id));
@@ -134,12 +135,13 @@ const EmissionTypesPage = () => {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${REACT_APP_API_URL}/emission-types`,
         currentEmissionType,
         {
           headers: {
-            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -153,12 +155,13 @@ const EmissionTypesPage = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.put(
         `${REACT_APP_API_URL}/emission-types/${editEmissionTypeId}`,
         currentEmissionType,
         {
           headers: {
-            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
