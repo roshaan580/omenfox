@@ -4,6 +4,8 @@ import { FaBars, FaShippingFast, FaCog, FaBuilding } from "react-icons/fa";
 import { MdManageAccounts, MdTravelExplore } from "react-icons/md";
 import { BsCloudHaze2Fill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import LogoWhite from "../assets/logo-white.png";
+import LogoBlack from "../assets/logo-black.png";
 
 // Reusable MenuItem Component
 const MenuItem = ({ icon, title, isExpanded, isSidebarOpen, onToggle }) => {
@@ -321,35 +323,26 @@ const EmployeeMenu = memo(
     isActive,
     handleNavigation,
   }) => {
-    // Create custom event dispatchers - these don't depend on props so they're stable
-    const dispatchCustomEvent = useCallback(
-      (eventName) => (e) => {
-        e.stopPropagation();
-        window.dispatchEvent(new CustomEvent(eventName));
-      },
-      []
-    );
+    // Modal openers: dispatch custom events directly
+    const openTransportModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openTransportModal"));
+    }, []);
 
-    // Define all event handlers using the stable dispatchCustomEvent function
-    const openTransportModal = useCallback(
-      () => dispatchCustomEvent("openTransportModal"),
-      [dispatchCustomEvent]
-    );
+    const openVehicleModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openVehicleModal"));
+    }, []);
 
-    const openVehicleModal = useCallback(
-      () => dispatchCustomEvent("openVehicleModal"),
-      [dispatchCustomEvent]
-    );
+    const openOtherResourceModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openOtherResourceModal"));
+    }, []);
 
-    const openOtherResourceModal = useCallback(
-      () => dispatchCustomEvent("openOtherResourceModal"),
-      [dispatchCustomEvent]
-    );
-
-    const openProfileModal = useCallback(
-      () => dispatchCustomEvent("openProfileModal"),
-      [dispatchCustomEvent]
-    );
+    const openProfileModal = useCallback((e) => {
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent("openProfileModal"));
+    }, []);
 
     // This toggles the travel menu - we now include toggleExpand in dependencies
     const handleToggleTravelMenu = useCallback(() => {
@@ -522,31 +515,17 @@ const Sidebar = ({
             isSidebarOpen ? "" : "d-none"
           }`}
         >
-          <div
-            className="sidebar-header-logo"
-            onClick={() => navigate(isAdmin ? "/dashboard" : "/user-dashboard")}
-            style={{ cursor: "pointer" }}
-          >
+          <div className="sidebar-header-logo">
             {theme === "light" ? (
-              <img
-                src="/logo-black.png"
-                alt="Logo"
-                width={128}
-                height={71.41}
-              />
+              <img src={LogoBlack} alt="Logo" width={128} height={71.41} />
             ) : (
-              <img
-                src="/logo-white.png"
-                alt="Logo"
-                width={128}
-                height={71.41}
-              />
+              <img src={LogoWhite} alt="Logo" width={128} height={71.41} />
             )}
           </div>
         </div>
       </div>
     ),
-    [isSidebarOpen, theme, handleSidebarToggle, navigate, isAdmin]
+    [isSidebarOpen, theme, handleSidebarToggle]
   );
 
   // Sidebar footer with theme toggle and logout - memoized
