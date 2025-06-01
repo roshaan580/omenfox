@@ -14,26 +14,54 @@ const LocationPicker = ({
   error = "",
   disabled = false,
 }) => {
-  const [location, setLocation] = useState(value || null);
+  const [location, setLocation] = useState(() => {
+    // Initialize with properly parsed coordinates
+    if (value) {
+      return {
+        address: value.address || "",
+        lat: parseFloat(value.lat) || 0,
+        lon: parseFloat(value.lon) || 0,
+      };
+    }
+    return null;
+  });
 
   // Update local state when prop changes
   useEffect(() => {
     if (value) {
-      setLocation(value);
+      setLocation({
+        address: value.address || "",
+        lat: parseFloat(value.lat) || 0,
+        lon: parseFloat(value.lon) || 0,
+      });
     }
   }, [value]);
 
   const handleLocationSelect = (newLocation) => {
-    setLocation(newLocation);
-    if (onChange) {
-      onChange(newLocation);
+    if (newLocation) {
+      const parsedLocation = {
+        address: newLocation.address || "",
+        lat: parseFloat(newLocation.lat) || 0,
+        lon: parseFloat(newLocation.lon) || 0,
+      };
+      setLocation(parsedLocation);
+      if (onChange) {
+        onChange(parsedLocation);
+      }
     }
   };
 
   const handleMapLocationSelect = (mapLocation) => {
-    setLocation(mapLocation);
-    if (onChange) {
-      onChange(mapLocation);
+    if (mapLocation) {
+      const parsedLocation = {
+        address: mapLocation.address || "",
+        lat: parseFloat(mapLocation.lat) || 0,
+        lon: parseFloat(mapLocation.lon) || 0,
+      };
+      setLocation(parsedLocation);
+      if (onChange) {
+        onChange(parsedLocation);
+      }
     }
   };
 
@@ -69,8 +97,8 @@ const LocationPicker = ({
 LocationPicker.propTypes = {
   value: PropTypes.shape({
     address: PropTypes.string,
-    lat: PropTypes.number,
-    lon: PropTypes.number,
+    lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    lon: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   }),
   onChange: PropTypes.func,
   label: PropTypes.string,

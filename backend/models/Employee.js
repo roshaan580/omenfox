@@ -7,7 +7,15 @@ const employeeSchema = new mongoose.Schema(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     homeAddress: { type: String, required: true },
+    homeLocation: {
+      lat: { type: Number, required: true },
+      lon: { type: Number, required: true },
+    },
     companyAddress: { type: String, required: true },
+    companyLocation: {
+      lat: { type: Number, required: true },
+      lon: { type: Number, required: true },
+    },
     email: {
       type: String,
       required: true,

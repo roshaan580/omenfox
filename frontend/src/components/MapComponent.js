@@ -23,14 +23,14 @@ L.Icon.Default.mergeOptions({
 });
 
 // Component to update the map view when location changes
-const MapUpdater = ({ center }) => {
+const MapUpdater = ({ center, zoom }) => {
   const map = useMap();
 
   useEffect(() => {
     if (center && Array.isArray(center) && center.length === 2) {
-      map.flyTo(center, map.getZoom());
+      map.setView(center, zoom || map.getZoom());
     }
-  }, [center, map]);
+  }, [center, map, zoom]);
 
   return null;
 };
@@ -54,8 +54,8 @@ const MapClickHandler = ({ onLocationSelected }) => {
           const data = await response.json();
 
           onLocationSelected({
-            lat: lat,
-            lon: lng,
+            lat: parseFloat(lat),
+            lon: parseFloat(lng),
             address: data.display_name,
             placeId: data.place_id,
             addressComponents: data.address,
@@ -63,8 +63,8 @@ const MapClickHandler = ({ onLocationSelected }) => {
         } catch (error) {
           console.error("Error reverse geocoding:", error);
           onLocationSelected({
-            lat: lat,
-            lon: lng,
+            lat: parseFloat(lat),
+            lon: parseFloat(lng),
             address: `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`,
           });
         }
@@ -88,11 +88,19 @@ const MapComponent = ({
   className = "",
   popupContent = null,
 }) => {
-  const [position, setPosition] = useState([51.505, -0.09]); // Default to London
+  // Initialize position with location data or default to London
+  const [position, setPosition] = useState(() => {
+    if (location?.lat && location?.lon) {
+      return [parseFloat(location.lat), parseFloat(location.lon)];
+    }
+    return [51.505, -0.09]; // Default to London
+  });
 
+  // Update position when location changes
   useEffect(() => {
-    if (location && location.lat && location.lon) {
-      setPosition([location.lat, location.lon]);
+    if (location?.lat && location?.lon) {
+      const newPosition = [parseFloat(location.lat), parseFloat(location.lon)];
+      setPosition(newPosition);
     }
   }, [location]);
 
@@ -108,7 +116,7 @@ const MapComponent = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
-        <MapUpdater center={position} />
+        <MapUpdater center={position} zoom={defaultZoom} />
 
         {showMarker && location && (
           <Marker position={position}>
@@ -130,8 +138,8 @@ const MapComponent = ({
 
 MapComponent.propTypes = {
   location: PropTypes.shape({
-    lat: PropTypes.number,
-    lon: PropTypes.number,
+    lat: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    lon: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     address: PropTypes.string,
   }),
   onLocationSelected: PropTypes.func,

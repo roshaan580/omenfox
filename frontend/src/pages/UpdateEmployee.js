@@ -4,18 +4,21 @@ import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
 
 const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
-  const [firstName, setFirstName] = useState(userData?.firstName || "");
-  const [lastName, setLastName] = useState(userData?.lastName || "");
+  // Initialize state with properly structured location data
   const [homeAddress, setHomeAddress] = useState({
     address: userData?.homeAddress || "",
-    lat: userData?.homeLocation?.lat || 0,
-    lon: userData?.homeLocation?.lon || 0,
+    lat: parseFloat(userData?.homeLocation?.lat) || 0,
+    lon: parseFloat(userData?.homeLocation?.lon) || 0,
   });
+
   const [companyAddress, setCompanyAddress] = useState({
     address: userData?.companyAddress || "",
-    lat: userData?.companyLocation?.lat || 0,
-    lon: userData?.companyLocation?.lon || 0,
+    lat: parseFloat(userData?.companyLocation?.lat) || 0,
+    lon: parseFloat(userData?.companyLocation?.lon) || 0,
   });
+
+  const [firstName, setFirstName] = useState(userData?.firstName || "");
+  const [lastName, setLastName] = useState(userData?.lastName || "");
   const [carName, setCarName] = useState(userData?.car?.name || ""); // Car name input
   const [licensePlate, setLicensePlate] = useState(
     userData?.car?.licensePlate || ""
@@ -28,25 +31,25 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
   const [updateSuccess, setUpdateSuccess] = useState(false); // State for showing success message
   const [updateError, setUpdateError] = useState(""); // State for showing error message
 
+  // Update state when modal becomes visible or userData changes
   useEffect(() => {
-    if (isModelVisible) {
+    if (isModelVisible && userData) {
       setFirstName(userData?.firstName || "");
       setLastName(userData?.lastName || "");
       setHomeAddress({
         address: userData?.homeAddress || "",
-        lat: userData?.homeLocation?.lat || 0,
-        lon: userData?.homeLocation?.lon || 0,
+        lat: parseFloat(userData?.homeLocation?.lat) || 0,
+        lon: parseFloat(userData?.homeLocation?.lon) || 0,
       });
       setCompanyAddress({
         address: userData?.companyAddress || "",
-        lat: userData?.companyLocation?.lat || 0,
-        lon: userData?.companyLocation?.lon || 0,
+        lat: parseFloat(userData?.companyLocation?.lat) || 0,
+        lon: parseFloat(userData?.companyLocation?.lon) || 0,
       });
       setCarName(userData?.car?.name || "");
       setLicensePlate(userData?.car?.licensePlate || "");
       setCarType(userData?.car?.companyCar);
       setEmail(userData?.email || "");
-      // Reset states when modal opens
       setUpdateSuccess(false);
       setUpdateError("");
     }
@@ -54,24 +57,21 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Reset states
     setUpdateSuccess(false);
     setUpdateError("");
 
-    // Prepare the data object
     const data = {
       firstName,
       lastName,
       homeAddress: homeAddress.address,
       homeLocation: {
-        lat: homeAddress.lat,
-        lon: homeAddress.lon,
+        lat: parseFloat(homeAddress.lat),
+        lon: parseFloat(homeAddress.lon),
       },
       companyAddress: companyAddress.address,
       companyLocation: {
-        lat: companyAddress.lat,
-        lon: companyAddress.lon,
+        lat: parseFloat(companyAddress.lat),
+        lon: parseFloat(companyAddress.lon),
       },
       car: {
         name: carName,
@@ -80,46 +80,37 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
         companyCar: carType,
       },
       email,
-      password, // Include password in the data object for registration
+      password,
     };
 
     try {
-      setIsLoading(true); // Set loading state
-
-      const url = `${REACT_APP_API_URL}/employees/${userData?._id}`; // For edit mode, include the user ID in the URL
+      setIsLoading(true);
+      const url = `${REACT_APP_API_URL}/employees/${userData?._id}`;
 
       const response = await fetch(url, {
-        method: "PUT", // Use PUT for updating and POST for creating new
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`, // Include token for authentication
+          Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`,
         },
-        body: JSON.stringify(data), // Convert data to JSON format
+        body: JSON.stringify(data),
       });
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("API response:", responseData);
-
-        // Call onUpdate with the updated employee data but prevent default form submission behavior
         if (onUpdate && typeof onUpdate === "function") {
           onUpdate(responseData?.employee);
         }
-
-        // Set success message
         setUpdateSuccess(true);
-
-        // Log success but don't redirect
         console.log("Profile updated successfully!");
       } else {
-        const errorData = await response.json(); // Parse the error response data
+        const errorData = await response.json();
         console.error("Profile update failed!", errorData);
         setUpdateError(
           errorData.message || "Failed to update profile. Please try again."
         );
       }
     } catch (error) {
-      // Log detailed error information
       console.error("Error during update", error);
       setUpdateError("An error occurred. Please try again later.");
     } finally {
@@ -164,7 +155,6 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
             />
           </div>
         </div>
-        {/* Email and Password fields */}
         <div className="row">
           <div className="col-6 mb-3">
             <label className="form-label">Email</label>
@@ -179,13 +169,12 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
           <div className="col-6 mb-3 position-relative">
             <label className="form-label">Password</label>
             <input
-              type={showPassword ? "text" : "password"} // Toggle between text and password
+              type={showPassword ? "text" : "password"}
               className="form-control"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {/* Eye Icon to toggle password visibility */}
             <div
               className="position-absolute"
               style={{
@@ -194,12 +183,11 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
                 transform: "translateY(-50%)",
                 cursor: "pointer",
               }}
-              onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+              onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </div>
           </div>
-          {/* )} */}
         </div>
         <div className="row">
           <div className="col-6 mb-4">
@@ -250,11 +238,11 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
           <select
             className="form-select"
             value={carType}
-            onChange={(e) => setCarType(e.target.value)}
+            onChange={(e) => setCarType(e.target.value === "true")}
             required
           >
-            <option value={false}>Personal</option>
-            <option value={true}>Company</option>
+            <option value="false">Personal</option>
+            <option value="true">Company</option>
           </select>
         </div>
         <div className="d-flex justify-content-end">

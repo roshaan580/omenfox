@@ -24,7 +24,6 @@ exports.getEmployeeById = async (req, res) => {
 };
 
 // Create a new employee
-
 exports.createEmployee = async (req, res) => {
   const {
     firstName,
@@ -32,7 +31,9 @@ exports.createEmployee = async (req, res) => {
     email,
     password,
     homeAddress,
+    homeLocation,
     companyAddress,
+    companyLocation,
     car,
   } = req.body;
 
@@ -55,7 +56,15 @@ exports.createEmployee = async (req, res) => {
       email,
       password,
       homeAddress,
+      homeLocation: {
+        lat: parseFloat(homeLocation.lat),
+        lon: parseFloat(homeLocation.lon),
+      },
       companyAddress,
+      companyLocation: {
+        lat: parseFloat(companyLocation.lat),
+        lon: parseFloat(companyLocation.lon),
+      },
       car: savedCar._id, // Save the car's ID in the employee
     });
 
@@ -64,7 +73,6 @@ exports.createEmployee = async (req, res) => {
 
     // Now, update the saved car with the employee ID
     savedCar.employeeId = newEmployee._id;
-    console.log((savedCar.employeeId = newEmployee._id));
     await savedCar.save();
 
     // Return the newly created employee along with the car info
@@ -86,7 +94,9 @@ exports.updateEmployee = async (req, res) => {
     email,
     password,
     homeAddress,
+    homeLocation,
     companyAddress,
+    companyLocation,
     car,
   } = req.body;
 
@@ -128,7 +138,19 @@ exports.updateEmployee = async (req, res) => {
     employee.email = email || employee.email;
     employee.password = password || employee.password;
     employee.homeAddress = homeAddress || employee.homeAddress;
+    if (homeLocation) {
+      employee.homeLocation = {
+        lat: parseFloat(homeLocation.lat),
+        lon: parseFloat(homeLocation.lon),
+      };
+    }
     employee.companyAddress = companyAddress || employee.companyAddress;
+    if (companyLocation) {
+      employee.companyLocation = {
+        lat: parseFloat(companyLocation.lat),
+        lon: parseFloat(companyLocation.lon),
+      };
+    }
 
     // Save the updated employee details
     const updatedEmployee = await employee.save();
