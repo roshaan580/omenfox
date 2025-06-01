@@ -364,7 +364,7 @@ const EmployeeMenu = memo(
             <NavLinkItem
               to="/user-dashboard"
               isActive={isActive("/user-dashboard")}
-              onClick={handleNavigation("/user-dashboard", false, true)}
+              onClick={handleNavigation("/user-dashboard", false, false)}
             >
               <i className="fas fa-tachometer-alt me-2"></i>
               My Dashboard
@@ -514,6 +514,8 @@ const Sidebar = ({
           className={`welcome-section mt-md-0 mt-4 ${
             isSidebarOpen ? "" : "d-none"
           }`}
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate(isAdmin ? "/dashboard" : "/user-dashboard")}
         >
           <div className="sidebar-header-logo">
             {theme === "light" ? (
@@ -525,7 +527,7 @@ const Sidebar = ({
         </div>
       </div>
     ),
-    [isSidebarOpen, theme, handleSidebarToggle]
+    [isSidebarOpen, theme, handleSidebarToggle, navigate, isAdmin]
   );
 
   // Sidebar footer with theme toggle and logout - memoized

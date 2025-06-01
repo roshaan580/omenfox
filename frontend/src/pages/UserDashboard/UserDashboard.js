@@ -305,6 +305,7 @@ const DashboardPage = () => {
             onClose={() => setIsTransportationModalVisible(false)}
             formData={employeeTransportationData}
             onChange={handleTransportationChange}
+            vehicles={vehicles}
             onSubmitSuccess={async () => {
               // First close the modal
               setIsTransportationModalVisible(false);

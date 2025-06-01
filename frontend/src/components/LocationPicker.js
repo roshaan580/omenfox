@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import LocationAutocomplete from "./LocationAutocomplete";
 import MapComponent from "./MapComponent";
@@ -37,39 +37,29 @@ const LocationPicker = ({
     }
   }, [value]);
 
-  const handleLocationSelect = (newLocation) => {
-    if (newLocation) {
-      const parsedLocation = {
-        address: newLocation.address || "",
-        lat: parseFloat(newLocation.lat) || 0,
-        lon: parseFloat(newLocation.lon) || 0,
-      };
-      setLocation(parsedLocation);
-      if (onChange) {
-        onChange(parsedLocation);
+  // Memoize the location update handler
+  const handleLocationUpdate = useCallback(
+    (newLocation) => {
+      if (newLocation) {
+        const parsedLocation = {
+          address: newLocation.address || "",
+          lat: parseFloat(newLocation.lat) || 0,
+          lon: parseFloat(newLocation.lon) || 0,
+        };
+        setLocation(parsedLocation);
+        if (onChange) {
+          onChange(parsedLocation);
+        }
       }
-    }
-  };
-
-  const handleMapLocationSelect = (mapLocation) => {
-    if (mapLocation) {
-      const parsedLocation = {
-        address: mapLocation.address || "",
-        lat: parseFloat(mapLocation.lat) || 0,
-        lon: parseFloat(mapLocation.lon) || 0,
-      };
-      setLocation(parsedLocation);
-      if (onChange) {
-        onChange(parsedLocation);
-      }
-    }
-  };
+    },
+    [onChange]
+  );
 
   return (
     <div className={`location-picker ${className}`}>
       <LocationAutocomplete
         value={location}
-        onSelect={handleLocationSelect}
+        onSelect={handleLocationUpdate}
         placeholder={placeholder}
         label={label}
         required={required}
@@ -80,9 +70,11 @@ const LocationPicker = ({
       <div className="mt-2">
         <MapComponent
           location={location}
-          onLocationSelected={handleMapLocationSelect}
+          onLocationSelected={handleLocationUpdate}
           height={mapHeight}
           className="rounded border"
+          showMarker={true}
+          defaultZoom={13}
         />
         {location && (
           <small className="form-text text-muted mt-1">

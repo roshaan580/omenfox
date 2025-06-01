@@ -20,16 +20,28 @@ exports.getTransportationRecords = async (req, res) => {
 // Create a new transportation record
 exports.createTransportationRecord = async (req, res) => {
   try {
+    console.log("Received data:", req.body); // Log received data
+
     const {
       transportationMode,
       beginLocation,
+      beginLocationLat,
+      beginLocationLon,
       endLocation,
+      endLocationLat,
+      endLocationLon,
       date,
       recurring,
       employeeId,
+      vehicleId,
+      carType,
+      co2Emission,
+      usageType,
+      workFromHomeDays,
+      recurrenceDays,
     } = req.body;
 
-    // Validation (check if fields are empty)
+    // Validation
     if (
       !transportationMode ||
       !beginLocation ||
@@ -37,25 +49,54 @@ exports.createTransportationRecord = async (req, res) => {
       !date ||
       !employeeId
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        message: "Required fields missing",
+        required: [
+          "transportationMode",
+          "beginLocation",
+          "endLocation",
+          "date",
+          "employeeId",
+        ],
+        received: req.body,
+      });
     }
 
-    const transportationRecord = await EmployeeTransportation.create({
+    // Create new record
+    const transportationRecord = new EmployeeTransportation({
       transportationMode,
       beginLocation,
+      beginLocationLat,
+      beginLocationLon,
       endLocation,
+      endLocationLat,
+      endLocationLon,
       date,
-      recurring,
+      recurring: recurring || false,
       employeeId,
+      vehicleId,
+      carType,
+      co2Emission: parseFloat(co2Emission),
+      usageType,
+      workFromHomeDays: parseInt(workFromHomeDays) || 0,
+      recurrenceDays: parseInt(recurrenceDays) || 0,
     });
+
+    // Save the record
+    const savedRecord = await transportationRecord.save();
+    console.log("Saved record:", savedRecord);
 
     res.status(201).json({
       message: "Transportation record added successfully!",
-      data: transportationRecord,
+      data: savedRecord,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error saving transportation record" });
+    console.error("Error in createTransportationRecord:", error);
+    res.status(500).json({
+      message: "Error saving transportation record",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 

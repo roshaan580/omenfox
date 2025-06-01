@@ -129,6 +129,11 @@ export const saveTransportationRecord = async (formData) => {
       // Clean up location strings by removing any extra quotes
       beginLocation: formData.beginLocation.replace(/"/g, ""),
       endLocation: formData.endLocation.replace(/"/g, ""),
+      // Ensure location coordinates are numbers
+      beginLocationLat: parseFloat(formData.beginLocationLat) || 0,
+      beginLocationLon: parseFloat(formData.beginLocationLon) || 0,
+      endLocationLat: parseFloat(formData.endLocationLat) || 0,
+      endLocationLon: parseFloat(formData.endLocationLon) || 0,
       // Format date
       date: new Date(formData.date).toISOString(),
       // Convert numeric fields
@@ -159,16 +164,17 @@ export const saveTransportationRecord = async (formData) => {
       }
     );
 
+    const responseData = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Server error response:", errorData);
+      console.error("Server error response:", responseData);
       throw new Error(
-        errorData.message || "Failed to save transportation record"
+        responseData.message || "Failed to save transportation record"
       );
     }
 
     console.log("Transportation record saved successfully!");
-    return await response.json();
+    return responseData;
   } catch (error) {
     console.error("Error saving transportation record:", error);
     throw error;
