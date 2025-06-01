@@ -111,11 +111,20 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
     }
   };
 
+  // Determine container classes based on whether it's a modal or page
+  const containerClasses = isAdmin
+    ? "d-flex flex-column justify-content-center"
+    : "container py-5 px-0 px-md-4 min-vh-100 d-flex flex-column  justify-content-center";
+
+  const cardClasses = isAdmin ? "w-100" : "col-xl-6 col-lg-8 col-md-10";
+
+  const cardStyles = isAdmin ? { margin: 0 } : {};
+
   return (
-    <div className="container py-5 min-vh-100 d-flex flex-column justify-content-center">
+    <div className={containerClasses}>
       <div className="row justify-content-center">
-        <div className="col-xl-6 col-lg-8 col-md-10">
-          <div className="card">
+        <div className={cardClasses}>
+          <div className="card" style={cardStyles}>
             <div className="card-body">
               <div className="text-center mb-4">
                 <img
@@ -136,7 +145,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
               )}
               <form onSubmit={handleSubmit}>
                 <div className="row">
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">First Name</label>
                     <input
                       type="text"
@@ -146,7 +155,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                       required
                     />
                   </div>
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Last Name</label>
                     <input
                       type="text"
@@ -158,7 +167,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Email</label>
                     <input
                       type="email"
@@ -168,7 +177,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                       required
                     />
                   </div>
-                  <div className="col-6 mb-3 position-relative">
+                  <div className="col-sm-6 col-12 mb-3 position-relative">
                     <label className="form-label">Password</label>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -191,7 +200,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-6 mb-4">
+                  <div className="col-sm-6 col-12 mb-4">
                     <LocationPicker
                       label="Home Address"
                       value={homeAddress}
@@ -201,7 +210,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                       placeholder="Enter your home address"
                     />
                   </div>
-                  <div className="col-6 mb-4">
+                  <div className="col-sm-6 col-12 mb-4">
                     <LocationPicker
                       label="Company Address"
                       value={companyAddress}
@@ -213,7 +222,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                   </div>
                 </div>
                 <div className="row">
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Car Name</label>
                     <input
                       type="text"
@@ -223,7 +232,7 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
                       required
                     />
                   </div>
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">License Plate</label>
                     <input
                       type="text"

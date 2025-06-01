@@ -350,13 +350,12 @@ const EmployeePage = () => {
                       aria-label="Close"
                     ></button>
                   </div>
-                  <div className="modal-body">
-                    <Registration
-                      userData={isRegModel}
-                      isModalVisible={false}
-                      isAdmin={true}
-                    />
-                  </div>
+
+                  <Registration
+                    userData={isRegModel}
+                    isModalVisible={false}
+                    isAdmin={true}
+                  />
                 </div>
               </div>
             </div>
