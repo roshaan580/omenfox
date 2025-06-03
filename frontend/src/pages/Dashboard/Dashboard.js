@@ -6,8 +6,9 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Sidebar from "../../components/Sidebar";
 import Leaderboard from "../../components/Leaderboard";
-import StatCard from "../../components/StatCard";
 import { authenticatedFetch } from "../../utils/axiosConfig";
+import { formatDecimal } from "../../utils/dateUtils";
+import { Card, Row, Col } from "react-bootstrap";
 
 // Import chart configurations
 import {
@@ -29,12 +30,10 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [userData, setUserData] = useState(null);
-  const [employeeCount, setEmployeeCount] = useState(0);
-  const [companyCount, setCompanyCount] = useState(0);
   const [emissionsCount, setEmissionsCount] = useState(0);
-  const [vehicle, setVehicle] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [totalEmissions, setTotalEmissions] = useState(0);
 
   // Chart states with initial configurations
   const [co2Reduction, setco2Reduction] = useState(
@@ -158,16 +157,8 @@ const DashboardPage = () => {
       };
 
       try {
-        const [
-          employeeData,
-          companyData,
-          emissionsData,
-          vehiclesData,
-          redutionOverTime,
-          emissionsByDate,
-          emissionsByCategory,
-          emissionsTrend,
-        ] = await Promise.all([
+        // Using array destructuring with array indexes instead of named variables
+        const responses = await Promise.all([
           fetchData(
             `${REACT_APP_API_URL}/employees`,
             "Failed to fetch employees"
@@ -202,6 +193,13 @@ const DashboardPage = () => {
           ),
         ]);
 
+        // Extract only the data we need by index
+        const emissionsData = responses[2];
+        const redutionOverTime = responses[4];
+        const emissionsByDate = responses[5];
+        const emissionsByCategory = responses[6];
+        const emissionsTrend = responses[7];
+
         console.log("API Responses:", {
           redutionOverTime,
           emissionsTrend,
@@ -209,20 +207,21 @@ const DashboardPage = () => {
           emissionsData,
         });
 
-        // Set counts with proper null checks
-        setEmployeeCount(employeeData?.length || 0);
-        setCompanyCount(companyData?.length || 0);
-
         // Special handling for emissions count
         if (Array.isArray(emissionsData)) {
           console.log(`Setting emissions count to ${emissionsData.length}`);
           setEmissionsCount(emissionsData.length);
+
+          // Calculate total emissions
+          const totalEmissions = emissionsData.reduce(
+            (sum, record) => sum + parseFloat(record.co2Used || 0),
+            0
+          );
+          setTotalEmissions(totalEmissions);
         } else {
           console.warn("Emissions data is not an array:", emissionsData);
           setEmissionsCount(0);
         }
-
-        setVehicle(vehiclesData?.length || 0);
 
         // Handle CO2 Reduction Over Time data
         if (redutionOverTime && Array.isArray(redutionOverTime)) {
@@ -408,67 +407,74 @@ const DashboardPage = () => {
 
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container text-center">
-          {/* Dashboard stats */}
-          <div className="row g-4 ">
-            {[
-              {
-                icon: "fa-users",
-                title: "Employees",
-                count: employeeCount,
-                label: "Employees",
-                buttonText: "Manage Employees",
-                path: "/employees",
-                hasShadow: true,
-              },
-              {
-                icon: "fa-building",
-                title: "Company Locations",
-                count: companyCount,
-                label: "Companies",
-                buttonText: "Manage Companies",
-                path: "/companies",
-              },
-              {
-                icon: "fa-chart-line",
-                title: "Emission Records",
-                count: emissionsCount,
-                label: "Emissions",
-                buttonText: "View Emission Records",
-                path: "/emissions",
-              },
-              {
-                icon: "fa-chart-line",
-                title: "Emission Type",
-                count: emissionsCount,
-                label: "Emissions",
-                buttonText: "View Emission Type",
-                path: "/emission-types",
-              },
-              {
-                icon: "fa-car",
-                title: "Vehicles",
-                count: vehicle,
-                label: "Total Vehicles",
-                buttonText: "Manage Vehicles",
-                path: "/vehicles",
-                hasShadow: true,
-              },
-            ].map((stat, index) => (
-              <StatCard
-                key={index}
-                theme={theme}
-                icon={stat.icon}
-                title={stat.title}
-                count={stat.count}
-                label={stat.label}
-                buttonText={stat.buttonText}
-                onButtonClick={() => navigate(stat.path)}
-                buttonClassName={stat.buttonClassName || "btn-success"}
-                cardClassName={stat.cardClassName || ""}
-                hasShadow={stat.hasShadow}
-              />
-            ))}
-          </div>
+          {/* Dashboard Analytics Cards */}
+          <Row className="mt-2">
+            <Col lg={3} md={6} className="mb-3 mb-lg-0">
+              <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+                <Card.Body className="d-flex flex-column align-items-center">
+                  <div className="icon-container mb-3 text-primary">
+                    <i className="fas fa-cloud fa-3x"></i>
+                  </div>
+                  <Card.Title className="text-center mb-3">
+                    Total CO₂ Emissions
+                  </Card.Title>
+                  <h3 className="text-center mb-0">
+                    {formatDecimal(totalEmissions)} kg
+                  </h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={3} md={6} className="mb-3 mb-lg-0">
+              <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+                <Card.Body className="d-flex flex-column align-items-center">
+                  <div className="icon-container mb-3 text-success">
+                    <i className="fas fa-list fa-3x"></i>
+                  </div>
+                  <Card.Title className="text-center mb-3">
+                    Total Records
+                  </Card.Title>
+                  <h3 className="text-center mb-0">{emissionsCount}</h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={3} md={6} className="mb-3 mb-lg-0">
+              <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+                <Card.Body className="d-flex flex-column align-items-center">
+                  <div className="icon-container mb-3 text-warning">
+                    <i className="fas fa-calculator fa-3x"></i>
+                  </div>
+                  <Card.Title className="text-center mb-3">
+                    Average per Record
+                  </Card.Title>
+                  <h3 className="text-center mb-0">
+                    {emissionsCount > 0
+                      ? formatDecimal(totalEmissions / emissionsCount)
+                      : 0}{" "}
+                    kg
+                  </h3>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col lg={3} md={6} className="mb-3 mb-lg-0">
+              <Card
+                className={`bg-${theme} shadow-sm h-100 m-0 cursor-pointer`}
+                onClick={() => navigate("/yearly-reports")}
+                style={{ cursor: "pointer" }}
+              >
+                <Card.Body className="d-flex flex-column align-items-center">
+                  <div className="icon-container mb-3 text-info">
+                    <i className="fas fa-file-alt fa-3x"></i>
+                  </div>
+                  <Card.Title className="text-center mb-3">
+                    Yearly Reports
+                  </Card.Title>
+                  <h3 className="text-center mb-0">
+                    <i className="fas fa-external-link-alt"></i>
+                  </h3>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
           {/* Charts Section */}
           <ChartSection

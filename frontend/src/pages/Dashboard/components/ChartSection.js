@@ -26,7 +26,7 @@ const ChartSection = ({
     <>
       {/* Download PDF button */}
       <div className="row">
-        <div className="col-12 mt-3">
+        <div className="col-12 mt-1">
           <button
             onClick={downloadAllPDFs}
             className="btn btn-success float-end mx-3 mt-3"

@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { CiLogout } from "react-icons/ci";
-import { FaBars, FaShippingFast, FaCog, FaBuilding } from "react-icons/fa";
+import {
+  FaBars,
+  FaShippingFast,
+  FaCog,
+  FaBuilding,
+  FaGasPump,
+} from "react-icons/fa";
 import { MdManageAccounts, MdTravelExplore } from "react-icons/md";
 import { BsCloudHaze2Fill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -122,25 +128,18 @@ const GreenhouseEmissionsMenu = ({
       {isSidebarOpen && expandedItem === "emissions" && (
         <div className="submenu">
           <NavLinkItem
+            to="/dashboard"
+            isActive={isActive("/dashboard")}
+            onClick={handleNavigation("/dashboard", true)}
+          >
+            Dashboard
+          </NavLinkItem>
+          <NavLinkItem
             to="/emissions"
             isActive={isActive("/emissions")}
             onClick={handleNavigation("/emissions", true)}
           >
             Emissions
-          </NavLinkItem>
-          <NavLinkItem
-            to="/emission-types"
-            isActive={isActive("/emission-types")}
-            onClick={handleNavigation("/emission-types", true)}
-          >
-            Emission Types
-          </NavLinkItem>
-          <NavLinkItem
-            to="/energy-emissions"
-            isActive={isActive("/energy-emissions")}
-            onClick={handleNavigation("/energy-emissions", true)}
-          >
-            Energy & Gas Emissions
           </NavLinkItem>
           <NavLinkItem
             to="/scenarios"
@@ -268,6 +267,46 @@ const ManagementMenu = ({
           >
             Vehicles
           </NavLinkItem>
+          <NavLinkItem
+            to="/emission-types"
+            isActive={isActive("/emission-types")}
+            onClick={handleNavigation("/emission-types", true)}
+          >
+            Emission Types
+          </NavLinkItem>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Admin Energy and Gas Menu
+const EnergyAndGasMenu = ({
+  isSidebarOpen,
+  expandedItem,
+  toggleExpand,
+  isActive,
+  handleNavigation,
+}) => {
+  return (
+    <div className="nav-group mb-1">
+      <MenuItem
+        icon={<FaGasPump size={22} />}
+        title="Energy and Gas"
+        isExpanded={expandedItem === "energy"}
+        isSidebarOpen={isSidebarOpen}
+        onToggle={() => toggleExpand("energy")}
+      />
+
+      {isSidebarOpen && expandedItem === "energy" && (
+        <div className="submenu">
+          <NavLinkItem
+            to="/energy-emissions"
+            isActive={isActive("/energy-emissions")}
+            onClick={handleNavigation("/energy-emissions", true)}
+          >
+            Energy & Gas Emissions
+          </NavLinkItem>
         </div>
       )}
     </div>
@@ -307,6 +346,13 @@ const FeaturesMenu = ({
             onClick={handleNavigation("/license-plate", true)}
           >
             License Plate CO₂
+          </NavLinkItem>
+          <NavLinkItem
+            to="/yearly-reports"
+            isActive={isActive("/yearly-reports")}
+            onClick={handleNavigation("/yearly-reports", true)}
+          >
+            Yearly Reports
           </NavLinkItem>
         </div>
       )}
@@ -590,14 +636,21 @@ const Sidebar = ({
             {isAdmin ? (
               <>
                 {/* ADMIN MENU */}
-                <TravelAndCommuteMenu
+                <GreenhouseEmissionsMenu
                   isSidebarOpen={isSidebarOpen}
                   expandedItem={expandedItem}
                   toggleExpand={toggleExpand}
                   isActive={isActive}
                   handleNavigation={handleNavigation}
                 />
-                <GreenhouseEmissionsMenu
+                <EnergyAndGasMenu
+                  isSidebarOpen={isSidebarOpen}
+                  expandedItem={expandedItem}
+                  toggleExpand={toggleExpand}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
+                <TravelAndCommuteMenu
                   isSidebarOpen={isSidebarOpen}
                   expandedItem={expandedItem}
                   toggleExpand={toggleExpand}

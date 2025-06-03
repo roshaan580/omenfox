@@ -202,22 +202,21 @@ const DashboardPage = () => {
               <li className="nav-item tab-item">
                 <button
                   className={`nav-link ${
-                    activeTab === "otherResources" ? "active" : ""
+                    activeTab === "TransportEmissions" ? "active" : ""
                   }`}
-                  onClick={() => setActiveTab("otherResources")}
+                  onClick={() => setActiveTab("TransportEmissions")}
                 >
-                  <i className="fas fa-leaf me-1"></i> Other Resources
+                  <i className="fas fa-chart-line me-1"></i> Freight Transport
                 </button>
               </li>
               <li className="nav-item tab-item">
                 <button
                   className={`nav-link ${
-                    activeTab === "TransportEmissions" ? "active" : ""
+                    activeTab === "otherResources" ? "active" : ""
                   }`}
-                  onClick={() => setActiveTab("TransportEmissions")}
+                  onClick={() => setActiveTab("otherResources")}
                 >
-                  <i className="fas fa-chart-line me-1"></i> Monthly Transport
-                  Emissions
+                  <i className="fas fa-leaf me-1"></i> Other Resources
                 </button>
               </li>
               <li className="nav-item tab-item">

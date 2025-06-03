@@ -13,7 +13,6 @@ const EmissionTypesPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentEmissionType, setCurrentEmissionType] = useState({
     name: "",
-    conversionFactor: "",
     gwp: "1",
   });
   const [editEmissionTypeId, setEditEmissionTypeId] = useState(null);
@@ -108,7 +107,7 @@ const EmissionTypesPage = () => {
   }, []);
 
   const handleAddEmissionType = () => {
-    setCurrentEmissionType({ name: "", conversionFactor: "", gwp: "1" });
+    setCurrentEmissionType({ name: "", gwp: "1" });
     setShowAddModal(true);
   };
 
@@ -236,7 +235,6 @@ const EmissionTypesPage = () => {
                 <tr>
                   <th>#</th>
                   <th>Name</th>
-                  <th>Conversion Factor</th>
                   <th>GWP</th>
                   <th>Actions</th>
                 </tr>
@@ -247,7 +245,6 @@ const EmissionTypesPage = () => {
                       <tr key={type._id}>
                         <td>{index + 1}</td>
                         <td>{type.name}</td>
-                        <td>{type.conversionFactor}</td>
                         <td>{type.gwp}</td>
                         <td className="text-center">
                           <div className="d-flex flex-wrap align-items-center justify-content-center gap-2">
@@ -299,16 +296,6 @@ const EmissionTypesPage = () => {
                     required
                   />
                 </Form.Group>
-                <Form.Group controlId="conversionFactor" className="mb-3">
-                  <Form.Label>Conversion Factor</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="conversionFactor"
-                    value={currentEmissionType.conversionFactor}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
                 <Form.Group controlId="gwp" className="mb-3">
                   <Form.Label>Global Warming Potential (GWP)</Form.Label>
                   <Form.Control
@@ -351,16 +338,6 @@ const EmissionTypesPage = () => {
                     type="text"
                     name="name"
                     value={currentEmissionType.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
-                <Form.Group controlId="conversionFactor" className="mb-3">
-                  <Form.Label>Conversion Factor</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="conversionFactor"
-                    value={currentEmissionType.conversionFactor}
                     onChange={handleChange}
                     required
                   />

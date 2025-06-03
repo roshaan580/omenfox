@@ -236,9 +236,7 @@ const TransportEmissions = ({ activeTab }) => {
           {error && renderError()}
 
           <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-            <h4 className="text-left text-success mb-0">
-              Monthly Transport Emissions
-            </h4>
+            <h4 className="text-left text-success mb-0">Freight Transport</h4>
             <button
               className="btn btn-success"
               onClick={handleAdd}
