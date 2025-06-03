@@ -235,29 +235,105 @@ const EmissionPage = () => {
   };
 
   const handleStartLocationChange = (location) => {
-    setEmissionRecord((prev) => ({
-      ...prev,
-      startLocation: location,
-    }));
+    console.log("Start location changed:", location);
+    // Make sure address is properly set
+    if (location && !location.address && location.lat && location.lon) {
+      // If we have coordinates but no address, try to fetch the address
+      fetchAddressFromCoordinates(location.lat, location.lon)
+        .then((address) => {
+          setEmissionRecord((prev) => ({
+            ...prev,
+            startLocation: {
+              ...location,
+              address: address || `Lat: ${location.lat}, Lon: ${location.lon}`,
+            },
+          }));
+        })
+        .catch((err) => {
+          console.error("Error fetching address:", err);
+          setEmissionRecord((prev) => ({
+            ...prev,
+            startLocation: location,
+          }));
+        });
+    } else {
+      setEmissionRecord((prev) => ({
+        ...prev,
+        startLocation: location,
+      }));
+    }
   };
 
   const handleEndLocationChange = (location) => {
-    setEmissionRecord((prev) => ({
-      ...prev,
-      endLocation: location,
-    }));
+    console.log("End location changed:", location);
+    // Make sure address is properly set
+    if (location && !location.address && location.lat && location.lon) {
+      // If we have coordinates but no address, try to fetch the address
+      fetchAddressFromCoordinates(location.lat, location.lon)
+        .then((address) => {
+          setEmissionRecord((prev) => ({
+            ...prev,
+            endLocation: {
+              ...location,
+              address: address || `Lat: ${location.lat}, Lon: ${location.lon}`,
+            },
+          }));
+        })
+        .catch((err) => {
+          console.error("Error fetching address:", err);
+          setEmissionRecord((prev) => ({
+            ...prev,
+            endLocation: location,
+          }));
+        });
+    } else {
+      setEmissionRecord((prev) => ({
+        ...prev,
+        endLocation: location,
+      }));
+    }
+  };
+
+  // Helper function to get address from coordinates
+  const fetchAddressFromCoordinates = async (lat, lon) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch address");
+      }
+      const data = await response.json();
+      return data.display_name;
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      return null;
+    }
   };
 
   const handleAdd = () => {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Initialize with empty objects but with correct structure
     setEmissionRecord({
-      startLocation: { address: "", lat: 0, lon: 0 },
-      endLocation: { address: "", lat: 0, lon: 0 },
-      date: "",
+      startLocation: {
+        address: "",
+        lat: null,
+        lon: null,
+      },
+      endLocation: {
+        address: "",
+        lat: null,
+        lon: null,
+      },
+      date: today,
       distance: "",
       co2Used: "",
       employee: "",
       transportation: "",
     });
+
+    console.log("Opening Add New Record modal");
     setShowAddModal(true);
   };
 
@@ -523,7 +599,7 @@ const EmissionPage = () => {
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container-fluid mt-4">
           <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h1>Emission Records</h1>
+            <h1>Transport Emission Records</h1>
             <div>
               <Button
                 variant="outline-primary"
@@ -707,7 +783,7 @@ const EmissionPage = () => {
 
           {/* Charts */}
           <Row className="mb-4">
-            <Col md={8}>
+            <Col md={12} lg={6}>
               <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
                 <Card.Body>
                   <Card.Title className="mb-4">
@@ -788,7 +864,7 @@ const EmissionPage = () => {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md={4}>
+            <Col md={12} lg={6}>
               <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
                 <Card.Body>
                   <Card.Title className="mb-4">Emissions by Type</Card.Title>
@@ -921,6 +997,13 @@ const EmissionPage = () => {
             onHide={closeAddModal}
             className="custom-scrollbar"
             size="lg"
+            onEntered={() => {
+              console.log("Add modal fully shown - triggering map refresh");
+              // Trigger a window resize event to force the map to render correctly
+              setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+              }, 100);
+            }}
           >
             <Modal.Header closeButton>
               <Modal.Title>Add New Emission Record</Modal.Title>
@@ -1062,6 +1145,13 @@ const EmissionPage = () => {
             onHide={closeEditModal}
             className="custom-scrollbar"
             size="lg"
+            onEntered={() => {
+              console.log("Edit modal fully shown - triggering map refresh");
+              // Trigger a window resize event to force the map to render correctly
+              setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+              }, 100);
+            }}
           >
             <Modal.Header closeButton>
               <Modal.Title>Update Record</Modal.Title>

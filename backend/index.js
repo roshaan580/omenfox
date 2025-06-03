@@ -27,6 +27,7 @@ const rdwProxyRoutes = require("./routes/rdwProxy");
 const scenarioRoutes = require("./routes/scenarioRoutes");
 const targetRoutes = require("./routes/targetRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const generalEmissionRoutes = require("./routes/generalEmissionRoutes");
 
 const energyEmissionRoutes = require("./routes/energyEmissions");
 const transportEmissionRoutes = require("./routes/transportEmission");
@@ -58,6 +59,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/emissions", emissionRoutes);
+app.use("/api/general-emissions", generalEmissionRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/employeeTransportations", employeeTransportation);
 app.use("/api/employeeWorkTransportations", employeeWorkTransportation);

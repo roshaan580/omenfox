@@ -6,6 +6,42 @@ import { Modal, Button, Form } from "react-bootstrap";
 import { isRecordEditable, formatDecimal } from "../utils/dateUtils"; // Import the utility function and formatDecimal function
 import Sidebar from "../components/Sidebar";
 import { authenticatedFetch } from "../utils/axiosConfig";
+import { IoMdClose } from "react-icons/io";
+
+// Helper function to get userId from multiple sources
+const getUserId = () => {
+  let userId = null;
+
+  // First try userObj in localStorage
+  try {
+    const userObjStr = localStorage.getItem("userObj");
+    if (userObjStr) {
+      const userObj = JSON.parse(userObjStr);
+      // Check for both id and _id formats
+      userId = userObj._id || userObj.id;
+
+      if (userId) return userId;
+    }
+  } catch (e) {
+    console.error("Error getting user ID from userObj:", e);
+  }
+
+  // Then try userData in localStorage if userObj failed
+  try {
+    const userDataStr = localStorage.getItem("userData");
+    if (userDataStr) {
+      const userDataObj = JSON.parse(userDataStr);
+      // Check for both id and _id formats
+      userId = userDataObj._id || userDataObj.id;
+
+      if (userId) return userId;
+    }
+  } catch (e) {
+    console.error("Error getting user ID from userData:", e);
+  }
+
+  return userId;
+};
 
 const EnergyEmissions = () => {
   const navigate = useNavigate();
@@ -39,7 +75,27 @@ const EnergyEmissions = () => {
             // Set the user data
             const userObj = JSON.parse(localStorage.getItem("userObj"));
             setUserData(userObj);
-            setUser(userObj);
+
+            // Ensure we have a valid user object with ID
+            if (userObj && (userObj._id || userObj.id)) {
+              setUser(userObj);
+
+              // Update emission record with user ID
+              setEmissionRecord((prev) => ({
+                ...prev,
+                userId: userObj._id || userObj.id,
+              }));
+            } else {
+              // If we don't have a proper user object, try to get the ID directly
+              const userId = getUserId();
+              if (userId) {
+                setUser({ _id: userId });
+                setEmissionRecord((prev) => ({
+                  ...prev,
+                  userId: userId,
+                }));
+              }
+            }
           } else {
             localStorage.removeItem("token");
             localStorage.removeItem("userObj");
@@ -75,10 +131,13 @@ const EnergyEmissions = () => {
 
   // Update emission record whenever user changes
   useEffect(() => {
-    if (user && user._id) {
+    // Get userId from either the user state or directly from localStorage
+    const userId = user?._id || user?.id || getUserId();
+
+    if (userId) {
       setEmissionRecord((prev) => ({
         ...prev,
-        userId: user._id,
+        userId: userId,
       }));
     }
   }, [user]);
@@ -177,17 +236,16 @@ const EnergyEmissions = () => {
   };
 
   const handleAdd = () => {
-    if (!user || !user._id) {
-      setError("User ID is missing. Please log in again.");
-      return;
-    }
+    // Get the user ID directly using our helper function
+    const userId = user?._id || user?.id || getUserId();
 
     setEmissionRecord({
-      userId: user._id,
+      userId: userId || "",
       startDate: "",
       endDate: "",
       energySources: [{ type: "", emission: "" }],
     });
+
     setShowAddModal(true);
   };
 
@@ -198,13 +256,16 @@ const EnergyEmissions = () => {
   const handleEdit = (record) => {
     console.log("Editing record:", record);
 
-    if (!user || !user._id) {
+    // Get the user ID using our helper function
+    const userId = user?._id || user?.id || getUserId();
+
+    if (!userId) {
       setError("User ID is missing. Please log in again.");
       return;
     }
 
     setEmissionRecord({
-      userId: user._id,
+      userId: userId,
       startDate: record.startDate
         ? new Date(record.startDate).toISOString().split("T")[0]
         : "",
@@ -232,7 +293,11 @@ const EnergyEmissions = () => {
     );
 
     try {
-      if (!user || !user._id) {
+      // Get user ID using our helper function
+      const userId =
+        user?._id || user?.id || getUserId() || emissionRecord.userId;
+
+      if (!userId) {
         throw new Error(
           "User ID is missing or invalid. Please refresh and try again."
         );
@@ -241,7 +306,7 @@ const EnergyEmissions = () => {
       // Include the user ID in the payload
       const formattedEmissionRecord = {
         ...emissionRecord,
-        userId: user._id,
+        userId: userId,
         energySources: emissionRecord.energySources.map((source) =>
           JSON.stringify(source)
         ), // Convert each object to a string
@@ -477,33 +542,6 @@ const EnergyEmissions = () => {
             </Modal.Header>
             <Modal.Body>
               <Form>
-                {/* Month Selection */}
-                {/* <Form.Group className="mb-3">
-                                <Form.Label>Month</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={emissionRecord.month}
-                                    onChange={(e) => handleInputChange(e, "month")}
-                                >
-                                    <option value="">Select Month</option>
-                                    {[...Array(12).keys()].map((m) => (
-                                        <option key={m + 1} value={m + 1}>
-                                            {new Date(0, m).toLocaleString("default", { month: "long" })}
-                                        </option>
-                                    ))}
-                                </Form.Control>
-                            </Form.Group> */}
-
-                {/* Year Selection */}
-                {/* <Form.Group className="mb-3">
-                                <Form.Label>Year</Form.Label>
-                                <Form.Control
-                                    type="number"
-                                    placeholder="Enter Year (e.g., 2024)"
-                                    value={emissionRecord.year}
-                                    onChange={(e) => handleInputChange(e, "year")}
-                                />
-                            </Form.Group> */}
                 <Form.Group className="mb-3">
                   <Form.Label>Start Date</Form.Label>
                   <Form.Control
@@ -525,31 +563,38 @@ const EnergyEmissions = () => {
                 <Form.Group>
                   <Form.Label>Energy Sources</Form.Label>
                   {emissionRecord.energySources.map((source, index) => (
-                    <div key={index} className="d-flex mb-2">
-                      <Form.Control
-                        type="text"
-                        placeholder="Energy Type (e.g., Electricity, Gas)"
-                        value={source.type}
-                        onChange={(e) =>
-                          handleEnergySourceChange(e, index, "type")
-                        }
-                        className="me-2"
-                      />
-                      <Form.Control
-                        type="number"
-                        placeholder="CO₂ Emission (kg)"
-                        value={source.emission}
-                        onChange={(e) =>
-                          handleEnergySourceChange(e, index, "emission")
-                        }
-                        className="me-2"
-                      />
+                    <div
+                      key={index}
+                      className="d-flex align-items-center mb-2 w-100"
+                    >
+                      <div className="d-flex align-items-center flex-sm-row flex-column w-100 gap-1">
+                        <Form.Control
+                          type="text"
+                          placeholder="Energy Type (e.g., Electricity, Gas)"
+                          value={source.type}
+                          onChange={(e) =>
+                            handleEnergySourceChange(e, index, "type")
+                          }
+                          className="me-2"
+                        />
+                        <Form.Control
+                          type="number"
+                          placeholder="CO₂ Emission (kg)"
+                          value={source.emission}
+                          onChange={(e) =>
+                            handleEnergySourceChange(e, index, "emission")
+                          }
+                          className="me-2"
+                        />
+                      </div>
                       {index > 0 && (
                         <Button
                           variant="danger"
+                          className="px-2"
+                          style={{ minWidth: "35px" }}
                           onClick={() => removeEnergySource(index)}
                         >
-                          X
+                          <IoMdClose size={18} />
                         </Button>
                       )}
                     </div>
@@ -638,29 +683,32 @@ const EnergyEmissions = () => {
                   <Form.Label>Energy Sources</Form.Label>
                   {emissionRecord.energySources.map((source, index) => (
                     <div key={index} className="d-flex align-items-center mb-2">
-                      <Form.Control
-                        type="text"
-                        className="me-2"
-                        value={source.type}
-                        onChange={(e) =>
-                          handleEnergySourceChange(e, index, "type")
-                        }
-                        placeholder="Energy Type (e.g., Electricity, Gas)"
-                      />
-                      <Form.Control
-                        type="number"
-                        value={source.emission}
-                        onChange={(e) =>
-                          handleEnergySourceChange(e, index, "emission")
-                        }
-                        placeholder="Emission (kg CO2)"
-                      />
+                      <div className="d-flex align-items-center flex-sm-row flex-column w-100 gap-1">
+                        <Form.Control
+                          type="text"
+                          className="me-2"
+                          value={source.type}
+                          onChange={(e) =>
+                            handleEnergySourceChange(e, index, "type")
+                          }
+                          placeholder="Energy Type (e.g., Electricity, Gas)"
+                        />
+                        <Form.Control
+                          type="number"
+                          value={source.emission}
+                          onChange={(e) =>
+                            handleEnergySourceChange(e, index, "emission")
+                          }
+                          placeholder="Emission (kg CO2)"
+                        />
+                      </div>
                       <Button
                         variant="danger"
-                        className="ms-2"
+                        className="ms-2 px-2"
+                        style={{ minWidth: "35px" }}
                         onClick={() => removeEnergySource(index)}
                       >
-                        ✖
+                        <IoMdClose size={20} />
                       </Button>
                     </div>
                   ))}

@@ -88,13 +88,6 @@ const TravelAndCommuteMenu = ({
       {isSidebarOpen && expandedItem === "travel" && (
         <div className="submenu">
           <NavLinkItem
-            to="/transport-emissions"
-            isActive={isActive("/transport-emissions")}
-            onClick={handleNavigation("/transport-emissions", true)}
-          >
-            Transport Emissions
-          </NavLinkItem>
-          <NavLinkItem
             to="/vehicles"
             isActive={isActive("/vehicles")}
             onClick={handleNavigation("/vehicles", true)}
@@ -140,6 +133,13 @@ const GreenhouseEmissionsMenu = ({
             onClick={handleNavigation("/emissions", true)}
           >
             Emissions
+          </NavLinkItem>
+          <NavLinkItem
+            to="/transport-emission-records"
+            isActive={isActive("/transport-emission-records")}
+            onClick={handleNavigation("/transport-emission-records", true)}
+          >
+            Transport Emission Records
           </NavLinkItem>
           <NavLinkItem
             to="/scenarios"

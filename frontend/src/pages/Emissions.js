@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Modal, Button, Form, Card, Row, Col } from "react-bootstrap";
 import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import DynamicSelect from "../components/DynamicSelect";
-import LocationPicker from "../components/LocationPicker";
 import { isRecordEditable, formatDecimal } from "../utils/dateUtils";
 import { authenticatedFetch } from "../utils/axiosConfig";
 import Sidebar from "../components/Sidebar";
 import { FaPlusCircle } from "react-icons/fa";
-import { Line, Pie } from "react-chartjs-2";
+import { Line, Pie, Bar } from "react-chartjs-2";
 import EmployeeSelect from "../components/EmployeeSelect";
-import CarsSelect from "../components/CarsSelect";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,24 +35,22 @@ ChartJS.register(
   Legend
 );
 
-const EmissionPage = () => {
+const EmissionsPage = () => {
   const [emissionRecords, setEmissionRecords] = useState([]);
   const [error, setError] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [emissionRecord, setEmissionRecord] = useState({
-    startLocation: { address: "", lat: 0, lon: 0 },
-    endLocation: { address: "", lat: 0, lon: 0 },
+    emissionType: "",
     date: "",
-    distance: "",
-    co2Used: "",
+    quantity: "",
+    co2Equivalent: "",
     employee: "",
-    transportation: "",
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteRecordId, setDeleteRecordId] = useState(null);
   const [employeesState, setEmployeesState] = useState([]);
-  const [carsState, setCarsState] = useState([]);
+  const [emissionTypes, setEmissionTypes] = useState([]);
   const navigate = useNavigate();
 
   // Add Sidebar state variables
@@ -72,7 +68,7 @@ const EmissionPage = () => {
     startDate: "",
     endDate: "",
     employees: [],
-    transportations: [],
+    emissionTypes: [],
   });
 
   const [filteredRecords, setFilteredRecords] = useState([]);
@@ -127,7 +123,7 @@ const EmissionPage = () => {
     document.body.className = `${theme}-theme`;
   }, [navigate, theme]);
 
-  // Fetch all emission records, employees, and cars
+  // Fetch all emission records, employees, and emission types
   useEffect(() => {
     const fetchEmissions = async () => {
       try {
@@ -135,52 +131,42 @@ const EmissionPage = () => {
         // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
-        // Use Promise.all with authenticatedFetch instead
-        const [emissionsRes, employeesRes, carsRes] = await Promise.all([
-          authenticatedFetch(`${REACT_APP_API_URL}/emissions?global=true`, {
-            method: "GET",
-            headers: {
-              // Include JWT_ADMIN_SECRET as a fallback
-              ...(JWT_ADMIN_SECRET && !localStorage.getItem("token")
-                ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-                : {}),
-            },
-          }),
+        // Use Promise.all to fetch data from multiple endpoints simultaneously
+        const [emissionsRes, employeesRes, typesRes] = await Promise.all([
+          authenticatedFetch(
+            `${REACT_APP_API_URL}/general-emissions?global=true`,
+            {
+              method: "GET",
+            }
+          ),
           authenticatedFetch(`${REACT_APP_API_URL}/employees`, {
             method: "GET",
-            headers: {
-              ...(JWT_ADMIN_SECRET && !localStorage.getItem("token")
-                ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-                : {}),
-            },
           }),
-          authenticatedFetch(`${REACT_APP_API_URL}/transportations`, {
+          authenticatedFetch(`${REACT_APP_API_URL}/emission-types`, {
             method: "GET",
-            headers: {
-              ...(JWT_ADMIN_SECRET && !localStorage.getItem("token")
-                ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-                : {}),
-            },
           }),
         ]);
 
-        console.log("Emissions API response status:", emissionsRes.status);
-        console.log("Employees API response status:", employeesRes.status);
-        console.log("Transportations API response status:", carsRes.status);
+        // Check if responses are successful
+        if (!emissionsRes.ok || !employeesRes.ok || !typesRes.ok) {
+          throw new Error("One or more API requests failed");
+        }
 
-        const [emissionsData, employeesData, carsData] = await Promise.all([
+        // Parse the JSON responses
+        const [emissionsData, employeesData, typesData] = await Promise.all([
           emissionsRes.json(),
           employeesRes.json(),
-          carsRes.json(),
+          typesRes.json(),
         ]);
 
-        console.log("Emissions data length:", emissionsData.length);
-        console.log("Employees data length:", employeesData.length);
-        console.log("Cars data length:", carsData.length);
+        console.log("Emissions data:", emissionsData);
+        console.log("Employees data:", employeesData);
+        console.log("Emission types data:", typesData);
 
+        // Update state with the fetched data
         setEmissionRecords(emissionsData);
         setEmployeesState(employeesData);
-        setCarsState(carsData);
+        setEmissionTypes(typesData);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError(`Failed to fetch data: ${error.message}`);
@@ -189,44 +175,6 @@ const EmissionPage = () => {
     fetchEmissions();
   }, []);
 
-  // Calculate distance between two coordinates using Haversine formula
-  const calculateDistance = (startLat, startLon, endLat, endLon) => {
-    const R = 6371; // Radius of the Earth in kilometers
-    const dLat = ((endLat - startLat) * Math.PI) / 180;
-    const dLon = ((endLon - startLon) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((startLat * Math.PI) / 180) *
-        Math.cos((endLat * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Distance in km
-    return distance.toFixed(2);
-  };
-
-  // Update distance whenever start or end location changes
-  useEffect(() => {
-    if (
-      emissionRecord.startLocation?.lat &&
-      emissionRecord.startLocation?.lon &&
-      emissionRecord.endLocation?.lat &&
-      emissionRecord.endLocation?.lon
-    ) {
-      const distance = calculateDistance(
-        emissionRecord.startLocation.lat,
-        emissionRecord.startLocation.lon,
-        emissionRecord.endLocation.lat,
-        emissionRecord.endLocation.lon
-      );
-
-      setEmissionRecord((prev) => ({
-        ...prev,
-        distance,
-      }));
-    }
-  }, [emissionRecord.startLocation, emissionRecord.endLocation]);
-
   const handleInputChange = (e, field) => {
     setEmissionRecord({
       ...emissionRecord,
@@ -234,29 +182,13 @@ const EmissionPage = () => {
     });
   };
 
-  const handleStartLocationChange = (location) => {
-    setEmissionRecord((prev) => ({
-      ...prev,
-      startLocation: location,
-    }));
-  };
-
-  const handleEndLocationChange = (location) => {
-    setEmissionRecord((prev) => ({
-      ...prev,
-      endLocation: location,
-    }));
-  };
-
   const handleAdd = () => {
     setEmissionRecord({
-      startLocation: { address: "", lat: 0, lon: 0 },
-      endLocation: { address: "", lat: 0, lon: 0 },
+      emissionType: "",
       date: "",
-      distance: "",
-      co2Used: "",
+      quantity: "",
+      co2Equivalent: "",
       employee: "",
-      transportation: "",
     });
     setShowAddModal(true);
   };
@@ -269,18 +201,57 @@ const EmissionPage = () => {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      await authenticatedFetch(`${REACT_APP_API_URL}/emissions`, {
-        method: "POST",
-        body: JSON.stringify(emissionRecord),
-        headers: {
-          ...(JWT_ADMIN_SECRET && !localStorage.getItem("token")
-            ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-            : {}),
-        },
-      });
+      // Format the data to match the backend API expectations
+      const formattedData = {
+        date: emissionRecord.date,
+        emissionType: emissionRecord.emissionType,
+        employee: emissionRecord.employee,
+        quantity: parseFloat(emissionRecord.quantity || 0),
+        co2Equivalent: parseFloat(emissionRecord.co2Equivalent || 0),
+      };
 
-      console.log("Emission record created successfully!");
-      window.location.reload();
+      // Log the data being sent
+      console.log(
+        "Sending emission data:",
+        JSON.stringify(formattedData, null, 2)
+      );
+
+      // Send data to the backend API
+      const response = await authenticatedFetch(
+        `${REACT_APP_API_URL}/general-emissions`,
+        {
+          method: "POST",
+          body: JSON.stringify(formattedData),
+        }
+      );
+
+      if (!response.ok) {
+        // Try to get more detailed error information
+        let errorDetail = "";
+        try {
+          const errorResponse = await response.json();
+          errorDetail = JSON.stringify(errorResponse);
+        } catch (e) {
+          errorDetail = await response.text();
+        }
+
+        throw new Error(
+          `Error ${response.status}: ${response.statusText}. Details: ${errorDetail}`
+        );
+      }
+
+      const newEmission = await response.json();
+      console.log("Emission record created successfully:", newEmission);
+
+      // Add the new record to state instead of reloading
+      setEmissionRecords([newEmission.emissionRecord, ...emissionRecords]);
+      setFilteredRecords([newEmission.emissionRecord, ...filteredRecords]);
+
+      // Close the modal
+      setShowAddModal(false);
+
+      // Show success message
+      setError(null);
     } catch (error) {
       console.error("Error submitting record:", error);
       setError(`Failed to submit emission record: ${error.message}`);
@@ -290,21 +261,11 @@ const EmissionPage = () => {
   // Edit modal handler
   const handleEdit = (record) => {
     setEmissionRecord({
-      startLocation: {
-        address: record.startLocation.address,
-        lat: record.startLocation.lat,
-        lon: record.startLocation.lon,
-      },
-      endLocation: {
-        address: record.endLocation.address,
-        lat: record.endLocation.lat,
-        lon: record.endLocation.lon,
-      },
+      emissionType: record.emissionType._id,
       date: new Date(record?.date).toISOString().split("T")[0],
-      distance: record.distance,
-      co2Used: record.co2Used,
+      quantity: record.quantity,
+      co2Equivalent: record.co2Equivalent,
       employee: record.employee?._id,
-      transportation: record.transportation?._id,
       _id: record?._id,
     });
     setShowEditModal(true);
@@ -314,23 +275,61 @@ const EmissionPage = () => {
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     try {
-      await authenticatedFetch(
-        `${REACT_APP_API_URL}/emissions/${emissionRecord._id}`,
+      // Format the data to match the backend API expectations
+      const formattedData = {
+        date: emissionRecord.date,
+        emissionType: emissionRecord.emissionType,
+        employee: emissionRecord.employee,
+        quantity: parseFloat(emissionRecord.quantity || 0),
+        co2Equivalent: parseFloat(emissionRecord.co2Equivalent || 0),
+      };
+
+      console.log("Updating emission record:", emissionRecord._id);
+      console.log("With data:", JSON.stringify(formattedData, null, 2));
+
+      // Send updated data to the backend API
+      const response = await authenticatedFetch(
+        `${REACT_APP_API_URL}/general-emissions/${emissionRecord._id}`,
         {
           method: "PUT",
-          body: JSON.stringify(emissionRecord),
-          headers: {
-            ...(JWT_ADMIN_SECRET && !localStorage.getItem("token")
-              ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-              : {}),
-          },
+          body: JSON.stringify(formattedData),
         }
       );
 
-      console.log("Emission record updated successfully!");
-      window.location.reload();
+      if (!response.ok) {
+        // Try to get more detailed error information
+        let errorDetail = "";
+        try {
+          const errorResponse = await response.json();
+          errorDetail = JSON.stringify(errorResponse);
+        } catch (e) {
+          errorDetail = await response.text();
+        }
+
+        throw new Error(
+          `Error ${response.status}: ${response.statusText}. Details: ${errorDetail}`
+        );
+      }
+
+      const updatedEmission = await response.json();
+      console.log("Emission record updated successfully:", updatedEmission);
+
+      // Update the record in state instead of reloading
+      const updatedRecords = emissionRecords.map((record) =>
+        record._id === emissionRecord._id
+          ? updatedEmission.emissionRecord
+          : record
+      );
+      setEmissionRecords(updatedRecords);
+      setFilteredRecords(updatedRecords);
+
+      // Close the modal
+      setShowEditModal(false);
+
+      // Show success message
+      setError(null);
     } catch (error) {
-      console.error("Error submitting updated record:", error);
+      console.error("Error updating record:", error);
       setError(`Failed to update emission record: ${error.message}`);
     }
   };
@@ -344,20 +343,25 @@ const EmissionPage = () => {
   // Delete the emission record
   const handleDelete = async () => {
     try {
-      await authenticatedFetch(
-        `${REACT_APP_API_URL}/emissions/${deleteRecordId}`,
+      // Send delete request to the backend API
+      const response = await authenticatedFetch(
+        `${REACT_APP_API_URL}/general-emissions/${deleteRecordId}`,
         {
           method: "DELETE",
-          headers: {
-            ...(JWT_ADMIN_SECRET && !localStorage.getItem("token")
-              ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-              : {}),
-          },
         }
       );
 
-      console.log("Emission record deleted successfully!");
-      window.location.reload();
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      console.log("Emission record deleted successfully");
+      setShowDeleteConfirm(false);
+
+      // Remove the deleted record from the state
+      setEmissionRecords(
+        emissionRecords.filter((record) => record._id !== deleteRecordId)
+      );
     } catch (error) {
       console.error("Error deleting record:", error);
       setError(`Failed to delete emission record: ${error.message}`);
@@ -386,20 +390,20 @@ const EmissionPage = () => {
         const month = new Date(record.date).toLocaleString("default", {
           month: "long",
         });
-        acc[month] = (acc[month] || 0) + parseFloat(record.co2Used);
+        acc[month] = (acc[month] || 0) + parseFloat(record.co2Equivalent);
         return acc;
       }, {});
 
-      // Process type data
+      // Process type data - using name instead of category
       const typeData = emissionRecords.reduce((acc, record) => {
-        const type = record.transportation?.name || "Other";
-        acc[type] = (acc[type] || 0) + parseFloat(record.co2Used);
+        const type = record.emissionType?.name || "Other";
+        acc[type] = (acc[type] || 0) + parseFloat(record.co2Equivalent);
         return acc;
       }, {});
 
       // Calculate total emissions
       const total = emissionRecords.reduce(
-        (sum, record) => sum + parseFloat(record.co2Used),
+        (sum, record) => sum + parseFloat(record.co2Equivalent),
         0
       );
 
@@ -437,14 +441,14 @@ const EmissionPage = () => {
       console.log("After employees filter:", filtered.length);
     }
 
-    if (filters.transportations && filters.transportations.length > 0) {
-      console.log("Selected transportations:", filters.transportations);
+    if (filters.emissionTypes && filters.emissionTypes.length > 0) {
+      console.log("Selected emission types:", filters.emissionTypes);
       filtered = filtered.filter((record) =>
-        filters.transportations.some(
-          (trans) => trans.value === record.transportation?._id
+        filters.emissionTypes.some(
+          (type) => type.value === record.emissionType?._id
         )
       );
-      console.log("After transportations filter:", filtered.length);
+      console.log("After emission types filter:", filtered.length);
     }
 
     setFilteredRecords(filtered);
@@ -486,7 +490,7 @@ const EmissionPage = () => {
     labels: Object.keys(emissionsByType),
     datasets: [
       {
-        label: "Emissions by Type",
+        label: "Emissions by Category",
         data: Object.values(emissionsByType),
         backgroundColor: [
           "rgba(255, 99, 132, 0.7)",
@@ -509,6 +513,22 @@ const EmissionPage = () => {
     ],
   };
 
+  // Emission by source (for bar chart) - update to use name instead of category
+  const emissionsBySource = {
+    labels: emissionRecords.map(
+      (record) => record.emissionType?.name || "Unknown"
+    ),
+    datasets: [
+      {
+        label: "CO₂ Emissions by Source (kg)",
+        data: emissionRecords.map((record) => record.co2Equivalent),
+        backgroundColor: "rgba(153, 102, 255, 0.5)",
+        borderColor: "rgba(153, 102, 255, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
   return (
     <div className={`dashboard-container bg-${theme}`}>
       <Sidebar
@@ -523,7 +543,7 @@ const EmissionPage = () => {
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container-fluid mt-4">
           <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h1>Emission Records</h1>
+            <h1>Emissions</h1>
             <div>
               <Button
                 variant="outline-primary"
@@ -534,7 +554,7 @@ const EmissionPage = () => {
                 {showFilters ? "Hide Filters" : "Show Filters"}
               </Button>
               <Button variant="outline-success" onClick={handleAdd}>
-                <FaPlusCircle className="me-2" /> Add New Record
+                <FaPlusCircle className="me-2" /> Add New Emission
               </Button>
             </div>
           </div>
@@ -593,21 +613,30 @@ const EmissionPage = () => {
                     />
                   </Col>
                   <Col xl={3} md={6}>
-                    <CarsSelect
-                      modalData={{ cars: filters.transportations }}
-                      carsState={carsState}
-                      handleCarChange={(selectedOptions) => {
-                        console.log(
-                          "Emissions: Transportation selection changed to:",
-                          selectedOptions
-                        );
-                        setFilters({
-                          ...filters,
-                          transportations: selectedOptions,
-                        });
-                      }}
-                      theme={theme}
-                    />
+                    <Form.Group className="mb-3">
+                      <Form.Label>Emission Type</Form.Label>
+                      <DynamicSelect
+                        modalData={{ emissionTypes: filters.emissionTypes }}
+                        stateData={emissionTypes}
+                        handleChange={(selectedOptions) => {
+                          console.log(
+                            "Emissions: Type selection changed to:",
+                            selectedOptions
+                          );
+                          setFilters({
+                            ...filters,
+                            emissionTypes: selectedOptions,
+                          });
+                        }}
+                        formatData={(type) => ({
+                          value: type._id,
+                          label: type.name,
+                          key: type._id,
+                        })}
+                        isMulti={true}
+                        id="emissionTypeFilter"
+                      />
+                    </Form.Group>
                   </Col>
                 </Row>
                 <div className="d-flex justify-content-end">
@@ -619,7 +648,7 @@ const EmissionPage = () => {
                         startDate: "",
                         endDate: "",
                         employees: [],
-                        transportations: [],
+                        emissionTypes: [],
                       });
                       setFilteredRecords(emissionRecords);
                     }}
@@ -686,19 +715,13 @@ const EmissionPage = () => {
               <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
                 <Card.Body className="d-flex flex-column align-items-center">
                   <div className="icon-container mb-3 text-info">
-                    <i className="fas fa-road fa-3x"></i>
+                    <i className="fas fa-tags fa-3x"></i>
                   </div>
                   <Card.Title className="text-center mb-3">
-                    Total Distance
+                    Emission Types
                   </Card.Title>
                   <h3 className="text-center mb-0">
-                    {formatDecimal(
-                      filteredRecords.reduce(
-                        (sum, record) => sum + parseFloat(record.distance || 0),
-                        0
-                      )
-                    )}{" "}
-                    km
+                    {Object.keys(emissionsByType).length}
                   </h3>
                 </Card.Body>
               </Card>
@@ -707,7 +730,7 @@ const EmissionPage = () => {
 
           {/* Charts */}
           <Row className="mb-4">
-            <Col md={8}>
+            <Col md={12} lg={6}>
               <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
                 <Card.Body>
                   <Card.Title className="mb-4">
@@ -788,7 +811,7 @@ const EmissionPage = () => {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md={4}>
+            <Col md={12} lg={6}>
               <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
                 <Card.Body>
                   <Card.Title className="mb-4">Emissions by Type</Card.Title>
@@ -832,6 +855,74 @@ const EmissionPage = () => {
             </Col>
           </Row>
 
+          {/* Additional Bar Chart */}
+          <Row className="mb-4">
+            <Col md={12}>
+              <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+                <Card.Body>
+                  <Card.Title className="mb-4">Emissions by Source</Card.Title>
+                  <div style={{ height: "300px", padding: "10px" }}>
+                    <Bar
+                      data={emissionsBySource}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            grid: {
+                              color:
+                                theme === "dark"
+                                  ? "rgba(255, 255, 255, 0.1)"
+                                  : "rgba(0, 0, 0, 0.1)",
+                            },
+                            ticks: {
+                              color: theme === "dark" ? "#fff" : "#666",
+                            },
+                            title: {
+                              display: true,
+                              text: "CO₂ Emissions (kg)",
+                              color: theme === "dark" ? "#fff" : "#666",
+                              font: {
+                                weight: "bold",
+                              },
+                            },
+                          },
+                          x: {
+                            grid: {
+                              color:
+                                theme === "dark"
+                                  ? "rgba(255, 255, 255, 0.1)"
+                                  : "rgba(0, 0, 0, 0.1)",
+                            },
+                            ticks: {
+                              color: theme === "dark" ? "#fff" : "#666",
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            labels: {
+                              color: theme === "dark" ? "#fff" : "#666",
+                            },
+                          },
+                          tooltip: {
+                            backgroundColor:
+                              theme === "dark"
+                                ? "rgba(0, 0, 0, 0.8)"
+                                : "rgba(255, 255, 255, 0.8)",
+                            titleColor: theme === "dark" ? "#fff" : "#000",
+                            bodyColor: theme === "dark" ? "#fff" : "#000",
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
           {/* Records Table */}
           <Card className={`bg-${theme} shadow-sm m-0`}>
             <Card.Body>
@@ -841,13 +932,11 @@ const EmissionPage = () => {
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>Start Location</th>
-                      <th>End Location</th>
                       <th>Date</th>
-                      <th>Distance (km)</th>
-                      <th>CO₂ Used (kg)</th>
+                      <th>Emission Type</th>
+                      <th>Quantity</th>
+                      <th>CO₂ Equivalent (kg)</th>
                       <th>Employee</th>
-                      <th>Transportation</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -856,24 +945,14 @@ const EmissionPage = () => {
                       filteredRecords.map((record, index) => (
                         <tr key={record._id}>
                           <td>{index + 1}</td>
-                          <td className="f10">
-                            <div className="scrollable-address">
-                              {record.startLocation.address}
-                            </div>
-                          </td>
-                          <td className="f10">
-                            <div className="scrollable-address">
-                              {record.endLocation.address}
-                            </div>
-                          </td>
                           <td>{new Date(record.date).toLocaleDateString()}</td>
-                          <td>{formatDecimal(record.distance)}</td>
-                          <td>{record.co2Used}</td>
+                          <td>{record.emissionType?.name || "N/A"}</td>
+                          <td>{formatDecimal(record.quantity)}</td>
+                          <td>{formatDecimal(record.co2Equivalent)}</td>
                           <td>
                             {record.employee?.firstName}{" "}
                             {record.employee?.lastName}
                           </td>
-                          <td>{record.transportation?.name || "N/A"}</td>
                           <td>
                             <div className="d-flex gap-2 justify-content-center">
                               {isRecordEditable(record) ? (
@@ -904,7 +983,7 @@ const EmissionPage = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="9" className="text-center text-muted">
+                        <td colSpan="7" className="text-center text-muted">
                           No records found
                         </td>
                       </tr>
@@ -927,30 +1006,26 @@ const EmissionPage = () => {
             </Modal.Header>
             <Modal.Body>
               <Form onSubmit={handleAddSubmit}>
-                <Form.Group controlId="startLocation" className="mb-4">
-                  <LocationPicker
-                    label="Start Location"
-                    value={emissionRecord.startLocation}
-                    onChange={handleStartLocationChange}
-                    required
-                    mapHeight="200px"
-                    placeholder="Enter or select start location"
-                  />
-                </Form.Group>
-
-                <Form.Group controlId="endLocation" className="mb-4">
-                  <LocationPicker
-                    label="End Location"
-                    value={emissionRecord.endLocation}
-                    onChange={handleEndLocationChange}
-                    required
-                    mapHeight="200px"
-                    placeholder="Enter or select end location"
-                  />
-                </Form.Group>
-
                 <div className="row">
-                  <div className="col-md-4">
+                  <div className="col-md-6">
+                    <Form.Group controlId="emissionType" className="mb-3">
+                      <Form.Label>Emission Type</Form.Label>
+                      <Form.Select
+                        value={emissionRecord.emissionType}
+                        onChange={(e) => handleInputChange(e, "emissionType")}
+                        required
+                      >
+                        <option value="">Select Emission Type</option>
+                        {emissionTypes.map((type) => (
+                          <option key={type._id} value={type._id}>
+                            {type.name} (GWP: {type.gwp})
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+
+                  <div className="col-md-6">
                     <Form.Group controlId="date" className="mb-3">
                       <Form.Label>Date</Form.Label>
                       <Form.Control
@@ -961,30 +1036,30 @@ const EmissionPage = () => {
                       />
                     </Form.Group>
                   </div>
+                </div>
 
-                  <div className="col-md-4">
-                    <Form.Group controlId="distance" className="mb-3">
-                      <Form.Label>Distance (km)</Form.Label>
+                <div className="row">
+                  <div className="col-md-6">
+                    <Form.Group controlId="quantity" className="mb-3">
+                      <Form.Label>Quantity</Form.Label>
                       <Form.Control
                         type="number"
-                        disabled
-                        value={emissionRecord.distance}
-                        placeholder="Calculated automatically"
+                        value={emissionRecord.quantity}
+                        onChange={(e) => handleInputChange(e, "quantity")}
+                        placeholder="Enter quantity"
+                        required
                       />
-                      <small className="text-muted">
-                        Calculated automatically from locations
-                      </small>
                     </Form.Group>
                   </div>
 
-                  <div className="col-md-4">
-                    <Form.Group controlId="co2Used" className="mb-3">
-                      <Form.Label>CO2 Used (kg)</Form.Label>
+                  <div className="col-md-6">
+                    <Form.Group controlId="co2Equivalent" className="mb-3">
+                      <Form.Label>CO₂ Equivalent (kg)</Form.Label>
                       <Form.Control
                         type="number"
-                        value={emissionRecord.co2Used}
-                        onChange={(e) => handleInputChange(e, "co2Used")}
-                        placeholder="Enter CO2 used"
+                        value={emissionRecord.co2Equivalent}
+                        onChange={(e) => handleInputChange(e, "co2Equivalent")}
+                        placeholder="Enter CO₂ equivalent"
                         required
                       />
                     </Form.Group>
@@ -992,50 +1067,21 @@ const EmissionPage = () => {
                 </div>
 
                 <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <Form.Group controlId="employee" className="mb-3">
-                      <DynamicSelect
-                        label="Employee"
-                        id="employee"
-                        className="form-select"
-                        modalData={emissionRecord}
-                        stateData={employeesState}
-                        handleChange={(selected) =>
-                          setEmissionRecord({
-                            ...emissionRecord,
-                            employee: selected ? selected.value : "",
-                          })
-                        }
-                        formatData={(employee) => ({
-                          value: employee._id,
-                          label: `${employee.firstName} ${employee.lastName}`,
-                          key: employee._id,
-                        })}
-                        isMulti={false}
-                      />
-                    </Form.Group>
-                  </div>
-
-                  <div className="col-md-6">
-                    <Form.Group controlId="transportation" className="mb-3">
-                      <DynamicSelect
-                        label="Transportation"
-                        id="transportation"
-                        modalData={emissionRecord}
-                        stateData={carsState}
-                        handleChange={(selected) =>
-                          setEmissionRecord({
-                            ...emissionRecord,
-                            transportation: selected ? selected.value : "",
-                          })
-                        }
-                        formatData={(car) => ({
-                          value: car._id,
-                          label: `${car.name}`,
-                          key: car._id,
-                        })}
-                        isMulti={false}
-                      />
+                      <Form.Label>Employee</Form.Label>
+                      <Form.Select
+                        value={emissionRecord.employee}
+                        onChange={(e) => handleInputChange(e, "employee")}
+                        required
+                      >
+                        <option value="">Select Employee</option>
+                        {employeesState.map((employee) => (
+                          <option key={employee._id} value={employee._id}>
+                            {employee.firstName} {employee.lastName}
+                          </option>
+                        ))}
+                      </Form.Select>
                     </Form.Group>
                   </div>
                 </div>
@@ -1064,34 +1110,30 @@ const EmissionPage = () => {
             size="lg"
           >
             <Modal.Header closeButton>
-              <Modal.Title>Update Record</Modal.Title>
+              <Modal.Title>Update Emission Record</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form onSubmit={handleUpdateSubmit}>
-                <Form.Group controlId="startLocation" className="mb-4">
-                  <LocationPicker
-                    label="Start Location"
-                    value={emissionRecord.startLocation}
-                    onChange={handleStartLocationChange}
-                    required
-                    mapHeight="200px"
-                    placeholder="Enter or select start location"
-                  />
-                </Form.Group>
-
-                <Form.Group controlId="endLocation" className="mb-4">
-                  <LocationPicker
-                    label="End Location"
-                    value={emissionRecord.endLocation}
-                    onChange={handleEndLocationChange}
-                    required
-                    mapHeight="200px"
-                    placeholder="Enter or select end location"
-                  />
-                </Form.Group>
-
                 <div className="row">
-                  <div className="col-md-4">
+                  <div className="col-md-6">
+                    <Form.Group controlId="emissionType" className="mb-3">
+                      <Form.Label>Emission Type</Form.Label>
+                      <Form.Select
+                        value={emissionRecord.emissionType}
+                        onChange={(e) => handleInputChange(e, "emissionType")}
+                        required
+                      >
+                        <option value="">Select Emission Type</option>
+                        {emissionTypes.map((type) => (
+                          <option key={type._id} value={type._id}>
+                            {type.name} (GWP: {type.gwp})
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+
+                  <div className="col-md-6">
                     <Form.Group controlId="date" className="mb-3">
                       <Form.Label>Date</Form.Label>
                       <Form.Control
@@ -1102,30 +1144,30 @@ const EmissionPage = () => {
                       />
                     </Form.Group>
                   </div>
+                </div>
 
-                  <div className="col-md-4">
-                    <Form.Group controlId="distance" className="mb-3">
-                      <Form.Label>Distance (km)</Form.Label>
+                <div className="row">
+                  <div className="col-md-6">
+                    <Form.Group controlId="quantity" className="mb-3">
+                      <Form.Label>Quantity</Form.Label>
                       <Form.Control
                         type="number"
-                        disabled
-                        value={emissionRecord.distance}
-                        placeholder="Calculated automatically"
+                        value={emissionRecord.quantity}
+                        onChange={(e) => handleInputChange(e, "quantity")}
+                        placeholder="Enter quantity"
+                        required
                       />
-                      <small className="text-muted">
-                        Calculated automatically from locations
-                      </small>
                     </Form.Group>
                   </div>
 
-                  <div className="col-md-4">
-                    <Form.Group controlId="co2Used" className="mb-3">
-                      <Form.Label>CO2 Used (kg)</Form.Label>
+                  <div className="col-md-6">
+                    <Form.Group controlId="co2Equivalent" className="mb-3">
+                      <Form.Label>CO₂ Equivalent (kg)</Form.Label>
                       <Form.Control
                         type="number"
-                        value={emissionRecord.co2Used}
-                        onChange={(e) => handleInputChange(e, "co2Used")}
-                        placeholder="Enter CO2 used"
+                        value={emissionRecord.co2Equivalent}
+                        onChange={(e) => handleInputChange(e, "co2Equivalent")}
+                        placeholder="Enter CO₂ equivalent"
                         required
                       />
                     </Form.Group>
@@ -1133,49 +1175,21 @@ const EmissionPage = () => {
                 </div>
 
                 <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <Form.Group controlId="employee" className="mb-3">
-                      <DynamicSelect
-                        label="Employee"
-                        id="employee"
-                        modalData={emissionRecord}
-                        stateData={employeesState}
-                        handleChange={(selected) =>
-                          setEmissionRecord({
-                            ...emissionRecord,
-                            employee: selected ? selected.value : "",
-                          })
-                        }
-                        formatData={(employee) => ({
-                          value: employee._id,
-                          label: `${employee.firstName} ${employee.lastName}`,
-                          key: employee._id,
-                        })}
-                        isMulti={false}
-                      />
-                    </Form.Group>
-                  </div>
-
-                  <div className="col-md-6">
-                    <Form.Group controlId="transportation" className="mb-3">
-                      <DynamicSelect
-                        label="Transportation"
-                        id="transportation"
-                        modalData={emissionRecord}
-                        stateData={carsState}
-                        handleChange={(selected) =>
-                          setEmissionRecord({
-                            ...emissionRecord,
-                            transportation: selected ? selected.value : "",
-                          })
-                        }
-                        formatData={(car) => ({
-                          value: car._id,
-                          label: `${car.name}`,
-                          key: car._id,
-                        })}
-                        isMulti={false}
-                      />
+                      <Form.Label>Employee</Form.Label>
+                      <Form.Select
+                        value={emissionRecord.employee}
+                        onChange={(e) => handleInputChange(e, "employee")}
+                        required
+                      >
+                        <option value="">Select Employee</option>
+                        {employeesState.map((employee) => (
+                          <option key={employee._id} value={employee._id}>
+                            {employee.firstName} {employee.lastName}
+                          </option>
+                        ))}
+                      </Form.Select>
                     </Form.Group>
                   </div>
                 </div>
@@ -1225,4 +1239,4 @@ const EmissionPage = () => {
   );
 };
 
-export default EmissionPage;
+export default EmissionsPage;

@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard/Dashboard.js";
 import UserDashboard from "./pages/UserDashboard/UserDashboard.js";
 import Employees from "./pages/Employees";
 import Companies from "./pages/Companies";
+import TransportEmissionRecords from "./pages/TransportEmissionRecords";
 import Emissions from "./pages/Emissions";
 import Registration from "./pages/Registration";
 import EmissionTypesPage from "./pages/EmissionTypes";
@@ -18,7 +19,6 @@ import LicensePlatePage from "./pages/LicensePlate";
 import ScenariosPage from "./pages/Scenarios";
 import TargetsPage from "./pages/Targets/Targets.js";
 import AnalyticsPage from "./pages/Analytics";
-import TransportEmissions from "./pages/TransportEmissions";
 import { AdminRoute, EmployeeRoute } from "./utils/RouteProtection";
 import "./assets/style.css";
 
@@ -70,6 +70,14 @@ const App = () => {
           }
         />
         <Route
+          path="/transport-emission-records"
+          element={
+            <AdminRoute>
+              <TransportEmissionRecords />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/emission-types"
           element={
             <AdminRoute>
@@ -82,14 +90,6 @@ const App = () => {
           element={
             <AdminRoute>
               <EnergyEmissions />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/transport-emissions"
-          element={
-            <AdminRoute>
-              <TransportEmissions />
             </AdminRoute>
           }
         />
