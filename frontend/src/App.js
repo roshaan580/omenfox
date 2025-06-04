@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dashboard/Dashboard.js";
 import UserDashboard from "./pages/UserDashboard/UserDashboard.js";
 import Employees from "./pages/Employees";
 import Companies from "./pages/Companies";
-import TransportEmissionRecords from "./pages/TransportEmissionRecords/TransportEmissionRecords.js";
+import TransportEmissions from "./pages/TransportEmissions/TransportEmissions.js";
 import Emissions from "./pages/Emissions/Emissions.js";
 import Registration from "./pages/Registration";
 import EmissionTypesPage from "./pages/EmissionTypes";
@@ -73,7 +73,7 @@ const App = () => {
           path="/transport-emission-records"
           element={
             <AdminRoute>
-              <TransportEmissionRecords />
+              <TransportEmissions />
             </AdminRoute>
           }
         />
