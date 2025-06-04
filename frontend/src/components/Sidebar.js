@@ -7,7 +7,7 @@ import {
   FaBuilding,
   FaGasPump,
 } from "react-icons/fa";
-import { MdManageAccounts, MdTravelExplore } from "react-icons/md";
+import { MdManageAccounts, MdTravelExplore, MdDashboard } from "react-icons/md";
 import { BsCloudHaze2Fill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LogoWhite from "../assets/logo-white.png";
@@ -67,6 +67,54 @@ const ButtonItem = memo(({ onClick, children }) => {
   );
 });
 
+// Standalone Dashboard Item Component
+const DashboardItem = ({ isSidebarOpen, isActive, handleNavigation }) => {
+  return (
+    <Link
+      to="/dashboard"
+      className={`nav-item px-3 py-2 d-flex align-items-center ${
+        isActive("/dashboard") ? "active" : ""
+      }`}
+      onClick={handleNavigation("/dashboard", true)}
+    >
+      <div
+        className={`d-flex align-items-center ${
+          !isSidebarOpen && "justify-content-center w-100"
+        }`}
+      >
+        <span className="nav-icon me-0">
+          <MdDashboard size={22} />
+        </span>
+        {isSidebarOpen && <span className="nav-text ms-2">Dashboard</span>}
+      </div>
+    </Link>
+  );
+};
+
+// User Dashboard Item Component
+const UserDashboardItem = ({ isSidebarOpen, isActive, handleNavigation }) => {
+  return (
+    <Link
+      to="/user-dashboard"
+      className={`nav-item px-3 py-2 d-flex align-items-center ${
+        isActive("/user-dashboard") ? "active" : ""
+      }`}
+      onClick={handleNavigation("/user-dashboard", false, false)}
+    >
+      <div
+        className={`d-flex align-items-center ${
+          !isSidebarOpen && "justify-content-center w-100"
+        }`}
+      >
+        <span className="nav-icon me-0">
+          <MdDashboard size={22} />
+        </span>
+        {isSidebarOpen && <span className="nav-text ms-2">Dashboard</span>}
+      </div>
+    </Link>
+  );
+};
+
 // Admin Travel & Commute Menu
 const TravelAndCommuteMenu = ({
   isSidebarOpen,
@@ -120,13 +168,6 @@ const GreenhouseEmissionsMenu = ({
 
       {isSidebarOpen && expandedItem === "emissions" && (
         <div className="submenu">
-          <NavLinkItem
-            to="/dashboard"
-            isActive={isActive("/dashboard")}
-            onClick={handleNavigation("/dashboard", true)}
-          >
-            Dashboard
-          </NavLinkItem>
           <NavLinkItem
             to="/emissions"
             isActive={isActive("/emissions")}
@@ -407,14 +448,6 @@ const EmployeeMenu = memo(
 
         {isSidebarOpen && expandedItem === "travel" && (
           <div className="submenu">
-            <NavLinkItem
-              to="/user-dashboard"
-              isActive={isActive("/user-dashboard")}
-              onClick={handleNavigation("/user-dashboard", false, false)}
-            >
-              <i className="fas fa-tachometer-alt me-2"></i>
-              My Dashboard
-            </NavLinkItem>
             <ButtonItem onClick={openTransportModal}>
               <i className="fas fa-car me-2"></i>
               Add New Transport
@@ -635,6 +668,12 @@ const Sidebar = ({
           <nav className="sidebar-nav">
             {isAdmin ? (
               <>
+                {/* Admin standalone Dashboard button */}
+                <DashboardItem
+                  isSidebarOpen={isSidebarOpen}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
                 {/* ADMIN MENU */}
                 <GreenhouseEmissionsMenu
                   isSidebarOpen={isSidebarOpen}
@@ -686,6 +725,12 @@ const Sidebar = ({
               </>
             ) : (
               <>
+                {/* Employee standalone Dashboard button */}
+                <UserDashboardItem
+                  isSidebarOpen={isSidebarOpen}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
                 {/* EMPLOYEE MENU */}
                 <EmployeeMenu
                   isSidebarOpen={isSidebarOpen}
