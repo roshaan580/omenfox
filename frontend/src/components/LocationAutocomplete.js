@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { debounce } from "lodash";
 import PropTypes from "prop-types";
 import "./LocationAutocomplete.css";
+import { REACT_APP_API_URL } from "../config";
 
 const LocationAutocomplete = ({
   value,
@@ -58,10 +59,9 @@ const LocationAutocomplete = ({
 
     setIsLoading(true);
     try {
+      // Use our proxy to avoid CORS issues
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          query
-        )}&format=json&addressdetails=1&limit=5`
+        `${REACT_APP_API_URL}/rdw/search?q=${encodeURIComponent(query)}`
       );
 
       if (!response.ok) {

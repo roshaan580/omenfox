@@ -10,6 +10,7 @@ import {
 import PropTypes from "prop-types";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { REACT_APP_API_URL } from "../config";
 
 // Fix for default marker icon issue in React with Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -42,9 +43,9 @@ const MapClickHandler = ({ onLocationSelected }) => {
       const { lat, lng } = e.latlng;
       if (onLocationSelected) {
         try {
-          // Reverse geocode to get the address from coordinates
+          // Use our proxy to avoid CORS issues
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
+            `${REACT_APP_API_URL}/rdw/reverse-geocode?lat=${lat}&lon=${lng}`
           );
 
           if (!response.ok) {
