@@ -9,6 +9,8 @@ import LocationPicker from "../components/LocationPicker";
 import { authenticatedFetch } from "../utils/axiosConfig";
 import Sidebar from "../components/Sidebar";
 import { FaPlusCircle } from "react-icons/fa";
+import TablePagination from "../components/TablePagination";
+import usePagination from "../hooks/usePagination";
 
 const CompanyPage = () => {
   const [companies, setCompanies] = useState([]);
@@ -34,6 +36,19 @@ const CompanyPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const navigate = useNavigate();
+
+  // Use pagination hook
+  const {
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedItems,
+    paginate,
+    changeItemsPerPage,
+    indexOfFirstItem,
+    indexOfLastItem,
+    totalItems,
+  } = usePagination(companies);
 
   useEffect(() => {
     // Apply theme class to body element on mount and when theme changes
@@ -443,10 +458,10 @@ const CompanyPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {companies.length > 0 ? (
-                    companies.map((company, index) => (
+                  {paginatedItems.length > 0 ? (
+                    paginatedItems.map((company, index) => (
                       <tr key={company._id}>
-                        <td>{index + 1}</td>
+                        <td>{indexOfFirstItem + index + 1}</td>
                         <td>{company.name}</td>
                         <td>{company.address}</td>
                         <td>
@@ -486,13 +501,26 @@ const CompanyPage = () => {
                   ) : (
                     <tr>
                       <td colSpan="6" className="text-center text-muted">
-                        No records found
+                        No companies found
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination component */}
+            <TablePagination
+              currentPage={currentPage}
+              onPageChange={paginate}
+              totalPages={totalPages}
+              recordsPerPage={itemsPerPage}
+              onRecordsPerPageChange={changeItemsPerPage}
+              totalRecords={totalItems}
+              startIndex={indexOfFirstItem}
+              endIndex={indexOfLastItem}
+              theme={theme}
+            />
           </div>
         </div>
 

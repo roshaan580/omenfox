@@ -7,6 +7,8 @@ import Registration from "./Registration";
 import { FaUserPlus } from "react-icons/fa"; // Import FaPlusCircle here
 import Sidebar from "../components/Sidebar";
 import { authenticatedFetch } from "../utils/axiosConfig";
+import TablePagination from "../components/TablePagination";
+import usePagination from "../hooks/usePagination";
 
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
@@ -21,6 +23,19 @@ const EmployeePage = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [userData, setUserData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Use pagination hook
+  const {
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedItems,
+    paginate,
+    changeItemsPerPage,
+    indexOfFirstItem,
+    indexOfLastItem,
+    totalItems,
+  } = usePagination(employees);
 
   // Function to fetch employees
   const fetchEmployees = async () => {
@@ -249,15 +264,17 @@ const EmployeePage = () => {
                 </tr>
               </thead>
               <tbody>
-                {employees.length > 0 ? (
-                  employees.map((employee, index) => (
+                {paginatedItems.length > 0 ? (
+                  paginatedItems.map((employee, index) => (
                     <tr key={employee._id}>
-                      <td>{index + 1}</td>
-                      <td>{`${employee.firstName} ${employee.lastName}`}</td>
+                      <td>{indexOfFirstItem + index + 1}</td>
+                      <td>
+                        {employee.firstName} {employee.lastName}
+                      </td>
                       <td>{employee.homeAddress}</td>
                       <td>{employee.companyAddress}</td>
-                      <td>{employee.car?.name || "N/A"}</td>
-                      <td className="text-center">
+                      <td>{employee.transportation}</td>
+                      <td>
                         <div className="d-flex flex-wrap align-items-center justify-content-center gap-2">
                           <button
                             className="btn btn-sm btn-outline-success"
@@ -272,10 +289,10 @@ const EmployeePage = () => {
                             <i className="fas fa-trash"></i>
                           </button>
                           <button
-                            className="btn btn-sm btn-outline-warning"
+                            className="btn btn-sm btn-outline-info"
                             onClick={() => employeeDetails(employee._id)}
                           >
-                            <i class="fas fa-info"></i>
+                            <i className="fas fa-info-circle"></i>
                           </button>
                         </div>
                       </td>
@@ -284,7 +301,7 @@ const EmployeePage = () => {
                 ) : (
                   <tr>
                     <td colSpan="6" className="text-center text-muted">
-                      No records found
+                      No employees found
                     </td>
                   </tr>
                 )}
@@ -292,73 +309,38 @@ const EmployeePage = () => {
             </table>
           </div>
 
-          {/* Profile Update Modal */}
+          {/* Pagination component */}
+          <TablePagination
+            currentPage={currentPage}
+            onPageChange={paginate}
+            totalPages={totalPages}
+            recordsPerPage={itemsPerPage}
+            onRecordsPerPageChange={changeItemsPerPage}
+            totalRecords={totalItems}
+            startIndex={indexOfFirstItem}
+            endIndex={indexOfLastItem}
+            theme={theme}
+          />
+
+          {/* Update Employee Modal */}
           {isModalVisible && (
-            <div
-              className="modal fade show custom-scrollbar"
-              tabIndex="-1"
-              style={{ display: "block" }}
-              aria-labelledby="exampleModalLabel"
-              aria-hidden="true"
-            >
-              <div className="modal-dialog modal-lg" role="document">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title" id="exampleModalLabel">
-                      Update Profile
-                    </h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={closeModal}
-                      aria-label="Close"
-                    ></button>
-                  </div>
-                  <div className="modal-body">
-                    <UpdateEmployee
-                      userData={isModalVisible}
-                      isModalVisible={isModalVisible}
-                      onUpdate={(updatedData) =>
-                        handleProfileUpdate(updatedData)
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <UpdateEmployee
+              show={!!isModalVisible}
+              onHide={closeModal}
+              userProfile={isModalVisible}
+              onProfileUpdate={handleProfileUpdate}
+              isAdmin={true}
+            />
           )}
 
-          {/* Register Profile Modal */}
+          {/* Registration Modal */}
           {isRegModel && (
-            <div
-              className="modal fade show"
-              tabIndex="-1"
-              style={{ display: "block" }}
-              aria-labelledby="exampleModalLabel"
-              aria-hidden="true"
-            >
-              <div className="modal-dialog modal-lg" role="document">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title" id="exampleModalLabel">
-                      Employee Registration
-                    </h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={closeModal}
-                      aria-label="Close"
-                    ></button>
-                  </div>
-
-                  <Registration
-                    userData={isRegModel}
-                    isModalVisible={false}
-                    isAdmin={true}
-                  />
-                </div>
-              </div>
-            </div>
+            <Registration
+              show={isRegModel}
+              onHide={closeModal}
+              onProfileUpdate={fetchEmployees}
+              isAdmin={true}
+            />
           )}
         </div>
       </div>

@@ -7,6 +7,8 @@ import {
   formatDecimal,
 } from "../../../utils/dateUtils";
 import TransportEmissionsModal from "./modals/TransportEmissionsModal";
+import TablePagination from "../../../components/TablePagination";
+import usePagination from "../../../hooks/usePagination";
 
 /**
  * Transport Emissions component for monthly transport emissions tracking
@@ -31,6 +33,7 @@ const TransportEmissions = ({ activeTab }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [transportRecords, setTransportRecords] = useState([]);
+  const [sortedRecords, setSortedRecords] = useState([]);
   const [currentRecord, setCurrentRecord] = useState({
     userId: userId,
     month: "",
@@ -43,6 +46,58 @@ const TransportEmissions = ({ activeTab }) => {
   const [deleteRecordId, setDeleteRecordId] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [theme] = useState(localStorage.getItem("theme") || "light");
+
+  // Use pagination hook with sorted records
+  const {
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedItems,
+    paginate,
+    changeItemsPerPage,
+    indexOfFirstItem,
+    indexOfLastItem,
+    totalItems,
+  } = usePagination(sortedRecords);
+
+  // Sort records by date (latest first)
+  useEffect(() => {
+    if (transportRecords.length > 0) {
+      // Create a sortable date using year and month
+      const sorted = [...transportRecords].sort((a, b) => {
+        // Create date objects using year and month (set day to 1)
+        const dateA = new Date(`${a.year}-${getMonthNumber(a.month)}-01`);
+        const dateB = new Date(`${b.year}-${getMonthNumber(b.month)}-01`);
+
+        // Sort descending (newest first)
+        return dateB - dateA;
+      });
+
+      setSortedRecords(sorted);
+    } else {
+      setSortedRecords([]);
+    }
+  }, [transportRecords]);
+
+  // Helper to convert month name to number
+  const getMonthNumber = (monthName) => {
+    const months = {
+      January: "01",
+      February: "02",
+      March: "03",
+      April: "04",
+      May: "05",
+      June: "06",
+      July: "07",
+      August: "08",
+      September: "09",
+      October: "10",
+      November: "11",
+      December: "12",
+    };
+    return months[monthName] || "01";
+  };
 
   const handleAdd = () => {
     if (!userId) {
@@ -249,73 +304,88 @@ const TransportEmissions = ({ activeTab }) => {
           {isLoading ? (
             renderLoading()
           ) : (
-            <div className="table-responsive">
-              <table className="table table-striped table-bordered table-hover">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Month</th>
-                    <th>Year</th>
-                    <th>Transport Mode</th>
-                    <th>Distance (km)</th>
-                    <th>Weight (tons)</th>
-                    <th>Emission Factor (kg CO₂/ton-km)</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transportRecords.length > 0 ? (
-                    transportRecords.map((record, index) => (
-                      <tr key={record._id || index}>
-                        <td>{index + 1}</td>
-                        <td>{record.month}</td>
-                        <td>{record.year}</td>
-                        <td>{record.transportMode}</td>
-                        <td>{formatDecimal(record.distance)}</td>
-                        <td>{formatDecimal(record.weight)}</td>
-                        <td>{formatDecimal(record.emissionFactor)}</td>
-                        <td>
-                          <div className="d-flex gap-2 justify-content-center">
-                            {isYearlyRecordEditable(record) ? (
-                              <>
-                                <Button
-                                  variant="outline-primary"
-                                  size="sm"
-                                  onClick={() => handleEdit(record)}
-                                  disabled={isLoading}
-                                >
-                                  <i className="fas fa-edit"></i>
-                                </Button>
-                                <Button
-                                  variant="outline-danger"
-                                  size="sm"
-                                  onClick={() => confirmDelete(record)}
-                                  disabled={isLoading}
-                                >
-                                  <i className="fas fa-trash"></i>
-                                </Button>
-                              </>
-                            ) : (
-                              <span className="text-muted small">
-                                Locked (previous year)
-                              </span>
-                            )}
-                          </div>
+            <>
+              <div className="table-responsive">
+                <table className="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Month</th>
+                      <th>Year</th>
+                      <th>Transport Mode</th>
+                      <th>Distance (km)</th>
+                      <th>Weight (tons)</th>
+                      <th>Emission Factor (kg CO₂/ton-km)</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedItems.length > 0 ? (
+                      paginatedItems.map((record, index) => (
+                        <tr key={record._id || index}>
+                          <td>{indexOfFirstItem + index + 1}</td>
+                          <td>{record.month}</td>
+                          <td>{record.year}</td>
+                          <td>{record.transportMode}</td>
+                          <td>{formatDecimal(record.distance)}</td>
+                          <td>{formatDecimal(record.weight)}</td>
+                          <td>{formatDecimal(record.emissionFactor)}</td>
+                          <td>
+                            <div className="d-flex gap-2 justify-content-center">
+                              {isYearlyRecordEditable(record) ? (
+                                <>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => handleEdit(record)}
+                                    disabled={isLoading}
+                                  >
+                                    <i className="fas fa-edit"></i>
+                                  </Button>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => confirmDelete(record)}
+                                    disabled={isLoading}
+                                  >
+                                    <i className="fas fa-trash"></i>
+                                  </Button>
+                                </>
+                              ) : (
+                                <span className="text-muted small">
+                                  Locked (previous year)
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="8" className="text-center text-muted">
+                          {userId
+                            ? "No records found"
+                            : "Please log in to view your records"}
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="8" className="text-center text-muted">
-                        {userId
-                          ? "No records found"
-                          : "Please log in to view your records"}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination component */}
+              <TablePagination
+                currentPage={currentPage}
+                onPageChange={paginate}
+                totalPages={totalPages}
+                recordsPerPage={itemsPerPage}
+                onRecordsPerPageChange={changeItemsPerPage}
+                totalRecords={totalItems}
+                startIndex={indexOfFirstItem}
+                endIndex={indexOfLastItem}
+                theme={theme}
+              />
+            </>
           )}
         </div>
       )}

@@ -6,6 +6,8 @@ import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import { FaPlusCircle } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import { authenticatedFetch } from "../utils/axiosConfig";
+import TablePagination from "../components/TablePagination";
+import usePagination from "../hooks/usePagination";
 
 const EmissionTypesPage = () => {
   const [emissionTypes, setEmissionTypes] = useState([]);
@@ -24,6 +26,19 @@ const EmissionTypesPage = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [userData, setUserData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Use pagination hook
+  const {
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedItems,
+    paginate,
+    changeItemsPerPage,
+    indexOfFirstItem,
+    indexOfLastItem,
+    totalItems,
+  } = usePagination(emissionTypes);
 
   // Check authentication on load and set user data
   useEffect(() => {
@@ -240,10 +255,10 @@ const EmissionTypesPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {emissionTypes.length > 0
-                  ? emissionTypes.map((type, index) => (
+                {paginatedItems.length > 0
+                  ? paginatedItems.map((type, index) => (
                       <tr key={type._id}>
-                        <td>{index + 1}</td>
+                        <td>{indexOfFirstItem + index + 1}</td>
                         <td>{type.name}</td>
                         <td>{type.gwp}</td>
                         <td className="text-center">
@@ -274,6 +289,19 @@ const EmissionTypesPage = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination component */}
+          <TablePagination
+            currentPage={currentPage}
+            onPageChange={paginate}
+            totalPages={totalPages}
+            recordsPerPage={itemsPerPage}
+            onRecordsPerPageChange={changeItemsPerPage}
+            totalRecords={totalItems}
+            startIndex={indexOfFirstItem}
+            endIndex={indexOfLastItem}
+            theme={theme}
+          />
 
           {/* Add Modal */}
           <Modal

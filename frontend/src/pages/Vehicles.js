@@ -7,6 +7,8 @@ import VehicleRegisterPage from "./VehicleRegister";
 import UpdateVehicle from "./UpdateVehicle";
 import Sidebar from "../components/Sidebar";
 import { authenticatedFetch } from "../utils/axiosConfig";
+import TablePagination from "../components/TablePagination";
+import usePagination from "../hooks/usePagination";
 
 const VehiclePage = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -20,6 +22,19 @@ const VehiclePage = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [userData, setUserData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Use pagination hook
+  const {
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedItems,
+    paginate,
+    changeItemsPerPage,
+    indexOfFirstItem,
+    indexOfLastItem,
+    totalItems,
+  } = usePagination(vehicles);
 
   // Check authentication on load and set user data
   useEffect(() => {
@@ -209,10 +224,10 @@ const VehiclePage = () => {
                 </tr>
               </thead>
               <tbody>
-                {vehicles.length > 0 ? (
-                  vehicles.map((vehicle, index) => (
+                {paginatedItems.length > 0 ? (
+                  paginatedItems.map((vehicle, index) => (
                     <tr key={vehicle._id}>
-                      <td>{index + 1}</td>
+                      <td>{indexOfFirstItem + index + 1}</td>
                       <td>{vehicle.vehicleName || "N/A"}</td>
                       <td>{vehicle.licensePlate || "N/A"}</td>
                       <td>{vehicle.vehicleType || "N/A"}</td>
@@ -240,83 +255,47 @@ const VehiclePage = () => {
                 ) : (
                   <tr>
                     <td colSpan="8" className="text-center text-muted">
-                      No records found
+                      No vehicles found
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination component */}
+          <TablePagination
+            currentPage={currentPage}
+            onPageChange={paginate}
+            totalPages={totalPages}
+            recordsPerPage={itemsPerPage}
+            onRecordsPerPageChange={changeItemsPerPage}
+            totalRecords={totalItems}
+            startIndex={indexOfFirstItem}
+            endIndex={indexOfLastItem}
+            theme={theme}
+          />
+
+          {/* Vehicle Update Modal */}
+          {isModalVisible && (
+            <UpdateVehicle
+              show={!!isModalVisible}
+              onHide={closeModal}
+              vehicleData={isModalVisible}
+              onVehicleUpdate={handleProfileUpdate}
+            />
+          )}
+
+          {/* Vehicle Registration Modal */}
+          {isRegModel && (
+            <VehicleRegisterPage
+              show={isRegModel}
+              onHide={closeModal}
+              onVehicleUpdate={fetchVehicles}
+            />
+          )}
         </div>
       </div>
-
-      {/* Vehicle Update Modal */}
-      {isModalVisible && (
-        <div
-          className="modal fade show custom-scrollbar"
-          tabIndex="-1"
-          style={{ display: "block" }}
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">
-                  Update Vehicle
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={closeModal}
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <UpdateVehicle
-                  userData={isModalVisible}
-                  isModelVisible={isModalVisible}
-                  onUpdate={(updatedData) => handleProfileUpdate(updatedData)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Register Vehicle Modal */}
-      {isRegModel && (
-        <div
-          className="modal fade show custom-scrollbar"
-          tabIndex="-1"
-          style={{ display: "block" }}
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">
-                  Vehicle Registration
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={closeModal}
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <VehicleRegisterPage
-                  userData={isRegModel}
-                  isModalVisible={false}
-                  isAdmin={true}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

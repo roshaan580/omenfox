@@ -176,11 +176,11 @@ const GreenhouseEmissionsMenu = ({
             Emissions
           </NavLinkItem>
           <NavLinkItem
-            to="/transport-emission-records"
-            isActive={isActive("/transport-emission-records")}
-            onClick={handleNavigation("/transport-emission-records", true)}
+            to="/transport-emissions"
+            isActive={isActive("/transport-emissions")}
+            onClick={handleNavigation("/transport-emissions", true)}
           >
-            Transport Emission Records
+            Transport Emissions
           </NavLinkItem>
           <NavLinkItem
             to="/scenarios"
@@ -346,7 +346,7 @@ const EnergyAndGasMenu = ({
             isActive={isActive("/energy-emissions")}
             onClick={handleNavigation("/energy-emissions", true)}
           >
-            Energy & Gas Emissions
+            Energy & Gas
           </NavLinkItem>
         </div>
       )}

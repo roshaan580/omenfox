@@ -4,7 +4,7 @@ import { formatDecimal, isRecordEditable } from "../../../utils/dateUtils";
 import TablePagination from "../../../components/TablePagination";
 import usePagination from "../../../hooks/usePagination";
 
-const EmissionsTable = ({
+const EnergyEmissionsTable = ({
   theme,
   filteredRecords,
   handleEdit,
@@ -16,8 +16,8 @@ const EmissionsTable = ({
   useEffect(() => {
     if (filteredRecords && filteredRecords.length > 0) {
       const sorted = [...filteredRecords].sort((a, b) => {
-        const dateA = new Date(a.date || 0);
-        const dateB = new Date(b.date || 0);
+        const dateA = new Date(a.startDate || a.date || 0);
+        const dateB = new Date(b.startDate || b.date || 0);
         return dateB - dateA; // Sort descending (newest first)
       });
       setSortedRecords(sorted);
@@ -39,22 +39,36 @@ const EmissionsTable = ({
     totalItems,
   } = usePagination(sortedRecords);
 
+  // Calculate total emissions for a record
+  const calculateTotalEmissions = (record) => {
+    if (!record.energySources || !Array.isArray(record.energySources)) {
+      return 0;
+    }
+
+    return record.energySources.reduce((total, source) => {
+      return total + parseFloat(source.emission || 0);
+    }, 0);
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <Card className={`bg-${theme} shadow-sm m-0`}>
       <Card.Body>
-        <Card.Title className="mb-3">Emission Records</Card.Title>
+        <Card.Title className="mb-3">Energy Emission Records</Card.Title>
         <div className="table-responsive">
           <table className="table table-striped table-hover">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Start Location</th>
-                <th>End Location</th>
-                <th>Date</th>
-                <th>Distance (km)</th>
-                <th>CO₂ Used (kg)</th>
-                <th>Employee</th>
-                <th>Transportation</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Energy Sources</th>
+                <th>Total CO₂ (kg)</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -63,26 +77,23 @@ const EmissionsTable = ({
                 paginatedItems.map((record, index) => (
                   <tr key={record._id}>
                     <td>{indexOfFirstItem + index + 1}</td>
-                    <td className="f10">
-                      <div className="scrollable-address">
-                        {record.startLocation.address}
-                      </div>
-                    </td>
-                    <td className="f10">
-                      <div className="scrollable-address">
-                        {record.endLocation.address}
-                      </div>
-                    </td>
-                    <td>{new Date(record.date).toLocaleDateString()}</td>
-                    <td>{formatDecimal(record.distance)}</td>
-                    <td>{record.co2Used}</td>
+                    <td>{formatDate(record.startDate)}</td>
+                    <td>{formatDate(record.endDate)}</td>
                     <td>
-                      {record.employee?.firstName} {record.employee?.lastName}
+                      <ul className="list-unstyled mb-0">
+                        {record.energySources &&
+                          Array.isArray(record.energySources) &&
+                          record.energySources.map((source, idx) => (
+                            <li key={idx}>
+                              {source.type}: {formatDecimal(source.emission)} kg
+                            </li>
+                          ))}
+                      </ul>
                     </td>
-                    <td>{record.transportation?.name || "N/A"}</td>
+                    <td>{formatDecimal(calculateTotalEmissions(record))}</td>
                     <td>
                       <div className="d-flex gap-2 justify-content-center">
-                        {isRecordEditable(record) ? (
+                        {isRecordEditable(record, "startDate") ? (
                           <>
                             <Button
                               variant="outline-primary"
@@ -110,7 +121,7 @@ const EmissionsTable = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9" className="text-center text-muted">
+                  <td colSpan="6" className="text-center text-muted">
                     No records found
                   </td>
                 </tr>
@@ -138,4 +149,4 @@ const EmissionsTable = ({
   );
 };
 
-export default EmissionsTable;
+export default EnergyEmissionsTable;

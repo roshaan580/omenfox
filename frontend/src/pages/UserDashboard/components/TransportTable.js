@@ -1,11 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MapComponent from "../../../components/MapComponent";
+import TablePagination from "../../../components/TablePagination";
+import usePagination from "../../../hooks/usePagination";
 
 /**
  * Table component for displaying transportation records
  */
-const TransportTable = ({ records = [] }) => {
+const TransportTable = ({ records = [], theme = "light" }) => {
   const [expandedRecord, setExpandedRecord] = useState(null);
+  const [sortedRecords, setSortedRecords] = useState([]);
+
+  // Sort records by date (newest first)
+  useEffect(() => {
+    if (records && records.length > 0) {
+      const sorted = [...records].sort((a, b) => {
+        const dateA = new Date(a.date || 0);
+        const dateB = new Date(b.date || 0);
+        return dateB - dateA; // Sort descending (newest first)
+      });
+      setSortedRecords(sorted);
+    } else {
+      setSortedRecords([]);
+    }
+  }, [records]);
+
+  // Use pagination hook
+  const {
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    paginatedItems,
+    paginate,
+    changeItemsPerPage,
+    indexOfFirstItem,
+    indexOfLastItem,
+    totalItems,
+  } = usePagination(sortedRecords);
 
   // Format transportation mode for display
   const formatTransportMode = (mode) => {
@@ -120,238 +150,257 @@ const TransportTable = ({ records = [] }) => {
   };
 
   return (
-    <div className="table-responsive shadow-sm rounded">
-      <table className="table table-striped table-hover mb-0">
-        <thead>
-          <tr>
-            <th scope="col" width="3%"></th>
-            <th scope="col" width="4%">
-              #
-            </th>
-            <th scope="col">Mode</th>
-            <th scope="col">Purpose</th>
-            <th scope="col">Distance</th>
-            <th scope="col">CO₂ Impact</th>
-            <th scope="col">Date</th>
-            <th scope="col">Recurring</th>
-          </tr>
-        </thead>
-        <tbody>
-          {records?.length > 0 ? (
-            records?.map((record, index) => {
-              const distance = calculateDistance(
-                record?.beginLocationLat,
-                record?.beginLocationLon,
-                record?.endLocationLat,
-                record?.endLocationLon
-              );
+    <>
+      <div className="table-responsive shadow-sm rounded">
+        <table className="table table-striped table-hover mb-0">
+          <thead>
+            <tr>
+              <th scope="col" width="3%"></th>
+              <th scope="col" width="4%">
+                #
+              </th>
+              <th scope="col">Mode</th>
+              <th scope="col">Purpose</th>
+              <th scope="col">Distance</th>
+              <th scope="col">CO₂ Impact</th>
+              <th scope="col">Date</th>
+              <th scope="col">Recurring</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedItems?.length > 0 ? (
+              paginatedItems?.map((record, index) => {
+                const distance = calculateDistance(
+                  record?.beginLocationLat,
+                  record?.beginLocationLon,
+                  record?.endLocationLat,
+                  record?.endLocationLon
+                );
 
-              const impact = calculateTotalImpact(record);
-              const isExpanded = expandedRecord === record?._id;
+                const impact = calculateTotalImpact(record);
+                const isExpanded = expandedRecord === record?._id;
 
-              return (
-                <React.Fragment key={record?._id}>
-                  <tr
-                    className={isExpanded ? "expanded-row" : ""}
-                    onClick={() => toggleExpand(record?._id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td>
-                      <i
-                        className={`fas fa-chevron-${
-                          isExpanded ? "down" : "right"
-                        }`}
-                      ></i>
-                    </td>
-                    <td>{index + 1}</td>
-                    <td>
-                      <div className="d-flex align-items-center">
+                return (
+                  <React.Fragment key={record?._id}>
+                    <tr
+                      className={isExpanded ? "expanded-row" : ""}
+                      onClick={() => toggleExpand(record?._id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td>
                         <i
-                          className={`fas fa-${
-                            record?.transportationMode === "car"
-                              ? "car"
-                              : record?.transportationMode === "bike"
-                              ? "bicycle"
-                              : record?.transportationMode === "walking"
-                              ? "walking"
-                              : record?.transportationMode ===
-                                "public_transport"
-                              ? "bus"
-                              : record?.transportationMode === "plane"
-                              ? "plane"
-                              : "question"
-                          } me-2`}
+                          className={`fas fa-chevron-${
+                            isExpanded ? "down" : "right"
+                          }`}
                         ></i>
-                        {formatTransportMode(record?.transportationMode)}
-                        {record?.vehicleType && (
-                          <span className="badge bg-info ms-2">
-                            {formatVehicleType(record?.vehicleType)}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>{formatPurpose(record?.usageType)}</td>
-                    <td>
-                      {distance ? (
-                        <span>{distance} km</span>
-                      ) : (
-                        <span className="text-muted">Unknown</span>
-                      )}
-                    </td>
-                    <td>
-                      {impact?.daily ? (
-                        <div>
-                          <span
-                            className={
-                              parseFloat(impact.daily) === 0
-                                ? "text-success"
-                                : ""
-                            }
-                          >
-                            {parseFloat(impact.daily) === 0
-                              ? "Zero Emission"
-                              : `${impact.daily} kg CO₂`}
-                          </span>
+                      </td>
+                      <td>{indexOfFirstItem + index + 1}</td>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <i
+                            className={`fas fa-${
+                              record?.transportationMode === "car"
+                                ? "car"
+                                : record?.transportationMode === "bike"
+                                ? "bicycle"
+                                : record?.transportationMode === "walking"
+                                ? "walking"
+                                : record?.transportationMode ===
+                                  "public_transport"
+                                ? "bus"
+                                : record?.transportationMode === "plane"
+                                ? "plane"
+                                : "question"
+                            } me-2`}
+                          ></i>
+                          {formatTransportMode(record?.transportationMode)}
+                          {record?.vehicleType && (
+                            <span className="badge bg-info ms-2">
+                              {formatVehicleType(record?.vehicleType)}
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        <span className="text-muted">Not calculated</span>
-                      )}
-                    </td>
-                    <td>{new Date(record?.date).toLocaleDateString()}</td>
-                    <td>{formatRecurring(record?.recurrenceDays)}</td>
-                  </tr>
+                      </td>
+                      <td>{formatPurpose(record?.usageType)}</td>
+                      <td>
+                        {distance ? (
+                          <span>{distance} km</span>
+                        ) : (
+                          <span className="text-muted">Unknown</span>
+                        )}
+                      </td>
+                      <td>
+                        {impact?.daily ? (
+                          <div>
+                            <span
+                              className={
+                                parseFloat(impact.daily) === 0
+                                  ? "text-success"
+                                  : ""
+                              }
+                            >
+                              {parseFloat(impact.daily) === 0
+                                ? "Zero Emission"
+                                : `${impact.daily} kg CO₂`}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted">Not calculated</span>
+                        )}
+                      </td>
+                      <td>{new Date(record?.date).toLocaleDateString()}</td>
+                      <td>{formatRecurring(record?.recurrenceDays)}</td>
+                    </tr>
 
-                  {isExpanded && (
-                    <tr className="expanded-details">
-                      <td colSpan="8">
-                        <div className="expanded-content p-3">
-                          <div className="row">
-                            <div className="col-md-6">
-                              <h5>Journey Details</h5>
-                              <div className="mb-3">
-                                <strong>Transportation Mode:</strong>{" "}
-                                {formatTransportMode(
-                                  record?.transportationMode
+                    {isExpanded && (
+                      <tr className="expanded-details">
+                        <td colSpan="8">
+                          <div className="expanded-content p-3">
+                            <div className="row">
+                              <div className="col-md-6">
+                                <h5>Journey Details</h5>
+                                <div className="mb-3">
+                                  <strong>Transportation Mode:</strong>{" "}
+                                  {formatTransportMode(
+                                    record?.transportationMode
+                                  )}
+                                  {record?.vehicleType && (
+                                    <span>
+                                      {" "}
+                                      ({formatVehicleType(record?.vehicleType)})
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Purpose:</strong>{" "}
+                                  {formatPurpose(record?.usageType)}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Date:</strong>{" "}
+                                  {new Date(record?.date).toLocaleDateString()}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Recurring:</strong>{" "}
+                                  {formatRecurring(record?.recurrenceDays)}
+                                </div>
+                                {record?.workFromHomeDays && (
+                                  <div className="mb-3">
+                                    <strong>Work from Home Days:</strong>{" "}
+                                    {record.workFromHomeDays} days/week
+                                  </div>
                                 )}
-                                {record?.vehicleType && (
-                                  <span>
-                                    {" "}
-                                    ({formatVehicleType(record?.vehicleType)})
-                                  </span>
+                                <div className="mb-3">
+                                  <strong>CO₂ Emission Rate:</strong>{" "}
+                                  {record?.co2Emission} kg/km
+                                </div>
+                                {distance && (
+                                  <div className="mb-3">
+                                    <strong>Distance:</strong> {distance} km
+                                  </div>
+                                )}
+                                {impact?.daily && (
+                                  <div className="mb-3">
+                                    <strong>Daily CO₂ Impact:</strong>{" "}
+                                    {impact.daily} kg
+                                  </div>
+                                )}
+                                {impact?.annual && (
+                                  <div className="mb-3">
+                                    <strong>Annual CO₂ Impact:</strong>{" "}
+                                    {impact.annual} kg
+                                  </div>
                                 )}
                               </div>
-                              <div className="mb-3">
-                                <strong>Purpose:</strong>{" "}
-                                {formatPurpose(record?.usageType)}
-                              </div>
-                              <div className="mb-3">
-                                <strong>Date:</strong>{" "}
-                                {new Date(record?.date).toLocaleDateString()}
-                              </div>
-                              <div className="mb-3">
-                                <strong>Recurring:</strong>{" "}
-                                {formatRecurring(record?.recurrenceDays)}
-                              </div>
-                              {record?.workFromHomeDays && (
-                                <div className="mb-3">
-                                  <strong>Work from Home Days:</strong>{" "}
-                                  {record.workFromHomeDays} days/week
-                                </div>
-                              )}
-                              <div className="mb-3">
-                                <strong>CO₂ Emission Rate:</strong>{" "}
-                                {record?.co2Emission} kg/km
-                              </div>
-                              {distance && (
-                                <div className="mb-3">
-                                  <strong>Distance:</strong> {distance} km
-                                </div>
-                              )}
-                              {impact?.daily && (
-                                <div className="mb-3">
-                                  <strong>Daily CO₂ Impact:</strong>{" "}
-                                  {impact.daily} kg
-                                </div>
-                              )}
-                              {impact?.annual && (
-                                <div className="mb-3">
-                                  <strong>Annual CO₂ Impact:</strong>{" "}
-                                  {impact.annual} kg
-                                </div>
-                              )}
-                            </div>
 
-                            <div className="col-md-6">
-                              <div className="row">
-                                <div className="col-md-6">
-                                  <h5>Begin Location</h5>
-                                  <div className="mb-2">
-                                    {record?.beginLocation}
+                              <div className="col-md-6">
+                                <div className="row">
+                                  <div className="col-md-6">
+                                    <h5>Begin Location</h5>
+                                    <div className="mb-2">
+                                      {record?.beginLocation}
+                                    </div>
+                                    <div className="map-container">
+                                      <MapComponent
+                                        location={{
+                                          lat:
+                                            parseFloat(
+                                              record?.beginLocationLat
+                                            ) || 0,
+                                          lon:
+                                            parseFloat(
+                                              record?.beginLocationLon
+                                            ) || 0,
+                                          address: record?.beginLocation || "",
+                                        }}
+                                        height="150px"
+                                        width="100%"
+                                        showMarker={true}
+                                        onLocationSelected={null}
+                                        defaultZoom={15}
+                                      />
+                                    </div>
                                   </div>
-                                  <div className="map-container">
-                                    <MapComponent
-                                      location={{
-                                        lat:
-                                          parseFloat(
-                                            record?.beginLocationLat
-                                          ) || 0,
-                                        lon:
-                                          parseFloat(
-                                            record?.beginLocationLon
-                                          ) || 0,
-                                        address: record?.beginLocation || "",
-                                      }}
-                                      height="150px"
-                                      width="100%"
-                                      showMarker={true}
-                                      onLocationSelected={null}
-                                      defaultZoom={15}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="col-md-6">
-                                  <h5>End Location</h5>
-                                  <div className="mb-2">
-                                    {record?.endLocation}
-                                  </div>
-                                  <div className="map-container">
-                                    <MapComponent
-                                      location={{
-                                        lat:
-                                          parseFloat(record?.endLocationLat) ||
-                                          0,
-                                        lon:
-                                          parseFloat(record?.endLocationLon) ||
-                                          0,
-                                        address: record?.endLocation || "",
-                                      }}
-                                      height="150px"
-                                      width="100%"
-                                      showMarker={true}
-                                      onLocationSelected={null}
-                                      defaultZoom={15}
-                                    />
+                                  <div className="col-md-6">
+                                    <h5>End Location</h5>
+                                    <div className="mb-2">
+                                      {record?.endLocation}
+                                    </div>
+                                    <div className="map-container">
+                                      <MapComponent
+                                        location={{
+                                          lat:
+                                            parseFloat(
+                                              record?.endLocationLat
+                                            ) || 0,
+                                          lon:
+                                            parseFloat(
+                                              record?.endLocationLon
+                                            ) || 0,
+                                          address: record?.endLocation || "",
+                                        }}
+                                        height="150px"
+                                        width="100%"
+                                        showMarker={true}
+                                        onLocationSelected={null}
+                                        defaultZoom={15}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })
-          ) : (
-            <tr>
-              <td colSpan="8" className="text-center">
-                No records found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  No records found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination component */}
+      {totalItems > 0 && (
+        <TablePagination
+          currentPage={currentPage}
+          onPageChange={paginate}
+          totalPages={totalPages}
+          recordsPerPage={itemsPerPage}
+          onRecordsPerPageChange={changeItemsPerPage}
+          totalRecords={totalItems}
+          startIndex={indexOfFirstItem}
+          endIndex={indexOfLastItem}
+          theme={theme}
+        />
+      )}
 
       <style jsx="true">{`
         .location-cell {
@@ -380,7 +429,7 @@ const TransportTable = ({ records = [] }) => {
           border-top: 1px dashed #dee2e6;
         }
       `}</style>
-    </div>
+    </>
   );
 };
 

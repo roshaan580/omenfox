@@ -132,12 +132,19 @@ const EmissionsPage = () => {
   useEffect(() => {
     const fetchEmissions = async () => {
       try {
-        console.log("Fetching emissions data...");
+        console.log("Fetching emissions data from all sources...");
         // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
         // Use Promise.all to fetch data from multiple endpoints simultaneously
-        const [emissionsRes, employeesRes, typesRes] = await Promise.all([
+        const [
+          generalEmissionsRes,
+          employeesRes,
+          typesRes,
+          transportEmissionsRes,
+          energyEmissionsRes,
+          transportRecordsRes,
+        ] = await Promise.all([
           authenticatedFetch(
             `${REACT_APP_API_URL}/general-emissions?global=true`,
             {
@@ -150,26 +157,114 @@ const EmissionsPage = () => {
           authenticatedFetch(`${REACT_APP_API_URL}/emission-types`, {
             method: "GET",
           }),
+          authenticatedFetch(`${REACT_APP_API_URL}/emissions?global=true`, {
+            method: "GET",
+          }),
+          authenticatedFetch(`${REACT_APP_API_URL}/energy-emissions`, {
+            method: "GET",
+          }),
+          // Skip transport emissions fetch or use a different approach
+          Promise.resolve({ ok: true, json: () => [] }), // Empty placeholder for transport emissions
         ]);
 
         // Check if responses are successful
-        if (!emissionsRes.ok || !employeesRes.ok || !typesRes.ok) {
+        if (!generalEmissionsRes.ok || !employeesRes.ok || !typesRes.ok) {
           throw new Error("One or more API requests failed");
         }
 
         // Parse the JSON responses
-        const [emissionsData, employeesData, typesData] = await Promise.all([
-          emissionsRes.json(),
+        const [
+          generalEmissionsData,
+          employeesData,
+          typesData,
+          transportEmissionsData,
+          energyEmissionsData,
+          transportRecordsData,
+        ] = await Promise.all([
+          generalEmissionsRes.json(),
           employeesRes.json(),
           typesRes.json(),
+          transportEmissionsRes.ok ? transportEmissionsRes.json() : [],
+          energyEmissionsRes.ok ? energyEmissionsRes.json() : [],
+          transportRecordsRes.ok ? transportRecordsRes.json() : [],
         ]);
 
-        console.log("Emissions data:", emissionsData);
+        console.log("General emissions data:", generalEmissionsData);
+        console.log("Transport emissions data:", transportEmissionsData);
+        console.log("Energy emissions data:", energyEmissionsData);
+        console.log("Transport records data:", transportRecordsData);
         console.log("Employees data:", employeesData);
         console.log("Emission types data:", typesData);
 
-        // Update state with the fetched data
-        setEmissionRecords(emissionsData);
+        // Process and combine all emission data
+        const allEmissions = [
+          ...generalEmissionsData,
+          // Transform transport emissions to match the general format
+          ...(Array.isArray(transportEmissionsData)
+            ? transportEmissionsData.map((item) => ({
+                date: item.date,
+                co2Equivalent: item.co2Used,
+                emissionType: {
+                  name: item.transportation?.name || "Transport",
+                },
+                employee: item.employee,
+                transportEmission: true,
+              }))
+            : []),
+          // Transform energy emissions to match the general format
+          ...(Array.isArray(energyEmissionsData)
+            ? energyEmissionsData.map((item) => {
+                let totalCO2 = 0;
+                // Calculate total CO2 from all energy sources
+                if (item.energySources && Array.isArray(item.energySources)) {
+                  item.energySources.forEach((source) => {
+                    try {
+                      if (typeof source === "string") {
+                        const parsedSource = JSON.parse(source);
+                        totalCO2 += parseFloat(parsedSource.emission) || 0;
+                      } else {
+                        totalCO2 += parseFloat(source.emission) || 0;
+                      }
+                    } catch (e) {
+                      console.error("Error parsing energy source:", e);
+                    }
+                  });
+                }
+                return {
+                  date: item.startDate || item.date,
+                  co2Equivalent: totalCO2,
+                  emissionType: { name: "Energy" },
+                  employee: item.employee || {
+                    firstName: "System",
+                    lastName: "User",
+                  },
+                  energyEmission: true,
+                };
+              })
+            : []),
+          // Transform transport records to match the general format
+          ...(Array.isArray(transportRecordsData)
+            ? transportRecordsData.map((item) => ({
+                date: new Date(`${item.month} 1, ${item.year}`),
+                co2Equivalent:
+                  item.totalEmissions ||
+                  item.distance * item.weight * item.emissionFactor,
+                emissionType: { name: item.transportMode || "Transport" },
+                employee: { firstName: "Transport", lastName: "User" },
+                transportRecord: true,
+              }))
+            : []),
+        ];
+
+        // Sort all emissions by date (newest first)
+        const sortedEmissions = allEmissions.sort((a, b) => {
+          const dateA = new Date(a.date || 0);
+          const dateB = new Date(b.date || 0);
+          return dateB - dateA; // Sort descending (newest first)
+        });
+
+        // Update state with the fetched, combined, and sorted data
+        setEmissionRecords(sortedEmissions);
         setEmployeesState(employeesData);
         setEmissionTypes(typesData);
       } catch (error) {
@@ -415,6 +510,9 @@ const EmissionsPage = () => {
       setEmissionsByMonth(monthlyData);
       setEmissionsByType(typeData);
       setTotalEmissions(total);
+
+      // Log the total emissions found
+      console.log(`Total emissions calculated: ${total} kg CO2`);
     }
   }, [emissionRecords]);
 
@@ -548,7 +646,7 @@ const EmissionsPage = () => {
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container-fluid mt-4">
           <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h1>Emissions</h1>
+            <h1>Comprehensive Emissions Dashboard</h1>
             <div>
               <Button
                 variant="outline-primary"
@@ -598,6 +696,7 @@ const EmissionsPage = () => {
             typeChartData={typeChartData}
             emissionsBySource={emissionsBySource}
             emissionsByType={emissionsByType}
+            filteredRecords={filteredRecords}
           />
 
           {/* Records Table Component */}

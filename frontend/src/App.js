@@ -9,7 +9,7 @@ import TransportEmissions from "./pages/TransportEmissions/TransportEmissions.js
 import Emissions from "./pages/Emissions/Emissions.js";
 import Registration from "./pages/Registration";
 import EmissionTypesPage from "./pages/EmissionTypes";
-import EnergyEmissions from "./pages/EnergyEmissions";
+import EnergyEmissions from "./pages/EnergyEmissions/EnergyEmissions.js";
 import VehiclePage from "./pages/Vehicles";
 import VehicleRegisterPage from "./pages/VehicleRegister";
 import YearlyReportsPage from "./pages/YearlyReports";
@@ -70,7 +70,7 @@ const App = () => {
           }
         />
         <Route
-          path="/transport-emission-records"
+          path="/transport-emissions"
           element={
             <AdminRoute>
               <TransportEmissions />
