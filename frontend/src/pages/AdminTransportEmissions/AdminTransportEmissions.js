@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "react-bootstrap";
 import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../../config";
 import { formatDecimal } from "../../utils/dateUtils";
 import Sidebar from "../../components/Sidebar";
