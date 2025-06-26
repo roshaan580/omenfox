@@ -49,7 +49,7 @@ const UpdateResourceModal = ({
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="updateResourceModalLabel">
-                Update Resource
+                Update Energy & Gas Record
               </h5>
               <button
                 type="button"

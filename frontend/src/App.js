@@ -6,6 +6,7 @@ import UserDashboard from "./pages/UserDashboard/UserDashboard.js";
 import Employees from "./pages/Employees";
 import Companies from "./pages/Companies";
 import TransportEmissions from "./pages/TransportEmissions/TransportEmissions.js";
+import TravelAndCommuteEmissions from "./pages/TravelAndCommuteEmissions/TravelAndCommuteEmissions.js";
 import Emissions from "./pages/Emissions/Emissions.js";
 import Registration from "./pages/Registration";
 import EmissionTypesPage from "./pages/EmissionTypes";
@@ -19,6 +20,9 @@ import LicensePlatePage from "./pages/LicensePlate";
 import ScenariosPage from "./pages/Scenarios";
 import TargetsPage from "./pages/Targets/Targets.js";
 import AnalyticsPage from "./pages/Analytics";
+import AdminTransport from "./pages/AdminTransport/AdminTransport.js";
+import AdminTransportEmissions from "./pages/AdminTransportEmissions/AdminTransportEmissions.js";
+import AdminUserTransport from "./pages/AdminUserTransport/AdminUserTransport.js";
 import { AdminRoute, EmployeeRoute } from "./utils/RouteProtection";
 import "./assets/style.css";
 
@@ -78,6 +82,14 @@ const App = () => {
           }
         />
         <Route
+          path="/travel-and-commute"
+          element={
+            <AdminRoute>
+              <TravelAndCommuteEmissions />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/emission-types"
           element={
             <AdminRoute>
@@ -98,6 +110,30 @@ const App = () => {
           element={
             <AdminRoute>
               <VehiclePage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin-transport"
+          element={
+            <AdminRoute>
+              <AdminTransport />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin-transport-emissions"
+          element={
+            <AdminRoute>
+              <AdminTransportEmissions />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin-user-transport"
+          element={
+            <AdminRoute>
+              <AdminUserTransport />
             </AdminRoute>
           }
         />

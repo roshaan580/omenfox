@@ -4,8 +4,10 @@ const mongoose = require("mongoose");
 // Get transportation records - either global or for a specific employee
 exports.getTransportationRecords = async (req, res) => {
   try {
-    // Fetch transportation records from the database
-    const records = await EmployeeTransportation.find({});
+    // Fetch transportation records from the database and populate employeeId
+    const records = await EmployeeTransportation.find({}).populate(
+      "employeeId"
+    );
 
     res.status(200).json({
       message: "Transportation records retrieved successfully!",

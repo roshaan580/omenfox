@@ -216,7 +216,7 @@ const DashboardPage = () => {
                   }`}
                   onClick={() => setActiveTab("otherResources")}
                 >
-                  <i className="fas fa-leaf me-1"></i> Other Resources
+                  <i className="fas fa-leaf me-1"></i> Energy & Gas
                 </button>
               </li>
               <li className="nav-item tab-item">
@@ -258,7 +258,7 @@ const DashboardPage = () => {
           {activeTab === "otherResources" && (
             <div className="container-fluid mt-4 px-3">
               <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h4 className="text-success mb-0">Other Resources</h4>
+                <h4 className="text-success mb-0">Energy & Gas</h4>
                 <div>
                   <select
                     className="form-select"

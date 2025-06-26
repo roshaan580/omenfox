@@ -36,12 +36,10 @@ exports.createTransportEmission = async (req, res) => {
     });
 
     await transportEmission.save();
-    res
-      .status(201)
-      .json({
-        message: "Transport Emission saved successfully",
-        transportEmission,
-      });
+    res.status(201).json({
+      message: "Transport Emission saved successfully",
+      transportEmission,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -62,6 +60,23 @@ exports.getAll = async (req, res) => {
     res.json(transportEmission);
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// ✅ Get all transport emissions for admin view with user information
+exports.getAllForAdmin = async (req, res) => {
+  try {
+    const transportEmissions = await TransportEmission.find()
+      .populate({
+        path: "userId",
+        select: "username email role", // Only select fields that exist in User
+      })
+      .sort({ year: -1, month: -1 });
+
+    res.json(transportEmissions);
+  } catch (error) {
+    console.error("Error fetching transport emissions for admin:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };

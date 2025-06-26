@@ -136,11 +136,11 @@ const TravelAndCommuteMenu = ({
       {isSidebarOpen && expandedItem === "travel" && (
         <div className="submenu">
           <NavLinkItem
-            to="/vehicles"
-            isActive={isActive("/vehicles")}
-            onClick={handleNavigation("/vehicles", true)}
+            to="/travel-and-commute"
+            isActive={isActive("/travel-and-commute")}
+            onClick={handleNavigation("/travel-and-commute", true)}
           >
-            Vehicles
+            Travel & Commute Emissions
           </NavLinkItem>
         </div>
       )}
@@ -247,6 +247,8 @@ const FreightTransportsMenu = ({
   isSidebarOpen,
   expandedItem,
   toggleExpand,
+  isActive,
+  handleNavigation,
 }) => {
   return (
     <div className="nav-group mb-1">
@@ -260,7 +262,20 @@ const FreightTransportsMenu = ({
 
       {isSidebarOpen && expandedItem === "freight" && (
         <div className="submenu">
-          {/* Currently no freight transport pages */}
+          <NavLinkItem
+            to="/admin-user-transport"
+            isActive={isActive("/admin-user-transport")}
+            onClick={handleNavigation("/admin-user-transport", true)}
+          >
+            User Transport Records
+          </NavLinkItem>
+          <NavLinkItem
+            to="/admin-transport-emissions"
+            isActive={isActive("/admin-transport-emissions")}
+            onClick={handleNavigation("/admin-transport-emissions", true)}
+          >
+            User Freight Transport
+          </NavLinkItem>
         </div>
       )}
     </div>
@@ -458,7 +473,7 @@ const EmployeeMenu = memo(
             </ButtonItem>
             <ButtonItem onClick={openOtherResourceModal}>
               <i className="fas fa-plus me-2"></i>
-              Add Other Resource
+              Add Energy & Gas
             </ButtonItem>
             <ButtonItem onClick={openProfileModal}>
               <i className="fas fa-user-edit me-2"></i>
@@ -707,6 +722,8 @@ const Sidebar = ({
                   isSidebarOpen={isSidebarOpen}
                   expandedItem={expandedItem}
                   toggleExpand={toggleExpand}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
                 />
                 <ManagementMenu
                   isSidebarOpen={isSidebarOpen}
