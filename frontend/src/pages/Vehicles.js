@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaPlusCircle } from "react-icons/fa";
-import VehicleRegisterPage from "./VehicleRegister";
 import UpdateVehicle from "./UpdateVehicle";
 import Sidebar from "../components/Sidebar";
 import { authenticatedFetch } from "../utils/axiosConfig";
 import TablePagination from "../components/TablePagination";
 import usePagination from "../hooks/usePagination";
+import VehicleModal from "./UserDashboard/components/modals/VehicleModal";
+import { Modal } from "react-bootstrap";
 
 const VehiclePage = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -278,21 +279,29 @@ const VehiclePage = () => {
 
           {/* Vehicle Update Modal */}
           {isModalVisible && (
-            <UpdateVehicle
+            <Modal
               show={!!isModalVisible}
               onHide={closeModal}
-              vehicleData={isModalVisible}
-              onVehicleUpdate={handleProfileUpdate}
-            />
+              size="lg"
+              backdrop="static"
+              centered
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Edit Vehicle</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <UpdateVehicle
+                  userData={isModalVisible}
+                  isModelVisible={!!isModalVisible}
+                  onUpdate={handleProfileUpdate}
+                />
+              </Modal.Body>
+            </Modal>
           )}
 
           {/* Vehicle Registration Modal */}
           {isRegModel && (
-            <VehicleRegisterPage
-              show={isRegModel}
-              onHide={closeModal}
-              onVehicleUpdate={fetchVehicles}
-            />
+            <VehicleModal visible={isRegModel} onClose={closeModal} />
           )}
         </div>
       </div>

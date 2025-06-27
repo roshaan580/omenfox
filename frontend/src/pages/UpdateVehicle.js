@@ -93,7 +93,7 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
 
       <form onSubmit={handleSubmit}>
         <div className="row">
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Vehicle Name</label>
             <input
               type="text"
@@ -103,7 +103,7 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
               required
             />
           </div>
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Vehicle Type</label>
             <input
               type="text"
@@ -116,7 +116,7 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
         </div>
 
         <div className="row">
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Engine Number</label>
             <input
               type="text"
@@ -126,7 +126,7 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
               required
             />
           </div>
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Vehicle Model</label>
             <input
               type="text"
@@ -139,7 +139,7 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
         </div>
 
         <div className="row">
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">License Plate</label>
             <input
               type="text"
@@ -152,7 +152,7 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
               Must be unique across all vehicles
             </small>
           </div>
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Car Type</label>
             <select
               className="form-select"

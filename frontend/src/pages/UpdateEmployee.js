@@ -134,7 +134,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
 
       <form onSubmit={handleSubmit}>
         <div className="row">
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">First Name</label>
             <input
               type="text"
@@ -144,7 +144,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
               required
             />
           </div>
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Last Name</label>
             <input
               type="text"
@@ -156,7 +156,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
           </div>
         </div>
         <div className="row">
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Email</label>
             <input
               type="email"
@@ -166,7 +166,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
               required
             />
           </div>
-          <div className="col-6 mb-3 position-relative">
+          <div className="col-sm-6 col-12 mb-3 position-relative">
             <label className="form-label">Password</label>
             <input
               type={showPassword ? "text" : "password"}
@@ -190,7 +190,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
           </div>
         </div>
         <div className="row">
-          <div className="col-6 mb-4">
+          <div className="col-sm-6 col-12 mb-4">
             <LocationPicker
               label="Home Address"
               value={homeAddress}
@@ -200,7 +200,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
               placeholder="Enter your home address"
             />
           </div>
-          <div className="col-6 mb-4">
+          <div className="col-sm-6 col-12 mb-4">
             <LocationPicker
               label="Company Address"
               value={companyAddress}
@@ -212,7 +212,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
           </div>
         </div>
         <div className="row">
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">Car Name</label>
             <input
               type="text"
@@ -222,7 +222,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
               required
             />
           </div>
-          <div className="col-6 mb-3">
+          <div className="col-sm-6 col-12 mb-3">
             <label className="form-label">License Plate</label>
             <input
               type="text"

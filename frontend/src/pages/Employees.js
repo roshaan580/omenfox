@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import "bootstrap/dist/css/bootstrap.min.css";
-import UpdateEmployee from "./UpdateEmployee";
 import Registration from "./Registration";
 import { FaUserPlus } from "react-icons/fa"; // Import FaPlusCircle here
 import Sidebar from "../components/Sidebar";
 import { authenticatedFetch } from "../utils/axiosConfig";
 import TablePagination from "../components/TablePagination";
 import usePagination from "../hooks/usePagination";
+import ProfileModal from "./UserDashboard/components/modals/ProfileModal";
+import { Modal } from "react-bootstrap";
 
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
@@ -324,23 +325,35 @@ const EmployeePage = () => {
 
           {/* Update Employee Modal */}
           {isModalVisible && (
-            <UpdateEmployee
-              show={!!isModalVisible}
-              onHide={closeModal}
-              userProfile={isModalVisible}
-              onProfileUpdate={handleProfileUpdate}
-              isAdmin={true}
+            <ProfileModal
+              visible={!!isModalVisible}
+              onClose={closeModal}
+              userData={isModalVisible}
+              onUpdate={handleProfileUpdate}
             />
           )}
 
           {/* Registration Modal */}
           {isRegModel && (
-            <Registration
+            <Modal
               show={isRegModel}
               onHide={closeModal}
-              onProfileUpdate={fetchEmployees}
-              isAdmin={true}
-            />
+              size="lg"
+              backdrop="static"
+              centered
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Register Employee</Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="p-0">
+                <Registration
+                  show={isRegModel}
+                  onHide={closeModal}
+                  onProfileUpdate={fetchEmployees}
+                  isAdmin={true}
+                />
+              </Modal.Body>
+            </Modal>
           )}
         </div>
       </div>

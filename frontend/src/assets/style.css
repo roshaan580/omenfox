@@ -159,6 +159,11 @@ a {
   color: #212529;
 }
 
+.light-theme .registeration-card {
+  background-color: #ffffff;
+  color: #212529;
+}
+
 .light-theme .navbar {
   background-color: #ffffff !important;
   color: #212529 !important;
@@ -226,6 +231,12 @@ a {
 }
 
 .dark-theme .card {
+  background-color: #272b30;
+  color: #e9ecef;
+  border-color: #343a40;
+}
+
+.dark-theme .registeration-card {
   background-color: #272b30;
   color: #e9ecef;
   border-color: #343a40;

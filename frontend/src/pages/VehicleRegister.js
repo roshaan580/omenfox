@@ -153,7 +153,7 @@ const VehicleRegisterPage = ({
                 }
               >
                 <div className="row">
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Vehicle Name</label>
                     <input
                       type="text"
@@ -163,7 +163,7 @@ const VehicleRegisterPage = ({
                       required
                     />
                   </div>
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Vehicle Type</label>
                     <select
                       className="form-select"
@@ -179,7 +179,7 @@ const VehicleRegisterPage = ({
                 </div>
 
                 <div className="row">
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Engine Number</label>
                     <input
                       type="text"
@@ -189,7 +189,7 @@ const VehicleRegisterPage = ({
                       required
                     />
                   </div>
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Vehicle Model</label>
                     <input
                       type="text"
@@ -202,7 +202,7 @@ const VehicleRegisterPage = ({
                 </div>
 
                 <div className="row">
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">Vehicle Use</label>
                     <select
                       className="form-select"
@@ -214,7 +214,7 @@ const VehicleRegisterPage = ({
                       <option value="Company">Company</option>
                     </select>
                   </div>
-                  <div className="col-6 mb-3">
+                  <div className="col-sm-6 col-12 mb-3">
                     <label className="form-label">License Plate</label>
                     <input
                       type="text"

@@ -124,9 +124,12 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
     <div className={containerClasses}>
       <div className="row justify-content-center">
         <div className={cardClasses}>
-          <div className="card" style={cardStyles}>
+          <div
+            className={`${isAdmin ? "p-4 registeration-card" : "card"}`}
+            style={cardStyles}
+          >
             <div className="card-body">
-              <div className="text-center mb-4">
+              <div className={`text-center mb-4 ${isAdmin && "d-none"}`}>
                 <img
                   src={theme === "dark" ? LogoWhite : LogoBlack}
                   alt="Logo"
