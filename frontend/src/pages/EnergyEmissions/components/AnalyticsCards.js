@@ -74,7 +74,7 @@ const AnalyticsCards = ({
   return (
     <Row className="mb-4">
       <Col xs={12} sm={6} lg={3} className="mb-3">
-        <Card className={`bg-${theme} shadow-sm h-100`}>
+        <Card className={`bg-${theme} m-0 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center text-center p-3">
             <div className="icon-wrapper mb-2">
               <i className="fas fa-bolt text-warning fa-2x"></i>
@@ -91,7 +91,7 @@ const AnalyticsCards = ({
       </Col>
 
       <Col xs={12} sm={6} lg={3} className="mb-3">
-        <Card className={`bg-${theme} shadow-sm h-100`}>
+        <Card className={`bg-${theme} m-0 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center text-center p-3">
             <div className="icon-wrapper mb-2">
               <i className="fas fa-plug text-primary fa-2x"></i>
@@ -108,7 +108,7 @@ const AnalyticsCards = ({
       </Col>
 
       <Col xs={12} sm={6} lg={3} className="mb-3">
-        <Card className={`bg-${theme} shadow-sm h-100`}>
+        <Card className={`bg-${theme} m-0 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center text-center p-3">
             <div className="icon-wrapper mb-2">
               <i className="fas fa-fire text-danger fa-2x"></i>
@@ -125,7 +125,7 @@ const AnalyticsCards = ({
       </Col>
 
       <Col xs={12} sm={6} lg={3} className="mb-3">
-        <Card className={`bg-${theme} shadow-sm h-100`}>
+        <Card className={`bg-${theme} m-0 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center text-center p-3">
             <div className="icon-wrapper mb-2">
               <i className="fas fa-lightbulb text-info fa-2x"></i>

@@ -184,9 +184,14 @@ const useTransportData = (employeeId) => {
         } else {
           // Filter by user ID
           if (activeTab === "transport") {
-            newRecords = (globalTransportationData || []).filter(
-              (record) => record?.employeeId === userId
-            );
+            newRecords = (globalTransportationData || []).filter((record) => {
+              const recEmpId =
+                typeof record.employeeId === "object" &&
+                record.employeeId !== null
+                  ? record.employeeId._id
+                  : record.employeeId;
+              return recEmpId === userId;
+            });
             if (
               JSON.stringify(newRecords) !==
               JSON.stringify(employeeTransListing)
@@ -195,7 +200,14 @@ const useTransportData = (employeeId) => {
             }
           } else if (activeTab === "workTransport") {
             newRecords = (globalWorkTransportationData || []).filter(
-              (record) => record?.employeeId === userId
+              (record) => {
+                const recEmpId =
+                  typeof record.employeeId === "object" &&
+                  record.employeeId !== null
+                    ? record.employeeId._id
+                    : record.employeeId;
+                return recEmpId === userId;
+              }
             );
             if (
               JSON.stringify(newRecords) !==

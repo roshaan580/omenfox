@@ -20,11 +20,13 @@ export const fetchTransportationRecords = async (employeeId) => {
 
     const records = await response.json();
     // Filter records for the logged-in user
-    const filteredRecords = records.data.filter((record) =>
-      employeeId
-        ? record?.employeeId === employeeId
-        : record?.employeeId === userObj._id
-    );
+    const filteredRecords = records.data.filter((record) => {
+      const recEmpId =
+        typeof record.employeeId === "object" && record.employeeId !== null
+          ? record.employeeId._id
+          : record.employeeId;
+      return employeeId ? recEmpId === employeeId : recEmpId === userObj._id;
+    });
 
     return {
       filteredRecords,

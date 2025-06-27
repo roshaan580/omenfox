@@ -173,6 +173,17 @@ const AdminTransportEmissions = () => {
     </div>
   );
 
+  useEffect(() => {
+    const handleOpenAddModal = (e) => {
+      if (e.detail && e.detail.category === "freight") {
+        // Implement your logic to open the add modal for freight transport here
+        // For example, setShowAddModal(true) if you have such a state
+      }
+    };
+    window.addEventListener("openAddModal", handleOpenAddModal);
+    return () => window.removeEventListener("openAddModal", handleOpenAddModal);
+  }, []);
+
   return (
     <div className={`dashboard-container bg-${theme}`}>
       <Sidebar

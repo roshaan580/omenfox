@@ -723,6 +723,16 @@ const EnergyEmissions = () => {
     ],
   };
 
+  useEffect(() => {
+    const handleOpenAddModal = (e) => {
+      if (e.detail && e.detail.category === "energy") {
+        setShowAddModal(true);
+      }
+    };
+    window.addEventListener("openAddModal", handleOpenAddModal);
+    return () => window.removeEventListener("openAddModal", handleOpenAddModal);
+  }, []);
+
   return (
     <div className={`dashboard-container bg-${theme}`}>
       <Sidebar
