@@ -53,6 +53,7 @@ const EmissionPage = () => {
     co2Used: "",
     employee: "",
     transportation: "",
+    licensePlate: "",
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteRecordId, setDeleteRecordId] = useState(null);
@@ -230,6 +231,39 @@ const EmissionPage = () => {
     }
   }, [emissionRecord.startLocation, emissionRecord.endLocation]);
 
+  // Add utility for formatting license plate
+  const formatLicensePlate = (plate) => {
+    return plate.replace(/\s/g, "").toUpperCase();
+  };
+
+  // Add effect to fetch CO2 when licensePlate changes
+  useEffect(() => {
+    const fetchCo2ForPlate = async () => {
+      if (!emissionRecord.licensePlate) return;
+      try {
+        const formattedPlate = formatLicensePlate(emissionRecord.licensePlate);
+        const co2Res = await fetch(
+          `${REACT_APP_API_URL}/rdw/co2/${formattedPlate}`
+        );
+        if (!co2Res.ok) return;
+        const co2Data = await co2Res.json();
+        if (
+          co2Data &&
+          co2Data.length > 0 &&
+          co2Data[0].brandstofverbruik_gecombineerd
+        ) {
+          setEmissionRecord((prev) => ({
+            ...prev,
+            co2Used: co2Data[0].brandstofverbruik_gecombineerd,
+          }));
+        }
+      } catch (err) {
+        // Silent fail, do not overwrite co2Used
+      }
+    };
+    fetchCo2ForPlate();
+  }, [emissionRecord.licensePlate]);
+
   const handleInputChange = (e, field) => {
     setEmissionRecord({
       ...emissionRecord,
@@ -334,6 +368,7 @@ const EmissionPage = () => {
       co2Used: "",
       employee: "",
       transportation: "",
+      licensePlate: "",
     });
 
     console.log("Opening Add New Record modal");

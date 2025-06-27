@@ -5,6 +5,7 @@ import { formatDecimal } from "../../utils/dateUtils";
 import Sidebar from "../../components/Sidebar";
 import TablePagination from "../../components/TablePagination";
 import usePagination from "../../hooks/usePagination";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 const AdminTransportEmissions = () => {
   const [transportEmissions, setTransportEmissions] = useState([]);
@@ -184,6 +185,22 @@ const AdminTransportEmissions = () => {
     return () => window.removeEventListener("openAddModal", handleOpenAddModal);
   }, []);
 
+  const [copiedId, setCopiedId] = useState(null);
+  const deepOmitFields = (obj, fields) => {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => deepOmitFields(item, fields));
+    } else if (obj && typeof obj === "object") {
+      const newObj = {};
+      Object.keys(obj).forEach((key) => {
+        if (!fields.includes(key)) {
+          newObj[key] = deepOmitFields(obj[key], fields);
+        }
+      });
+      return newObj;
+    }
+    return obj;
+  };
+
   return (
     <div className={`dashboard-container bg-${theme}`}>
       <Sidebar
@@ -215,7 +232,6 @@ const AdminTransportEmissions = () => {
                     <tr>
                       <th>#</th>
                       <th>User</th>
-                      <th>Company</th>
                       <th>Month</th>
                       <th>Year</th>
                       <th>Transport Mode</th>
@@ -223,6 +239,7 @@ const AdminTransportEmissions = () => {
                       <th>Weight (tons)</th>
                       <th>Emission Factor (kg CO₂/ton-km)</th>
                       <th>Total Emissions (kg CO₂)</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -237,11 +254,6 @@ const AdminTransportEmissions = () => {
                                 "Unknown User"
                               : "Unknown User"}
                           </td>
-                          <td>
-                            {record.userId && record.userId.company
-                              ? record.userId.company.name
-                              : "N/A"}
-                          </td>
                           <td>{record.month}</td>
                           <td>{record.year}</td>
                           <td>{record.transportMode}</td>
@@ -249,6 +261,36 @@ const AdminTransportEmissions = () => {
                           <td>{formatDecimal(record.weight)}</td>
                           <td>{formatDecimal(record.emissionFactor)}</td>
                           <td>{formatDecimal(record.totalEmissions)}</td>
+                          <td>
+                            <div className="d-flex gap-2 justify-content-center">
+                              <button
+                                className="btn btn-sm btn-outline-secondary"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const toCopy = deepOmitFields(record, [
+                                    "_id",
+                                    "createdAt",
+                                    "updatedAt",
+                                    "__v",
+                                  ]);
+                                  await navigator.clipboard.writeText(
+                                    JSON.stringify(toCopy, null, 2)
+                                  );
+                                  setCopiedId(record._id);
+                                  setTimeout(() => setCopiedId(null), 1000);
+                                }}
+                                title={
+                                  copiedId === record._id ? "Copied!" : "Copy"
+                                }
+                              >
+                                {copiedId === record._id ? (
+                                  <FaCheck />
+                                ) : (
+                                  <FaCopy />
+                                )}
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))
                     ) : (

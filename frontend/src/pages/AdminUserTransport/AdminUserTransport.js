@@ -5,6 +5,7 @@ import Sidebar from "../../components/Sidebar";
 import TablePagination from "../../components/TablePagination";
 import usePagination from "../../hooks/usePagination";
 import MapComponent from "../../components/MapComponent";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 const AdminUserTransport = () => {
   const [transportData, setTransportData] = useState([]);
@@ -13,6 +14,7 @@ const AdminUserTransport = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [expandedRecord, setExpandedRecord] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
 
   // Sidebar state
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
@@ -236,6 +238,21 @@ const AdminUserTransport = () => {
     }
   };
 
+  const deepOmitFields = (obj, fields) => {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => deepOmitFields(item, fields));
+    } else if (obj && typeof obj === "object") {
+      const newObj = {};
+      Object.keys(obj).forEach((key) => {
+        if (!fields.includes(key)) {
+          newObj[key] = deepOmitFields(obj[key], fields);
+        }
+      });
+      return newObj;
+    }
+    return obj;
+  };
+
   return (
     <div className={`dashboard-container bg-${theme}`}>
       <Sidebar
@@ -276,6 +293,7 @@ const AdminUserTransport = () => {
                       <th scope="col">CO₂ Impact</th>
                       <th scope="col">Date</th>
                       <th scope="col">Recurring</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -346,6 +364,38 @@ const AdminUserTransport = () => {
                                 {new Date(record?.date).toLocaleDateString()}
                               </td>
                               <td>{formatRecurring(record?.recurrenceDays)}</td>
+                              <td>
+                                <div className="d-flex gap-2 justify-content-center">
+                                  <button
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const toCopy = deepOmitFields(record, [
+                                        "_id",
+                                        "createdAt",
+                                        "updatedAt",
+                                        "__v",
+                                      ]);
+                                      await navigator.clipboard.writeText(
+                                        JSON.stringify(toCopy, null, 2)
+                                      );
+                                      setCopiedId(record._id);
+                                      setTimeout(() => setCopiedId(null), 1000);
+                                    }}
+                                    title={
+                                      copiedId === record._id
+                                        ? "Copied!"
+                                        : "Copy"
+                                    }
+                                  >
+                                    {copiedId === record._id ? (
+                                      <FaCheck />
+                                    ) : (
+                                      <FaCopy />
+                                    )}
+                                  </button>
+                                </div>
+                              </td>
                             </tr>
                             {isExpanded && (
                               <tr className="expanded-details">

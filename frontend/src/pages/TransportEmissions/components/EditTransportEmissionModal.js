@@ -85,6 +85,24 @@ const EditTransportEmissionModal = ({
             </div>
 
             <div className="col-md-4">
+              <Form.Group controlId="licensePlate" className="mb-3">
+                <Form.Label>License Plate</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={emissionRecord.licensePlate || ""}
+                  onChange={(e) => handleInputChange(e, "licensePlate")}
+                  placeholder="Enter license plate (e.g. JJ447K)"
+                />
+                <small className="text-muted">
+                  Enter a Dutch license plate to auto-fill CO₂ emissions if
+                  available.
+                </small>
+              </Form.Group>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-md-4">
               <Form.Group controlId="co2Used" className="mb-3">
                 <Form.Label>CO2 Used (kg)</Form.Label>
                 <Form.Control
@@ -94,12 +112,16 @@ const EditTransportEmissionModal = ({
                   placeholder="Enter CO2 used"
                   required
                 />
+                {emissionRecord.licensePlate && emissionRecord.co2Used && (
+                  <small className="text-success">
+                    Auto-filled from license plate lookup. You can override this
+                    value.
+                  </small>
+                )}
               </Form.Group>
             </div>
-          </div>
 
-          <div className="row">
-            <div className="col-md-6">
+            <div className="col-md-4">
               <Form.Group controlId="employee" className="mb-3">
                 <DynamicSelect
                   label="Employee"
@@ -122,7 +144,7 @@ const EditTransportEmissionModal = ({
               </Form.Group>
             </div>
 
-            <div className="col-md-6">
+            <div className="col-md-4">
               <Form.Group controlId="transportation" className="mb-3">
                 <DynamicSelect
                   label="Transportation"

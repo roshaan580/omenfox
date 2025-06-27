@@ -94,8 +94,8 @@ const EnergyEmissionsTable = ({
                     </td>
                     <td>{formatDecimal(calculateTotalEmissions(record))}</td>
                     <td>
-                      <div className="d-flex gap-2 justify-content-center">
-                        {isRecordEditable(record, "startDate") ? (
+                      <div className="d-flex gap-2 justify-content-center align-items-center">
+                        {isRecordEditable(record, "startDate") && (
                           <>
                             <Button
                               variant="outline-primary"
@@ -111,29 +111,25 @@ const EnergyEmissionsTable = ({
                             >
                               <i className="fas fa-trash"></i>
                             </Button>
-                            <Button
-                              variant="outline-secondary"
-                              size="sm"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await navigator.clipboard.writeText(
-                                  JSON.stringify(record, null, 2)
-                                );
-                                setCopiedId(record._id);
-                                setTimeout(() => setCopiedId(null), 1000);
-                              }}
-                              title={
-                                copiedId === record._id ? "Copied!" : "Copy"
-                              }
-                            >
-                              {copiedId === record._id ? (
-                                <FaCheck />
-                              ) : (
-                                <FaCopy />
-                              )}
-                            </Button>
                           </>
-                        ) : (
+                        )}
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          style={{ minWidth: "30px" }}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await navigator.clipboard.writeText(
+                              JSON.stringify(record, null, 2)
+                            );
+                            setCopiedId(record._id);
+                            setTimeout(() => setCopiedId(null), 1000);
+                          }}
+                          title={copiedId === record._id ? "Copied!" : "Copy"}
+                        >
+                          {copiedId === record._id ? <FaCheck /> : <FaCopy />}
+                        </Button>
+                        {!isRecordEditable(record, "startDate") && (
                           <span className="text-muted small">
                             Locked (previous year)
                           </span>
