@@ -1,6 +1,7 @@
 import React from "react";
 import TablePagination from "../../../components/TablePagination";
 import usePagination from "../../../hooks/usePagination";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 /**
  * Table component for displaying vehicles
@@ -22,6 +23,23 @@ const VehiclesTable = ({
     indexOfLastItem,
     totalItems,
   } = usePagination(vehicles);
+
+  const [copiedId, setCopiedId] = React.useState(null);
+
+  const deepOmitFields = (obj, fields) => {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => deepOmitFields(item, fields));
+    } else if (obj && typeof obj === "object") {
+      const newObj = {};
+      Object.keys(obj).forEach((key) => {
+        if (!fields.includes(key)) {
+          newObj[key] = deepOmitFields(obj[key], fields);
+        }
+      });
+      return newObj;
+    }
+    return obj;
+  };
 
   return (
     <>
@@ -51,16 +69,40 @@ const VehiclesTable = ({
                   <td>{vehicle.vehicleUseFor || "N/A"}</td>
                   <td>{vehicle.vehicleModel || "N/A"}</td>
                   <td>
-                    <button
-                      className={`btn w-100 p-2 ${
-                        vehicle.isFavorite
-                          ? "btn-warning"
-                          : "btn-outline-success"
-                      }`}
-                      onClick={() => onToggleFavorite(vehicle._id, index)}
-                    >
-                      {vehicle.isFavorite ? "★ Favorite" : "☆ Mark as Favorite"}
-                    </button>
+                    <div className="d-flex gap-2 justify-content-center">
+                      <button
+                        className={`btn btn-sm btn-outline-secondary`}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const toCopy = deepOmitFields(vehicle, [
+                            "_id",
+                            "createdAt",
+                            "updatedAt",
+                            "__v",
+                          ]);
+                          await navigator.clipboard.writeText(
+                            JSON.stringify(toCopy, null, 2)
+                          );
+                          setCopiedId(vehicle._id);
+                          setTimeout(() => setCopiedId(null), 1000);
+                        }}
+                        title={copiedId === vehicle._id ? "Copied!" : "Copy"}
+                      >
+                        {copiedId === vehicle._id ? <FaCheck /> : <FaCopy />}
+                      </button>
+                      <button
+                        className={`btn w-100 p-2 ${
+                          vehicle.isFavorite
+                            ? "btn-warning"
+                            : "btn-outline-success"
+                        }`}
+                        onClick={() => onToggleFavorite(vehicle._id, index)}
+                      >
+                        {vehicle.isFavorite
+                          ? "★ Favorite"
+                          : "☆ Mark as Favorite"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

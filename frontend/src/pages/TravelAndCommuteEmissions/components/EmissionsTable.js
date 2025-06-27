@@ -3,6 +3,7 @@ import { Card, Button } from "react-bootstrap";
 import { formatDecimal, isRecordEditable } from "../../../utils/dateUtils";
 import TablePagination from "../../../components/TablePagination";
 import usePagination from "../../../hooks/usePagination";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 const EmissionsTable = ({
   theme,
@@ -11,6 +12,7 @@ const EmissionsTable = ({
   confirmDelete,
 }) => {
   const [sortedRecords, setSortedRecords] = useState([]);
+  const [copiedId, setCopiedId] = useState(null);
 
   // Sort records by date (latest first)
   useEffect(() => {
@@ -97,6 +99,27 @@ const EmissionsTable = ({
                               onClick={() => confirmDelete(record)}
                             >
                               <i className="fas fa-trash"></i>
+                            </Button>
+                            <Button
+                              variant="outline-secondary"
+                              size="sm"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await navigator.clipboard.writeText(
+                                  JSON.stringify(record, null, 2)
+                                );
+                                setCopiedId(record._id);
+                                setTimeout(() => setCopiedId(null), 1000);
+                              }}
+                              title={
+                                copiedId === record._id ? "Copied!" : "Copy"
+                              }
+                            >
+                              {copiedId === record._id ? (
+                                <FaCheck />
+                              ) : (
+                                <FaCopy />
+                              )}
                             </Button>
                           </>
                         ) : (

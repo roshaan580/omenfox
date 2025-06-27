@@ -1,6 +1,9 @@
 import React from "react";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 const ProductTable = ({ products, openEditModal, handleDeleteProduct }) => {
+  const [copiedId, setCopiedId] = React.useState(null);
+
   return (
     <div className="table-responsive">
       <table className="table table-hover">
@@ -39,6 +42,20 @@ const ProductTable = ({ products, openEditModal, handleDeleteProduct }) => {
                     onClick={() => handleDeleteProduct(product._id)}
                   >
                     <i className="fas fa-trash"></i>
+                  </button>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await navigator.clipboard.writeText(
+                        JSON.stringify(product, null, 2)
+                      );
+                      setCopiedId(product._id);
+                      setTimeout(() => setCopiedId(null), 1000);
+                    }}
+                    title={copiedId === product._id ? "Copied!" : "Copy"}
+                  >
+                    {copiedId === product._id ? <FaCheck /> : <FaCopy />}
                   </button>
                 </div>
               </td>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Modal, Button } from "react-bootstrap";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaCopy, FaCheck } from "react-icons/fa";
 import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../../../config";
 import {
   isYearlyRecordEditable,
@@ -47,6 +47,7 @@ const TransportEmissions = ({ activeTab }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [theme] = useState(localStorage.getItem("theme") || "light");
+  const [copiedId, setCopiedId] = useState(null);
 
   // Use pagination hook with sorted records
   const {
@@ -284,6 +285,21 @@ const TransportEmissions = ({ activeTab }) => {
     </div>
   );
 
+  const deepOmitFields = (obj, fields) => {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => deepOmitFields(item, fields));
+    } else if (obj && typeof obj === "object") {
+      const newObj = {};
+      Object.keys(obj).forEach((key) => {
+        if (!fields.includes(key)) {
+          newObj[key] = deepOmitFields(obj[key], fields);
+        }
+      });
+      return newObj;
+    }
+    return obj;
+  };
+
   return (
     <>
       {activeTab === "TransportEmissions" && (
@@ -356,6 +372,34 @@ const TransportEmissions = ({ activeTab }) => {
                                   Locked (previous year)
                                 </span>
                               )}
+                              <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const toCopy = deepOmitFields(record, [
+                                    "_id",
+                                    "createdAt",
+                                    "updatedAt",
+                                    "__v",
+                                  ]);
+                                  await navigator.clipboard.writeText(
+                                    JSON.stringify(toCopy, null, 2)
+                                  );
+                                  setCopiedId(record._id);
+                                  setTimeout(() => setCopiedId(null), 1000);
+                                }}
+                                title={
+                                  copiedId === record._id ? "Copied!" : "Copy"
+                                }
+                                disabled={isLoading}
+                              >
+                                {copiedId === record._id ? (
+                                  <FaCheck />
+                                ) : (
+                                  <FaCopy />
+                                )}
+                              </Button>
                             </div>
                           </td>
                         </tr>

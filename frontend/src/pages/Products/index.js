@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { JWT_ADMIN_SECRET } from "../../config";
 import Sidebar from "../../components/Sidebar";
@@ -144,12 +144,12 @@ const ProductsPage = () => {
   };
 
   // Modal functions
-  const openAddModal = () => {
+  const openAddModal = useCallback(() => {
     // Get the user ID from state, with a fallback
     const userId = userData?._id || "6624c7ab8a89c9f76ded3d9e";
     setFormData(getEmptyFormData(userId));
     setShowAddModal(true);
-  };
+  }, [userData]);
 
   const openEditModal = (product) => {
     setSelectedProduct(product);
@@ -282,6 +282,16 @@ const ProductsPage = () => {
     localStorage.setItem("theme", newTheme);
     document.body.className = `${newTheme}-theme`;
   };
+
+  useEffect(() => {
+    const handleOpenAddModal = (e) => {
+      if (e.detail && e.detail.category === "products") {
+        openAddModal();
+      }
+    };
+    window.addEventListener("openAddModal", handleOpenAddModal);
+    return () => window.removeEventListener("openAddModal", handleOpenAddModal);
+  }, [openAddModal]);
 
   return (
     <div className={`dashboard-container bg-${theme}`}>

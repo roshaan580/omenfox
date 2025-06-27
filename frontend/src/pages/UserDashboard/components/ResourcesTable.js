@@ -4,6 +4,7 @@ import { isRecordEditable } from "../../../utils/dateUtils";
 import { Button } from "react-bootstrap";
 import TablePagination from "../../../components/TablePagination";
 import usePagination from "../../../hooks/usePagination";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 /**
  * Table component for displaying resource records
@@ -26,6 +27,23 @@ const ResourcesTable = ({
     indexOfLastItem,
     totalItems,
   } = usePagination(resources);
+
+  const [copiedId, setCopiedId] = React.useState(null);
+
+  const deepOmitFields = (obj, fields) => {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => deepOmitFields(item, fields));
+    } else if (obj && typeof obj === "object") {
+      const newObj = {};
+      Object.keys(obj).forEach((key) => {
+        if (!fields.includes(key)) {
+          newObj[key] = deepOmitFields(obj[key], fields);
+        }
+      });
+      return newObj;
+    }
+    return obj;
+  };
 
   return (
     <>
@@ -78,6 +96,27 @@ const ResourcesTable = ({
                           Locked (previous year)
                         </span>
                       )}
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const toCopy = deepOmitFields(resource, [
+                            "_id",
+                            "createdAt",
+                            "updatedAt",
+                            "__v",
+                          ]);
+                          await navigator.clipboard.writeText(
+                            JSON.stringify(toCopy, null, 2)
+                          );
+                          setCopiedId(resource._id);
+                          setTimeout(() => setCopiedId(null), 1000);
+                        }}
+                        title={copiedId === resource._id ? "Copied!" : "Copy"}
+                      >
+                        {copiedId === resource._id ? <FaCheck /> : <FaCopy />}
+                      </Button>
                     </div>
                   </td>
                 </tr>
