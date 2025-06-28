@@ -7,6 +7,12 @@ import VehicleRegisterPage from "../../../../pages/VehicleRegister";
 const VehicleModal = ({ visible, onClose }) => {
   if (!visible) return null;
 
+  // Handle successful vehicle registration
+  const handleSuccess = () => {
+    // Close the modal and trigger any additional refresh logic
+    onClose();
+  };
+
   // Modal backdrop
   const modalBackdrop = (
     <div
@@ -52,7 +58,7 @@ const VehicleModal = ({ visible, onClose }) => {
                 userData={visible}
                 isModalVisible={visible}
                 isAdmin={true}
-                onSuccess={onClose}
+                onSuccess={handleSuccess}
               />
             </div>
           </div>

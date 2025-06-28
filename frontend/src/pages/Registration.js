@@ -6,7 +6,12 @@ import LocationPicker from "../components/LocationPicker"; // Import LocationPic
 import LogoWhite from "../assets/logo-white.png";
 import LogoBlack from "../assets/logo-black.png";
 
-const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
+const RegisterPage = ({
+  userData,
+  isModelVisible,
+  isAdmin,
+  onProfileUpdate,
+}) => {
   const [firstName, setFirstName] = useState(userData?.firstName || "");
   const [lastName, setLastName] = useState(userData?.lastName || "");
   const [homeAddress, setHomeAddress] = useState({
@@ -57,19 +62,15 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    const data = {
+
+    /* ---------- build payload ---------- */
+    const payload = {
       firstName,
       lastName,
       homeAddress: homeAddress.address,
-      homeLocation: {
-        lat: homeAddress.lat,
-        lon: homeAddress.lon,
-      },
+      homeLocation: { lat: homeAddress.lat, lon: homeAddress.lon },
       companyAddress: companyAddress.address,
-      companyLocation: {
-        lat: companyAddress.lat,
-        lon: companyAddress.lon,
-      },
+      companyLocation: { lat: companyAddress.lat, lon: companyAddress.lon },
       car: {
         name: carName,
         licensePlate,
@@ -79,32 +80,51 @@ const RegisterPage = ({ userData, isModelVisible, isAdmin }) => {
       email,
       password,
     };
+
     try {
       setIsLoading(true);
+
       const url = isModelVisible
-        ? `${REACT_APP_API_URL}/employees/${userData?._id}`
-        : `${REACT_APP_API_URL}/employees`;
+        ? `${REACT_APP_API_URL}/employees/${userData?._id}` // edit
+        : `${REACT_APP_API_URL}/employees`; // new
+
       const response = await fetch(url, {
         method: isModelVisible ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("token", data?.employee?.jwtToken);
-        localStorage.setItem("userObj", JSON.stringify(data?.employee));
-        window.location.reload();
-      } else {
-        const errorData = await response.json();
+
+      /* ---------- error branch ---------- */
+      if (!response.ok) {
+        const errJSON = await response.json().catch(() => ({}));
         setError(
-          errorData?.message ||
+          errJSON?.message ||
             (isModelVisible ? "Profile update failed!" : "Registration failed!")
         );
+        return;
       }
-    } catch (error) {
+
+      /* ---------- success branch ---------- */
+      await response.json(); // parsed once – ignore body for this flow
+
+      /* === ADMIN FLOW ===================================== */
+      if (isAdmin) {
+        onProfileUpdate?.(); // refresh table
+        return; // keep admin session intact
+      }
+
+      /* === NON‑ADMIN FLOW ================================= */
+      localStorage.removeItem("token");
+      localStorage.removeItem("userObj");
+      localStorage.removeItem("userData");
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 300);
+    } catch (err) {
       setError("An error occurred. Please try again later.");
     } finally {
       setIsLoading(false);

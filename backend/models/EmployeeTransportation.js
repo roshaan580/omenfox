@@ -48,6 +48,10 @@ const employee_transportationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vehicle",
     },
+    vehicleType: {
+      type: String,
+      enum: ["electric", "hybrid", "petrol", "diesel", "average", ""],
+    },
     carType: {
       type: String,
       enum: ["personal", "company"],
@@ -59,7 +63,26 @@ const employee_transportationSchema = new mongoose.Schema(
     usageType: {
       type: String,
       required: true,
-      enum: ["company car", "business travel", "commuting"],
+      enum: [
+        "company car",
+        "business travel",
+        "commuting",
+        "personal_errands",
+        "leisure",
+        "school",
+        "shopping",
+        "medical",
+        "zero_emission",
+        "exercise",
+        "errands",
+        "dog_walking",
+        "vacation",
+        "relocation",
+        "family_visit",
+        "conference",
+        "business",
+        "personal",
+      ],
     },
     workFromHomeDays: {
       type: Number,

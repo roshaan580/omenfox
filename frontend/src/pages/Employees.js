@@ -349,7 +349,10 @@ const EmployeePage = () => {
                 <Registration
                   show={isRegModel}
                   onHide={closeModal}
-                  onProfileUpdate={fetchEmployees}
+                  onProfileUpdate={() => {
+                    fetchEmployees(); // Refresh employee list
+                    closeModal(); // Close modal after registration
+                  }}
                   isAdmin={true}
                 />
               </Modal.Body>

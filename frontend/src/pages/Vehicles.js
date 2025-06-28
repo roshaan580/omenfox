@@ -138,6 +138,7 @@ const VehiclePage = () => {
   const closeModal = () => {
     setModalVisible(false);
     setIsRegModel(false);
+    fetchVehicles();
   };
 
   // Add handleLogout function
