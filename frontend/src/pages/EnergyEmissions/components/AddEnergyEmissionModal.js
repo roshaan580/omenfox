@@ -13,6 +13,11 @@ const AddEnergyEmissionModal = ({
   handleAddSubmit,
   employeesState,
 }) => {
+  // Ensure we have a safe version of energySources to map over
+  const energySources = Array.isArray(emissionRecord?.energySources) 
+    ? emissionRecord.energySources 
+    : [{ type: "", emission: "0" }];
+
   return (
     <Modal
       className="custom-scrollbar"
@@ -31,9 +36,8 @@ const AddEnergyEmissionModal = ({
                 <Form.Label>Start Date</Form.Label>
                 <Form.Control
                   type="date"
-                  value={emissionRecord.startDate}
+                  value={emissionRecord?.startDate || ""}
                   onChange={(e) => handleInputChange(e, "startDate")}
-                  required
                 />
               </Form.Group>
             </div>
@@ -42,9 +46,8 @@ const AddEnergyEmissionModal = ({
                 <Form.Label>End Date</Form.Label>
                 <Form.Control
                   type="date"
-                  value={emissionRecord.endDate}
+                  value={emissionRecord?.endDate || ""}
                   onChange={(e) => handleInputChange(e, "endDate")}
-                  required
                 />
               </Form.Group>
             </div>
@@ -53,29 +56,27 @@ const AddEnergyEmissionModal = ({
           {/* Energy Sources */}
           <div className="mb-3">
             <label className="form-label">Energy Sources</label>
-            {emissionRecord.energySources.map((source, index) => (
+            {energySources.map((source, index) => (
               <div key={index} className="d-flex align-items-center mb-2 gap-2">
                 <div className="row flex-grow-1">
                   <div className="col-md-6 mb-2 mb-md-0">
                     <Form.Control
                       type="text"
                       placeholder="Energy Type (e.g., Electricity, Gas)"
-                      value={source.type}
+                      value={source?.type || ""}
                       onChange={(e) =>
                         handleEnergySourceChange(e, index, "type")
                       }
-                      required
                     />
                   </div>
                   <div className="col-md-6">
                     <Form.Control
                       type="number"
                       placeholder="CO₂ Emission (kg)"
-                      value={source.emission}
+                      value={source?.emission || "0"}
                       onChange={(e) =>
                         handleEnergySourceChange(e, index, "emission")
                       }
-                      required
                       min="0"
                       step="0.01"
                     />
@@ -109,7 +110,7 @@ const AddEnergyEmissionModal = ({
                 <Form.Group className="mb-3">
                   <Form.Label>Employee</Form.Label>
                   <Form.Select
-                    value={emissionRecord.employee}
+                    value={emissionRecord?.employee || ""}
                     onChange={(e) => handleInputChange(e, "employee")}
                   >
                     <option value="">Select Employee</option>

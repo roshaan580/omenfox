@@ -7,6 +7,10 @@ const energyEmissionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    employee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+    },
     // month: { type: Number, required: true }, // 1-12
     startDate: { type: Date, required: true },
     endDate: { type: Date }, // Optional

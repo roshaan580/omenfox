@@ -152,7 +152,127 @@ const TravelAndCommuteMenu = ({
   );
 };
 
-// Admin Greenhouse & Emissions Menu
+// Scope 1 Menu - Direct Emissions
+const Scope1Menu = ({
+  isSidebarOpen,
+  expandedItem,
+  toggleExpand,
+  isActive,
+  handleNavigation,
+}) => {
+  return (
+    <div className="nav-group mb-1">
+      <MenuItem
+        icon={<BsCloudHaze2Fill size={22} />}
+        title="Scope 1"
+        isExpanded={expandedItem === "scope1"}
+        isSidebarOpen={isSidebarOpen}
+        onToggle={() => toggleExpand("scope1")}
+      />
+
+      {isSidebarOpen && expandedItem === "scope1" && (
+        <div className="submenu">
+          <NavLinkItem
+            to="/mobile-combustion"
+            isActive={isActive("/mobile-combustion")}
+            onClick={handleNavigation("/mobile-combustion", true)}
+          >
+            Mobile Combustion
+          </NavLinkItem>
+          <NavLinkItem
+            to="/stationary-combustion"
+            isActive={isActive("/stationary-combustion")}
+            onClick={handleNavigation("/stationary-combustion", true)}
+          >
+            Stationary Combustion
+          </NavLinkItem>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Scope 2 Menu - Indirect Emissions from Purchased Energy
+const Scope2Menu = ({
+  isSidebarOpen,
+  expandedItem,
+  toggleExpand,
+  isActive,
+  handleNavigation,
+}) => {
+  return (
+    <div className="nav-group mb-1">
+      <MenuItem
+        icon={<FaGasPump size={22} />}
+        title="Scope 2"
+        isExpanded={expandedItem === "scope2"}
+        isSidebarOpen={isSidebarOpen}
+        onToggle={() => toggleExpand("scope2")}
+      />
+
+      {isSidebarOpen && expandedItem === "scope2" && (
+        <div className="submenu">
+          <NavLinkItem
+            to="/energy-emissions"
+            isActive={isActive("/energy-emissions")}
+            onClick={handleNavigation("/energy-emissions", true)}
+          >
+            Purchased Energy and Gases
+          </NavLinkItem>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Scope 3 Menu - Other Indirect Emissions
+const Scope3Menu = ({
+  isSidebarOpen,
+  expandedItem,
+  toggleExpand,
+  isActive,
+  handleNavigation,
+}) => {
+  return (
+    <div className="nav-group mb-1">
+      <MenuItem
+        icon={<MdTravelExplore size={22} />}
+        title="Scope 3"
+        isExpanded={expandedItem === "scope3"}
+        isSidebarOpen={isSidebarOpen}
+        onToggle={() => toggleExpand("scope3")}
+      />
+
+      {isSidebarOpen && expandedItem === "scope3" && (
+        <div className="submenu">
+          <NavLinkItem
+            to="/travel-and-commute"
+            isActive={isActive("/travel-and-commute")}
+            onClick={handleNavigation("/travel-and-commute", true)}
+          >
+            Travel & Commute
+          </NavLinkItem>
+          <NavLinkItem
+            to="/purchased-goods"
+            isActive={isActive("/purchased-goods")}
+            onClick={handleNavigation("/purchased-goods", true)}
+          >
+            Purchased Goods
+          </NavLinkItem>
+          <NavLinkItem
+            to="/freight-transport"
+            isActive={isActive("/freight-transport")}
+            onClick={handleNavigation("/freight-transport", true)}
+          >
+            Freight Transport
+          </NavLinkItem>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Admin Greenhouse & Emissions Menu (keeping for backward compatibility)
 const GreenhouseEmissionsMenu = ({
   isSidebarOpen,
   expandedItem,
@@ -352,7 +472,7 @@ const EnergyAndGasMenu = ({
     <div className="nav-group mb-1">
       <MenuItem
         icon={<FaGasPump size={22} />}
-        title="Energy and Gas"
+                  title="Energy and Gases"
         isExpanded={expandedItem === "energy"}
         isSidebarOpen={isSidebarOpen}
         onToggle={() => toggleExpand("energy")}
@@ -364,8 +484,8 @@ const EnergyAndGasMenu = ({
             to="/energy-emissions"
             isActive={isActive("/energy-emissions")}
             onClick={handleNavigation("/energy-emissions", true)}
-          >
-            Energy & Gas
+            >
+          Purchased Energy and Gases
           </NavLinkItem>
         </div>
       )}
@@ -477,7 +597,7 @@ const EmployeeMenu = memo(
             </ButtonItem>
             <ButtonItem onClick={openOtherResourceModal}>
               <i className="fas fa-plus me-2"></i>
-              Add Energy & Gas
+              Add Energy & Gases
             </ButtonItem>
             <ButtonItem onClick={openProfileModal}>
               <i className="fas fa-user-edit me-2"></i>
@@ -498,7 +618,7 @@ const CATEGORY_PATHS = {
 };
 export { CATEGORY_PATHS };
 const CATEGORY_LABELS = {
-  energy: "Energy & Gas",
+  energy: "Energy & Gases",
   travel: "Travel & Commute",
   products: "Purchased Goods",
   transport: "Transport Emission",
@@ -766,23 +886,31 @@ const Sidebar = ({
                       <span className="ms-2">New Measurement</span>
                     )}
                   </Button>
-                </div>
-                {/* ADMIN MENU */}
+                  </div>
+                {/* SCOPE-BASED ADMIN MENU */}
+                <Scope1Menu
+                  isSidebarOpen={isSidebarOpen}
+                  expandedItem={expandedItem}
+                  toggleExpand={toggleExpand}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
+                <Scope2Menu
+                  isSidebarOpen={isSidebarOpen}
+                  expandedItem={expandedItem}
+                  toggleExpand={toggleExpand}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
+                <Scope3Menu
+                  isSidebarOpen={isSidebarOpen}
+                  expandedItem={expandedItem}
+                  toggleExpand={toggleExpand}
+                  isActive={isActive}
+                  handleNavigation={handleNavigation}
+                />
+                {/* Keep legacy menu for backward compatibility */}
                 <GreenhouseEmissionsMenu
-                  isSidebarOpen={isSidebarOpen}
-                  expandedItem={expandedItem}
-                  toggleExpand={toggleExpand}
-                  isActive={isActive}
-                  handleNavigation={handleNavigation}
-                />
-                <EnergyAndGasMenu
-                  isSidebarOpen={isSidebarOpen}
-                  expandedItem={expandedItem}
-                  toggleExpand={toggleExpand}
-                  isActive={isActive}
-                  handleNavigation={handleNavigation}
-                />
-                <TravelAndCommuteMenu
                   isSidebarOpen={isSidebarOpen}
                   expandedItem={expandedItem}
                   toggleExpand={toggleExpand}

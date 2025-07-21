@@ -196,10 +196,10 @@ const Leaderboard = () => {
 
   // Function to render name with user icon and badge
   const renderName = (name, rank) => (
-    <span>
+    <span className="d-flex align-items-center justify-content-start flex-wrap gap-2">
       {name}
       {rank <= 3 && (
-        <span className="badge bg-success ms-2" style={{ fontSize: "0.75rem" }}>
+        <span className="badge bg-success" style={{ fontSize: "0.75rem" }}>
           Top Performer
         </span>
       )}

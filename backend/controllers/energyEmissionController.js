@@ -4,7 +4,9 @@ const EnergyEmission = require("../models/EnergyEmission");
 // ✅ Get all emissions for a specific user and month
 exports.getAll = async (req, res) => {
     try {
-        const emission = await EnergyEmission.find();
+        const emission = await EnergyEmission.find()
+            .populate("employee", "firstName lastName")
+            .sort({ createdAt: -1 });
 
         if (!emission) return res.status(404).json({ message: "No data found" });
 
@@ -18,7 +20,7 @@ exports.getAll = async (req, res) => {
 // ✅ Create a new energy emission record
 exports.createEnergyEmission = async (req, res) => {
     try {
-        const { userId, startDate, endDate, energySources } = req.body;
+        const { userId, startDate, endDate, energySources, employee } = req.body;
 
         if (!userId || !startDate || !energySources.length) {
             return res.status(400).json({ message: "All fields are required" });
@@ -29,10 +31,13 @@ exports.createEnergyEmission = async (req, res) => {
             energySources = JSON.parse(energySources);
         }
 
-        const emission = new EnergyEmission({ userId, startDate, endDate, energySources });
+        const emission = new EnergyEmission({ userId, startDate, endDate, energySources, employee });
 
-        await emission.save();
-        res.status(201).json({ message: "Energy emission saved successfully", emission });
+        const savedEmission = await emission.save();
+        const populatedEmission = await EnergyEmission.findById(savedEmission._id)
+            .populate("employee", "firstName lastName");
+
+        res.status(201).json({ message: "Energy emission saved successfully", emission: populatedEmission });
     } catch (error) {
         res.status(500).json({ message: "Server error", error });
     }
@@ -42,7 +47,8 @@ exports.createEnergyEmission = async (req, res) => {
 exports.getEnergyEmission = async (req, res) => {
     try {
         const { userId, startDate, endDate } = req.params;
-        const emission = await EnergyEmission.findOne({ userId, startDate, endDate });
+        const emission = await EnergyEmission.findOne({ userId, startDate, endDate })
+            .populate("employee", "firstName lastName");
 
         if (!emission) return res.status(404).json({ message: "No data found" });
 
@@ -59,7 +65,7 @@ exports.updateEnergyEmission = async (req, res) => {
             req.params.id,
             req.body,
             { new: true }
-        );
+        ).populate("employee", "firstName lastName");
 
         if (!updatedEmission) return res.status(404).json({ message: "Record not found" });
 

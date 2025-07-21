@@ -6,7 +6,7 @@ const AnalyticsCards = ({ theme, totalEmissions, filteredRecords }) => {
   return (
     <Row className="mb-4">
       <Col lg={3} md={6} className="mb-3 mb-lg-0">
-        <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+        <Card className={`bg-${theme} m-0 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center">
             <div className="icon-container mb-3 text-primary">
               <i className="fas fa-cloud fa-3x"></i>
@@ -21,7 +21,7 @@ const AnalyticsCards = ({ theme, totalEmissions, filteredRecords }) => {
         </Card>
       </Col>
       <Col lg={3} md={6} className="mb-3 mb-lg-0">
-        <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+        <Card className={`bg-${theme} m-0 p-md-3 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center">
             <div className="icon-container mb-3 text-success">
               <i className="fas fa-list fa-3x"></i>
@@ -32,7 +32,7 @@ const AnalyticsCards = ({ theme, totalEmissions, filteredRecords }) => {
         </Card>
       </Col>
       <Col lg={3} md={6} className="mb-3 mb-lg-0">
-        <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+        <Card className={`bg-${theme} m-0 p-md-3 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center">
             <div className="icon-container mb-3 text-warning">
               <i className="fas fa-calculator fa-3x"></i>
@@ -50,7 +50,7 @@ const AnalyticsCards = ({ theme, totalEmissions, filteredRecords }) => {
         </Card>
       </Col>
       <Col lg={3} md={6} className="mb-3 mb-lg-0">
-        <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+        <Card className={`bg-${theme} m-0 p-md-3 shadow-sm h-100`}>
           <Card.Body className="d-flex flex-column align-items-center">
             <div className="icon-container mb-3 text-info">
               <i className="fas fa-road fa-3x"></i>

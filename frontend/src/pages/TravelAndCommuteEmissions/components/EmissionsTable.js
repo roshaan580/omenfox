@@ -42,9 +42,14 @@ const EmissionsTable = ({
   } = usePagination(sortedRecords);
 
   return (
-    <Card className={`bg-${theme} shadow-sm m-0`}>
+    <Card className={`bg-${theme} m-0 p-md-3 shadow-sm m-0`}>
       <Card.Body>
-        <Card.Title className="mb-3">Travel & Commute Records</Card.Title>
+        <Card.Title className="mb-3">Travel & Commute Records (Scope 3)</Card.Title>
+        <p className="text-muted small mb-3">
+          <i className="fas fa-info-circle me-1"></i> 
+          This section includes only personal vehicle and public transportation emissions. 
+          Company vehicle emissions are tracked under Mobile Combustion (Scope 1/2).
+        </p>
         <div className="table-responsive">
           <table className="table table-striped table-hover">
             <thead>

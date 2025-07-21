@@ -355,11 +355,13 @@ const EnergyEmissions = () => {
     // Get the user ID directly using our helper function
     const userId = user?._id || user?.id || getUserId();
 
+    // Make sure to initialize with the correct structure and explicit empty values
     setEmissionRecord({
       userId: userId || "",
+      employee: "", // Initialize employee field
       startDate: "",
       endDate: "",
-      energySources: [{ type: "", emission: "" }],
+      energySources: [{ type: "", emission: "0" }], // Always initialize as an array with one item and ensure emission is a string
     });
 
     setShowAddModal(true);
@@ -380,8 +382,13 @@ const EnergyEmissions = () => {
       return;
     }
 
+    // Check for employee information in the record
+    const employeeId = record.employee?._id || record.employee || "";
+    console.log("Setting employee ID for edit:", employeeId);
+
     setEmissionRecord({
       userId: userId,
+      employee: employeeId,
       startDate: record.startDate
         ? new Date(record.startDate).toISOString().split("T")[0]
         : "",
@@ -439,11 +446,19 @@ const EnergyEmissions = () => {
         );
       }
 
+      // Create a local copy with defaults to handle the undefined case
+      let recordToSubmit = { ...emissionRecord };
+      
+      // Ensure energySources exists and is an array
+      if (!recordToSubmit.energySources || !Array.isArray(recordToSubmit.energySources)) {
+        recordToSubmit.energySources = [{ type: "", emission: "0" }];
+      }
+
       // Include the user ID in the payload
       const formattedEmissionRecord = {
-        ...emissionRecord,
+        ...recordToSubmit,
         userId: userId,
-        energySources: emissionRecord.energySources.map((source) =>
+        energySources: recordToSubmit.energySources.map((source) =>
           JSON.stringify(source)
         ), // Convert each object to a string
       };
@@ -467,12 +482,17 @@ const EnergyEmissions = () => {
       const result = await response.json();
       console.log("Energy Emission record added successfully!", result);
 
+      // Get the actual emission record from the response
+      const emissionData = result.emission || result;
+
       // Update local state instead of reloading
       const newRecord = {
-        ...result,
-        energySources: result.energySources.map((source) =>
+        ...emissionData,
+        energySources: Array.isArray(emissionData?.energySources)
+          ? emissionData.energySources.map((source) =>
           typeof source === "string" ? JSON.parse(source) : source
-        ),
+            )
+          : [{ type: "Unknown", emission: "0" }]
       };
 
       setEnergyRecords([newRecord, ...energyRecords]);
@@ -502,11 +522,19 @@ const EnergyEmissions = () => {
         );
       }
 
+      // Create a local copy with defaults to handle the undefined case
+      let recordToSubmit = { ...emissionRecord };
+      
+      // Ensure energySources exists and is an array
+      if (!recordToSubmit.energySources || !Array.isArray(recordToSubmit.energySources)) {
+        recordToSubmit.energySources = [{ type: "", emission: "0" }];
+      }
+
       // Include the user ID in the payload
       const formattedEmissionRecord = {
-        ...emissionRecord,
+        ...recordToSubmit,
         userId: userId,
-        energySources: emissionRecord.energySources.map((source) =>
+        energySources: recordToSubmit.energySources.map((source) =>
           JSON.stringify(source)
         ), // Convert each object to a string
       };
@@ -530,12 +558,17 @@ const EnergyEmissions = () => {
       const result = await response.json();
       console.log("Energy Emission record updated successfully!", result);
 
+      // Get the actual emission record from the response
+      const emissionData = result.emission || result;
+
       // Update local state instead of reloading
       const updatedRecord = {
-        ...result,
-        energySources: result.energySources.map((source) =>
+        ...emissionData,
+        energySources: Array.isArray(emissionData?.energySources)
+          ? emissionData.energySources.map((source) =>
           typeof source === "string" ? JSON.parse(source) : source
-        ),
+            )
+          : [{ type: "Unknown", emission: "0" }]
       };
 
       // Update in both record lists
@@ -746,8 +779,7 @@ const EnergyEmissions = () => {
 
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container-fluid mt-4">
-          <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h1>Energy & Gas</h1>
+          <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2"><h1>Purchased Energy and Gases (Scope 2)</h1>
             <div>
               <Button
                 variant="outline-primary"

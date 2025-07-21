@@ -84,7 +84,7 @@ button:hover {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin: 20px;
-  padding: 20px;
+  padding: 16px;
   transition: all 0.3s ease;
 }
 
@@ -1258,7 +1258,7 @@ h4 {
   color: #e9ecef;
 }
 
-.dark-theme .pagination .page-item.active .page-link {
+.pagination .page-item.active .page-link {
   background-color: #198754;
   border-color: #198754;
   color: #fff;
@@ -1587,6 +1587,10 @@ h4 {
   color: #198754;
 }
 
+.modal-body .nav-tabs .nav-item {
+  padding: 0;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .sidebar {
@@ -1743,7 +1747,6 @@ h4 {
 
 .nav-item.active {
   background-color: rgba(13, 253, 41, 0.144);
-
   color: #34d399;
   font-weight: 500;
 }
@@ -1809,6 +1812,7 @@ h4 {
   color: #157347;
   background-color: rgba(13, 110, 253, 0.1);
 }
+
 
 .light-theme .submenu-item {
   color: #6c757d;

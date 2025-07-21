@@ -11,7 +11,7 @@ const EmissionCharts = ({
   return (
     <Row className="mb-4">
       <Col md={12} lg={6}>
-        <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+        <Card className={`bg-${theme} m-0 p-md-3 shadow-sm h-100 m-0`}>
           <Card.Body>
             <Card.Title className="mb-4">Monthly Emissions Trend</Card.Title>
             <div style={{ height: "300px", padding: "10px" }}>
@@ -90,7 +90,7 @@ const EmissionCharts = ({
         </Card>
       </Col>
       <Col md={12} lg={6}>
-        <Card className={`bg-${theme} shadow-sm h-100 m-0`}>
+        <Card className={`bg-${theme} m-0 p-md-3 shadow-sm h-100 m-0`}>
           <Card.Body>
             <Card.Title className="mb-4">Emissions by Type</Card.Title>
             <div style={{ height: "300px", padding: "10px" }}>

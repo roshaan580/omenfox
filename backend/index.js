@@ -32,6 +32,11 @@ const generalEmissionRoutes = require("./routes/generalEmissionRoutes");
 const energyEmissionRoutes = require("./routes/energyEmissions");
 const transportEmissionRoutes = require("./routes/transportEmission");
 
+// New scope-based emission routes
+const mobileCombustionRoutes = require("./routes/mobileCombustionRoutes");
+const stationaryCombustionRoutes = require("./routes/stationaryCombustionRoutes");
+const freightTransportRoutes = require("./routes/freightTransportRoutes");
+
 // Middlewares
 const allowedOrigins = [
   "https://www.omenfoxfactory.app",
@@ -78,6 +83,11 @@ app.use("/api/tasks", taskRoutes);
 
 app.use("/api/energy-emissions", energyEmissionRoutes);
 app.use("/api/transport-emissions", transportEmissionRoutes);
+
+// New scope-based emission routes
+app.use("/api/mobile-combustion", mobileCombustionRoutes);
+app.use("/api/stationary-combustion", stationaryCombustionRoutes);
+app.use("/api/freight-transport", freightTransportRoutes);
 
 mongoose.connection.on("error", (err) => {
   console.error("MongoDB Connection Error:", err);

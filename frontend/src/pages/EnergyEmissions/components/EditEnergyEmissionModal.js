@@ -14,6 +14,11 @@ const EditEnergyEmissionModal = ({
   employeesState,
   formatDate,
 }) => {
+  // Ensure we have a safe version of energySources to map over
+  const energySources = Array.isArray(emissionRecord?.energySources) 
+    ? emissionRecord.energySources 
+    : [{ type: "", emission: "0" }];
+
   return (
     <Modal
       className="custom-scrollbar"
@@ -33,12 +38,11 @@ const EditEnergyEmissionModal = ({
                 <Form.Control
                   type="date"
                   value={
-                    formatDate
+                    formatDate && emissionRecord?.startDate
                       ? formatDate(emissionRecord.startDate)
-                      : emissionRecord.startDate
+                      : emissionRecord?.startDate || ""
                   }
                   onChange={(e) => handleInputChange(e, "startDate")}
-                  required
                 />
               </Form.Group>
             </div>
@@ -48,12 +52,11 @@ const EditEnergyEmissionModal = ({
                 <Form.Control
                   type="date"
                   value={
-                    formatDate
+                    formatDate && emissionRecord?.endDate
                       ? formatDate(emissionRecord.endDate)
-                      : emissionRecord.endDate
+                      : emissionRecord?.endDate || ""
                   }
                   onChange={(e) => handleInputChange(e, "endDate")}
-                  required
                 />
               </Form.Group>
             </div>
@@ -62,29 +65,27 @@ const EditEnergyEmissionModal = ({
           {/* Energy Sources */}
           <div className="mb-3">
             <label className="form-label">Energy Sources</label>
-            {emissionRecord.energySources.map((source, index) => (
+            {energySources.map((source, index) => (
               <div key={index} className="d-flex align-items-center mb-2 gap-2">
                 <div className="row flex-grow-1">
                   <div className="col-md-6 mb-2 mb-md-0">
                     <Form.Control
                       type="text"
                       placeholder="Energy Type (e.g., Electricity, Gas)"
-                      value={source.type}
+                      value={source?.type || ""}
                       onChange={(e) =>
                         handleEnergySourceChange(e, index, "type")
                       }
-                      required
                     />
                   </div>
                   <div className="col-md-6">
                     <Form.Control
                       type="number"
                       placeholder="CO₂ Emission (kg)"
-                      value={source.emission}
+                      value={source?.emission || "0"}
                       onChange={(e) =>
                         handleEnergySourceChange(e, index, "emission")
                       }
-                      required
                       min="0"
                       step="0.01"
                     />
@@ -94,7 +95,7 @@ const EditEnergyEmissionModal = ({
                   variant="outline-danger"
                   size="sm"
                   onClick={() => removeEnergySource(index)}
-                  disabled={emissionRecord.energySources.length <= 1}
+                  disabled={energySources.length <= 1}
                 >
                   <IoMdClose />
                 </Button>
@@ -117,12 +118,16 @@ const EditEnergyEmissionModal = ({
                 <Form.Group className="mb-3">
                   <Form.Label>Employee</Form.Label>
                   <Form.Select
-                    value={emissionRecord.employee}
+                    value={emissionRecord?.employee || ""}
                     onChange={(e) => handleInputChange(e, "employee")}
                   >
                     <option value="">Select Employee</option>
                     {employeesState.map((employee) => (
-                      <option key={employee._id} value={employee._id}>
+                      <option 
+                        key={employee._id} 
+                        value={employee._id}
+                        selected={employee._id === emissionRecord?.employee}
+                      >
                         {employee.firstName} {employee.lastName}
                       </option>
                     ))}

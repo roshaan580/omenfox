@@ -2,7 +2,7 @@ const Emission = require("../models/Emission");
 const mongoose = require("mongoose");
 const EnergyEmission = require("../models/EnergyEmission");
 
-exports.redutionOverTime = async (req, res) => {
+exports.reductionOverTime = async (req, res) => {
   try {
     const query = [
       {

@@ -1,21 +1,5 @@
 import React from "react";
 import { Pagination } from "react-bootstrap";
-
-/**
- * Reusable pagination component for tables
- *
- * @param {Object} props Component props
- * @param {number} props.currentPage Current active page
- * @param {Function} props.onPageChange Function to call when page changes
- * @param {number} props.totalPages Total number of pages
- * @param {number} props.recordsPerPage Number of records per page
- * @param {Function} props.onRecordsPerPageChange Function to call when records per page changes
- * @param {number} props.totalRecords Total number of records
- * @param {number} props.startIndex Index of the first record on the current page
- * @param {number} props.endIndex Index of the last record on the current page
- * @param {string} props.theme Theme for styling (light/dark)
- * @param {Array<number>} [props.pageSizeOptions=[5, 10, 25, 50, 100]] Available page size options
- */
 const TablePagination = ({
   currentPage,
   onPageChange,

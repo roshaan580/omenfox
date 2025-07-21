@@ -176,8 +176,8 @@ const DashboardPage = () => {
             "Failed to fetch vehicles"
           ),
           fetchData(
-            `${REACT_APP_API_URL}/dashboard/redution-over-time`,
-            "Failed to fetch redution-over-time"
+            `${REACT_APP_API_URL}/dashboard/reduction-over-time`,
+            "Failed to fetch reduction-over-time"
           ),
           fetchData(
             `${REACT_APP_API_URL}/dashboard/emissions-by-date`,

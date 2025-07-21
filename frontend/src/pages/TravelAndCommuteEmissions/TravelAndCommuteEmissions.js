@@ -184,7 +184,21 @@ const TravelAndCommuteEmissionsPage = () => {
         console.log("Employees data length:", employeesData.length);
         console.log("Cars data length:", carsData.length);
 
-        setEmissionRecords(emissionsData);
+        // Filter out company vehicles - only show personal vehicles in Travel & Commute section
+        const filteredEmissions = emissionsData.filter(emission => {
+          // Check if transportation exists and is not a company vehicle
+          if (!emission.transportation) return true; // Keep if no transportation is specified
+          
+          // Look up the vehicle in carsData
+          const vehicle = carsData.find(car => car._id === emission.transportation._id);
+          
+          // Keep only if it's not a company vehicle (vehicleUseFor !== "Company")
+          return !vehicle || vehicle.vehicleUseFor !== "Company";
+        });
+
+        console.log(`Filtered out ${emissionsData.length - filteredEmissions.length} company vehicle records`);
+        
+        setEmissionRecords(filteredEmissions);
         setEmployeesState(employeesData);
         setCarsState(carsData);
       } catch (error) {
@@ -650,7 +664,12 @@ const TravelAndCommuteEmissionsPage = () => {
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container-fluid mt-4">
           <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-            <h1>Travel and Commute Emission Records</h1>
+            <div>
+              <h1>Travel and Commute Emissions (Scope 3)</h1>
+              <p className="text-muted mb-0">
+                Personal and public transportation emissions excluding company vehicles
+              </p>
+            </div>
             <div>
               <Button
                 variant="outline-primary"

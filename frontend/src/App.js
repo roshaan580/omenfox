@@ -23,6 +23,10 @@ import AnalyticsPage from "./pages/Analytics";
 import AdminTransport from "./pages/AdminTransport/AdminTransport.js";
 import AdminTransportEmissions from "./pages/AdminTransportEmissions/AdminTransportEmissions.js";
 import AdminUserTransport from "./pages/AdminUserTransport/AdminUserTransport.js";
+import MobileCombustionPage from "./pages/MobileCombustion/MobileCombustion.js";
+import StationaryCombustionPage from "./pages/StationaryCombustion/StationaryCombustion.js";
+import PurchasedGoodsPage from "./pages/PurchasedGoods/PurchasedGoods.js";
+import FreightTransportPage from "./pages/FreightTransport/FreightTransport.js";
 import { AdminRoute, EmployeeRoute } from "./utils/RouteProtection";
 import "./assets/style.css";
 
@@ -134,6 +138,39 @@ const App = () => {
           element={
             <AdminRoute>
               <AdminUserTransport />
+            </AdminRoute>
+          }
+        />
+        {/* New Scope-based routes */}
+        <Route
+          path="/mobile-combustion"
+          element={
+            <AdminRoute>
+              <MobileCombustionPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/stationary-combustion"
+          element={
+            <AdminRoute>
+              <StationaryCombustionPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/purchased-goods"
+          element={
+            <AdminRoute>
+              <PurchasedGoodsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/freight-transport"
+          element={
+            <AdminRoute>
+              <FreightTransportPage />
             </AdminRoute>
           }
         />

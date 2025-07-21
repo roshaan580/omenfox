@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import LocationPicker from "../../../components/LocationPicker";
 import DynamicSelect from "../../../components/DynamicSelect";
@@ -15,6 +15,11 @@ const EditTravelEmissionModal = ({
   carsState,
   setEmissionRecord,
 }) => {
+  // Filter out company vehicles - only show personal vehicles in dropdown
+  const filteredCars = useMemo(() => {
+    return carsState.filter(car => car.vehicleUseFor !== "Company");
+  }, [carsState]);
+
   return (
     <Modal
       show={showEditModal}
@@ -30,10 +35,15 @@ const EditTravelEmissionModal = ({
       }}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Update Travel & Commute Record</Modal.Title>
+        <Modal.Title>Edit Travel & Commute Record</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleUpdateSubmit}>
+          <div className="alert alert-info mb-3">
+            <i className="fas fa-info-circle me-2"></i>
+            This section is for personal and public transportation only. Company vehicle emissions should be tracked under Mobile Combustion.
+          </div>
+          
           <Form.Group controlId="startLocation" className="mb-4">
             <LocationPicker
               label="Start Location"
@@ -126,6 +136,7 @@ const EditTravelEmissionModal = ({
                 <DynamicSelect
                   label="Employee"
                   id="employee"
+                  className="form-select"
                   modalData={emissionRecord}
                   stateData={employeesState}
                   handleChange={(selected) =>
@@ -147,10 +158,10 @@ const EditTravelEmissionModal = ({
             <div className="col-md-4">
               <Form.Group controlId="transportation" className="mb-3">
                 <DynamicSelect
-                  label="Transportation"
+                  label="Transportation (Personal Only)"
                   id="transportation"
                   modalData={emissionRecord}
-                  stateData={carsState}
+                  stateData={filteredCars}
                   handleChange={(selected) =>
                     setEmissionRecord({
                       ...emissionRecord,
@@ -159,11 +170,14 @@ const EditTravelEmissionModal = ({
                   }
                   formatData={(car) => ({
                     value: car._id,
-                    label: `${car.name}`,
+                    label: `${car.name}${car.vehicleUseFor ? ` (${car.vehicleUseFor})` : ''}`,
                     key: car._id,
                   })}
                   isMulti={false}
                 />
+                <small className="text-muted">
+                  Only personal vehicles are shown. Company vehicles should be recorded under Mobile Combustion.
+                </small>
               </Form.Group>
             </div>
           </div>

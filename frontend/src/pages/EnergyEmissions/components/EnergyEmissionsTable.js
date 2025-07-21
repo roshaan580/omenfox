@@ -87,7 +87,7 @@ const EnergyEmissionsTable = ({
                           Array.isArray(record.energySources) &&
                           record.energySources.map((source, idx) => (
                             <li key={idx}>
-                              {source.type}: {formatDecimal(source.emission)} kg
+                              {source.type}
                             </li>
                           ))}
                       </ul>
