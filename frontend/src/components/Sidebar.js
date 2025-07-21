@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { CiLogout } from "react-icons/ci";
 import {
   FaBars,
@@ -116,39 +116,6 @@ const UserDashboardItem = ({ isSidebarOpen, isActive, handleNavigation }) => {
         {isSidebarOpen && <span className="nav-text ms-2">Dashboard</span>}
       </div>
     </Link>
-  );
-};
-
-// Admin Travel & Commute Menu
-const TravelAndCommuteMenu = ({
-  isSidebarOpen,
-  expandedItem,
-  toggleExpand,
-  isActive,
-  handleNavigation,
-}) => {
-  return (
-    <div className="nav-group mb-1">
-      <MenuItem
-        icon={<MdTravelExplore size={22} />}
-        title="Travel & Commute"
-        isExpanded={expandedItem === "travel"}
-        isSidebarOpen={isSidebarOpen}
-        onToggle={() => toggleExpand("travel")}
-      />
-
-      {isSidebarOpen && expandedItem === "travel" && (
-        <div className="submenu">
-          <NavLinkItem
-            to="/travel-and-commute"
-            isActive={isActive("/travel-and-commute")}
-            onClick={handleNavigation("/travel-and-commute", true)}
-          >
-            Travel & Commute Emissions
-          </NavLinkItem>
-        </div>
-      )}
-    </div>
   );
 };
 
@@ -453,39 +420,6 @@ const ManagementMenu = ({
             onClick={handleNavigation("/emission-types", true)}
           >
             Emission Types
-          </NavLinkItem>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Admin Energy and Gas Menu
-const EnergyAndGasMenu = ({
-  isSidebarOpen,
-  expandedItem,
-  toggleExpand,
-  isActive,
-  handleNavigation,
-}) => {
-  return (
-    <div className="nav-group mb-1">
-      <MenuItem
-        icon={<FaGasPump size={22} />}
-                  title="Energy and Gases"
-        isExpanded={expandedItem === "energy"}
-        isSidebarOpen={isSidebarOpen}
-        onToggle={() => toggleExpand("energy")}
-      />
-
-      {isSidebarOpen && expandedItem === "energy" && (
-        <div className="submenu">
-          <NavLinkItem
-            to="/energy-emissions"
-            isActive={isActive("/energy-emissions")}
-            onClick={handleNavigation("/energy-emissions", true)}
-            >
-          Purchased Energy and Gases
           </NavLinkItem>
         </div>
       )}
