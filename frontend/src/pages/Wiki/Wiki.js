@@ -329,9 +329,8 @@ const Wiki = () => {
           )}
 
           {/* Header */}
-          <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
-            <h1 className="d-flex align-items-center">
-              <FaBook className="me-2" />
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-4">
+            <h1>
               Wiki Knowledge Base
             </h1>
             {userData && (
@@ -458,24 +457,27 @@ const Wiki = () => {
                           )}
                         </div>
 
-                        <div className="d-flex justify-content-between align-items-center mt-auto">
+                        <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap mt-auto">
                           <Button
                             variant="outline-primary"
                             size="sm"
+                            className="d-flex align-items-center justify-content-center gap-1 m-0"
                             onClick={() => handleViewWiki(wiki._id)}
+                            style={{ padding: "6px 8px" }}
                           >
-                            <FaEye className="me-1" />
+                            <FaEye />
                             Read
                           </Button>
                           
                           {userData &&
                             (userData.role === "admin" ||
                               wiki.author?._id === userData.id) && (
-                              <div>
+                              <div className="d-flex flex-wrap gap-2">
                                 <Button
                                   variant="outline-success"
                                   size="sm"
-                                  className="me-2"
+                                  className="m-0"
+                                  style={{ padding: "6px" }}
                                   onClick={() => handleEditWiki(wiki)}
                                 >
                                   <FaEdit />
@@ -483,6 +485,8 @@ const Wiki = () => {
                                 <Button
                                   variant="outline-danger"
                                   size="sm"
+                                  className="m-0"
+                                  style={{ padding: "6px" }}
                                   onClick={() => handleDeleteWiki(wiki._id)}
                                 >
                                   <FaTrash />
