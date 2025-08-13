@@ -7,7 +7,7 @@ const dotEnv = process.env;
 
 // Register new user
 exports.register = async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, company, firstName, lastName, phone, position } = req.body;
   console.log(req.body);
   try {
     // Check if user already exists
@@ -20,12 +20,21 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = new User({
+    const userData = {
       username,
       email,
       password: hashedPassword,
       role,
-    });
+    };
+
+    // Add optional fields if provided
+    if (company) userData.company = company;
+    if (firstName) userData.firstName = firstName;
+    if (lastName) userData.lastName = lastName;
+    if (phone) userData.phone = phone;
+    if (position) userData.position = position;
+
+    const user = new User(userData);
 
     // Save user to database
     await user.save();
@@ -46,6 +55,11 @@ exports.register = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        company: user.company,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        position: user.position,
       },
     });
   } catch (err) {
@@ -60,7 +74,7 @@ exports.login = async (req, res) => {
 
   try {
     // First check admin users
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("company");
 
     if (user) {
       // Compare plain text password with stored plain text password (for now)
@@ -88,12 +102,17 @@ exports.login = async (req, res) => {
           username: user.username,
           email: user.email,
           role: user.role,
+          company: user.company,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          position: user.position,
         },
       });
     }
 
     // If no admin user found, check Employee collection
-    const employee = await Employee.findOne({ email }).populate("car");
+    const employee = await Employee.findOne({ email }).populate("car").populate("company");
 
     if (employee) {
       // Compare plain text password with stored plain text password (for now)

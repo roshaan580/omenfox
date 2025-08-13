@@ -1,10 +1,10 @@
 import React from "react";
-import UpdateEmployee from "../../../../pages/UpdateEmployee";
+import UpdateEmployee from "../../../UpdateEmployee";
 
 /**
  * Modal for updating user profile
  */
-const ProfileModal = ({ visible, onClose, userData, onUpdate }) => {
+const ProfileModal = ({ visible, onClose, userData, onUpdate, companies = [] }) => {
   if (!visible) return null;
 
   // Modal backdrop
@@ -52,6 +52,7 @@ const ProfileModal = ({ visible, onClose, userData, onUpdate }) => {
                 userData={userData}
                 isModelVisible={visible}
                 onUpdate={onUpdate}
+                companies={companies}
               />
             </div>
           </div>

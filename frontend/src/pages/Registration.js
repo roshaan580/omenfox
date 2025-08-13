@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
+import { JWT_EMPLOYEE_SECRET, JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
+import DynamicSelect from "../components/DynamicSelect";
 import LogoWhite from "../assets/logo-white.png";
 import LogoBlack from "../assets/logo-black.png";
 
@@ -11,6 +12,7 @@ const RegisterPage = ({
   isModelVisible,
   isAdmin,
   onProfileUpdate,
+  companies = [],
 }) => {
   const [firstName, setFirstName] = useState(userData?.firstName || "");
   const [lastName, setLastName] = useState(userData?.lastName || "");
@@ -31,6 +33,8 @@ const RegisterPage = ({
   const [carType, setCarType] = useState(userData?.car?.companyCar); // Whether the car is personal or company-owned
   const [email, setEmail] = useState(userData?.email || ""); // Email input
   const [password, setPassword] = useState(userData?.password || ""); // Password input (optional for editing)
+  const [phone, setPhone] = useState(userData?.phone || ""); // Phone input
+  const [company, setCompany] = useState(userData?.company?._id || ""); // Company selection
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [isLoading, setIsLoading] = useState(false); // State for toggling password visibility
   const [error, setError] = useState(null);
@@ -56,6 +60,8 @@ const RegisterPage = ({
       setLicensePlate(userData?.car?.licensePlate || "");
       setCarType(userData?.car?.companyCar);
       setEmail(userData?.email || "");
+      setPhone(userData?.phone || "");
+      setCompany(userData?.company?._id || "");
     }
   }, [userData, isModelVisible]);
 
@@ -79,6 +85,8 @@ const RegisterPage = ({
       },
       email,
       password,
+      phone,
+      company: company || undefined,
     };
 
     try {
@@ -220,6 +228,32 @@ const RegisterPage = ({
                         <FaEye size={15} />
                       )}
                     </span>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-sm-6 col-12 mb-3">
+                    <label className="form-label">Phone</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-sm-6 col-12 mb-3">
+                    <label className="form-label">Company</label>
+                    <select
+                      className="form-select"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                    >
+                      <option value="">Select Company</option>
+                      {companies.map((comp) => (
+                        <option key={comp._id} value={comp._id}>
+                          {comp.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="row">

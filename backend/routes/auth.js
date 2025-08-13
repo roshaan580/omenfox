@@ -16,6 +16,60 @@ router.get(
   authController.validateToken
 );
 
+// Get all users (admin only)
+router.get("/users", authMiddleware.required, async (req, res) => {
+  try {
+    const User = require("../models/User");
+    const users = await User.find().populate("company").select("-password");
+    return res.status(200).json(users);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Update user (admin only)
+router.put("/users/:id", authMiddleware.required, async (req, res) => {
+  try {
+    const User = require("../models/User");
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Hash password if provided
+    if (updateData.password) {
+      const bcrypt = require("bcryptjs");
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(updateData.password, salt);
+    }
+
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true }).populate("company").select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (err) {
+    console.error("Error updating user:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Delete user (admin only)
+router.delete("/users/:id", authMiddleware.required, async (req, res) => {
+  try {
+    const User = require("../models/User");
+    const { id } = req.params;
+    
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 // Get current user information
 router.get("/me", authMiddleware.required, async (req, res) => {
   try {

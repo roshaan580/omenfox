@@ -13,6 +13,7 @@ import { Modal } from "react-bootstrap";
 
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRegModel, setIsRegModel] = useState(false);
@@ -38,21 +39,40 @@ const EmployeePage = () => {
     totalItems,
   } = usePagination(employees);
 
-  // Function to fetch employees
+  // Function to fetch employees and companies
   const fetchEmployees = async () => {
     try {
-      const response = await fetch(`${REACT_APP_API_URL}/employees`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
-        },
-      });
-      if (!response.ok) {
+      const [employeesResponse, companiesResponse] = await Promise.all([
+        fetch(`${REACT_APP_API_URL}/employees`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
+          },
+        }),
+        fetch(`${REACT_APP_API_URL}/companies`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
+          },
+        }),
+      ]);
+
+      if (!employeesResponse.ok) {
         throw new Error("Failed to fetch employees");
       }
-      const data = await response.json();
-      setEmployees(data);
+      if (!companiesResponse.ok) {
+        throw new Error("Failed to fetch companies");
+      }
+
+      const [employeesData, companiesData] = await Promise.all([
+        employeesResponse.json(),
+        companiesResponse.json(),
+      ]);
+
+      setEmployees(employeesData);
+      setCompanies(companiesData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,9 +106,6 @@ const EmployeePage = () => {
         setError(error.message);
       }
     }
-  };
-  const employeeDetails = async (id) => {
-    navigate(`/employee-details/${id}`);
   };
 
   // Edit employee function
@@ -205,7 +222,7 @@ const EmployeePage = () => {
 
       <div className={`main-content ${!isSidebarOpen ? "sidebar-closed" : ""}`}>
         <div className="container mt-4">
-          <h1 className="mb-4">Employees</h1>
+          <h1 className="mb-4">Employees & Users</h1>
 
           {/* Success Message Alert */}
           {successMessage && (
@@ -258,9 +275,10 @@ const EmployeePage = () => {
                 <tr>
                   <th>#</th>
                   <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Company</th>
                   <th>Home Address</th>
-                  <th>Company Address</th>
-                  <th>Transportation Mode</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -269,12 +287,15 @@ const EmployeePage = () => {
                   paginatedItems.map((employee, index) => (
                     <tr key={employee._id}>
                       <td>{indexOfFirstItem + index + 1}</td>
+                      <td>{employee.fullName || `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.username}</td>
+                      <td>{employee.email}</td>
                       <td>
-                        {employee.firstName} {employee.lastName}
+                        <span className="badge bg-info">
+                          Employee
+                        </span>
                       </td>
-                      <td>{employee.homeAddress}</td>
-                      <td>{employee.companyAddress}</td>
-                      <td>{employee.transportation}</td>
+                      <td>{employee.company?.name || "N/A"}</td>
+                      <td>{employee.homeAddress || "N/A"}</td>
                       <td>
                         <div className="d-flex flex-wrap align-items-center justify-content-center gap-2">
                           <button
@@ -289,20 +310,14 @@ const EmployeePage = () => {
                           >
                             <i className="fas fa-trash"></i>
                           </button>
-                          <button
-                            className="btn btn-sm btn-outline-info"
-                            onClick={() => employeeDetails(employee._id)}
-                          >
-                            <i className="fas fa-info-circle"></i>
-                          </button>
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center text-muted">
-                      No employees found
+                    <td colSpan="7" className="text-center text-muted">
+                      No employees or users found
                     </td>
                   </tr>
                 )}
@@ -330,6 +345,7 @@ const EmployeePage = () => {
               onClose={closeModal}
               userData={isModalVisible}
               onUpdate={handleProfileUpdate}
+              companies={companies}
             />
           )}
 
@@ -354,6 +370,7 @@ const EmployeePage = () => {
                     closeModal(); // Close modal after registration
                   }}
                   isAdmin={true}
+                  companies={companies}
                 />
               </Modal.Body>
             </Modal>

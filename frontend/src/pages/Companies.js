@@ -58,6 +58,7 @@ const CompanyPage = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
+        console.log("Fetching companies...");
         const response = await fetch(`${REACT_APP_API_URL}/companies`, {
           method: "GET",
           headers: {
@@ -65,10 +66,21 @@ const CompanyPage = () => {
             Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
           },
         });
+        
+        console.log("Companies response status:", response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch companies: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("Companies data:", data);
+        console.log("First company employees:", data[0]?.employees);
+        
         setCompanies(data);
         setIsLoading(false);
       } catch (error) {
+        console.error("Companies fetch error:", error);
         setError(error.message);
       }
     };
@@ -388,8 +400,8 @@ const CompanyPage = () => {
   // Add a new function specifically for editing a company
   const handleEditCompany = async (company) => {
     try {
-      // First fetch employees and cars
-      await fetchEmployeesAndCars();
+      // First fetch employees and cars and get the fresh data
+      const { employeeData, carData } = await fetchEmployeesAndCars();
 
       // Transform the address into location object structure if it's a simple string
       const updatedData = { ...company };
@@ -400,6 +412,59 @@ const CompanyPage = () => {
           lon: updatedData.lon || 0,
         };
       }
+
+      // Format employees for the EmployeeSelect component
+      // Use actualEmployees if available, otherwise fall back to the stored employees array
+      const employeesToUse = company.actualEmployees || company.employees || [];
+      const formattedEmployees = employeesToUse.map((employee) => {
+        if (typeof employee === 'string') {
+          // If it's just an ID, we need to find the full employee data
+          const fullEmployee = employeeData.find(emp => emp._id === employee);
+          return fullEmployee ? {
+            value: fullEmployee._id,
+            firstName: fullEmployee.firstName,
+            lastName: fullEmployee.lastName,
+          } : null;
+        } else {
+          // If it's a full employee object
+          return {
+            value: employee._id,
+            firstName: employee.firstName,
+            lastName: employee.lastName,
+          };
+        }
+      }).filter(Boolean); // Remove any null values
+
+      // Format cars for the CarsSelect component
+      const carsToUse = company.cars || [];
+      const formattedCars = carsToUse.map((car) => {
+        if (typeof car === 'string') {
+          // If it's just an ID, we need to find the full car data
+          const fullCar = carData.find(c => c._id === car);
+          return fullCar ? {
+            value: fullCar._id,
+            name: fullCar.name,
+          } : null;
+        } else {
+          // If it's a full car object
+          return {
+            value: car._id,
+            name: car.name,
+          };
+        }
+      }).filter(Boolean); // Remove any null values
+
+      // Update the company data with formatted employees and cars
+      updatedData.employees = formattedEmployees;
+      updatedData.cars = formattedCars;
+
+      console.log("Formatted company data for edit:", {
+        companyName: updatedData.name,
+        originalEmployees: employeesToUse,
+        formattedEmployees: formattedEmployees,
+        originalCars: carsToUse,
+        formattedCars: formattedCars
+      });
 
       // Set the edit data and open the modal
       setEditCompanyData(updatedData);
@@ -464,15 +529,7 @@ const CompanyPage = () => {
                         <td>{indexOfFirstItem + index + 1}</td>
                         <td>{company.name}</td>
                         <td>{company.address}</td>
-                        <td>
-                          {company.employees.length > 0
-                            ? company.employees.map((employee, empIndex) => (
-                                <div key={empIndex}>
-                                  {employee.firstName} {employee.lastName}
-                                </div>
-                              ))
-                            : "No employees"}
-                        </td>
+                        <td>{company.actualEmployeeCount || company.employees.length}</td>
                         <td>
                           {company.cars.length > 0
                             ? company.cars.map((car, carIndex) => (

@@ -29,6 +29,19 @@ const employeeSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "companies",
+      required: false,
+    },
+    phone: {
+      type: String,
+      required: false,
+    },
+    position: {
+      type: String,
+      required: false,
+    },
     car: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Transportation",

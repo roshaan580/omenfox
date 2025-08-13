@@ -4,9 +4,18 @@ const Transportation = require("../models/Transportation");
 // Get all employees
 exports.getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find().populate("car");
+    console.log("Fetching employees from database...");
+    const employees = await Employee.find().populate("car").populate("company");
+    console.log("Found employees:", employees.length);
+    console.log("Employee sample:", employees.slice(0, 2).map(e => ({ 
+      id: e._id, 
+      name: `${e.firstName} ${e.lastName}`,
+      email: e.email,
+      company: e.company?.name || 'No company'
+    })));
     res.json(employees);
   } catch (err) {
+    console.error("Error in getEmployees:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -34,6 +43,9 @@ exports.createEmployee = async (req, res) => {
     homeLocation,
     companyAddress,
     companyLocation,
+    company,
+    phone,
+    position,
     car,
   } = req.body;
 
@@ -66,6 +78,9 @@ exports.createEmployee = async (req, res) => {
         lon: parseFloat(companyLocation.lon),
       },
       car: savedCar._id, // Save the car's ID in the employee
+      company: company || undefined, // Link to company if provided
+      phone: phone || undefined,
+      position: position || undefined,
     });
 
     // Save the employee
@@ -74,6 +89,16 @@ exports.createEmployee = async (req, res) => {
     // Now, update the saved car with the employee ID
     savedCar.employeeId = newEmployee._id;
     await savedCar.save();
+
+    // If employee is linked to a company, add employee to company's employees array
+    if (company) {
+      const Companies = require("../models/Companies");
+      await Companies.findByIdAndUpdate(
+        company,
+        { $addToSet: { employees: newEmployee._id } }, // $addToSet prevents duplicates
+        { new: true }
+      );
+    }
 
     // Return the newly created employee along with the car info
     res.status(201).json({
@@ -97,6 +122,9 @@ exports.updateEmployee = async (req, res) => {
     homeLocation,
     companyAddress,
     companyLocation,
+    company,
+    phone,
+    position,
     car,
   } = req.body;
 
@@ -108,7 +136,7 @@ exports.updateEmployee = async (req, res) => {
     }
 
     // If car details need to be updated, update the car model first
-    if (car) {
+    if (car && (car.name || car.licensePlate)) {
       // Check if there's a car associated with the employee
       const existingCar = await Transportation.findById(employee.car);
 
@@ -117,15 +145,15 @@ exports.updateEmployee = async (req, res) => {
         existingCar.name = car.name || existingCar.name;
         existingCar.type = car.type || existingCar.type;
         existingCar.licensePlate = car.licensePlate || existingCar.licensePlate;
-        existingCar.companyCar = car.companyCar || existingCar.companyCar;
+        existingCar.companyCar = car.companyCar !== undefined ? car.companyCar : existingCar.companyCar;
         await existingCar.save();
       } else {
         // If no car exists, create a new car
         const newCar = new Transportation({
           name: car.name,
-          type: car.type,
+          type: car.type || "car",
           licensePlate: car.licensePlate,
-          companyCar: car.companyCar,
+          companyCar: car.companyCar || false,
         });
         const savedCar = await newCar.save();
         employee.car = savedCar._id; // Assign the new car to the employee
@@ -136,7 +164,7 @@ exports.updateEmployee = async (req, res) => {
     employee.firstName = firstName || employee.firstName;
     employee.lastName = lastName || employee.lastName;
     employee.email = email || employee.email;
-    employee.password = password || employee.password;
+    if (password) employee.password = password;
     employee.homeAddress = homeAddress || employee.homeAddress;
     if (homeLocation) {
       employee.homeLocation = {
@@ -151,20 +179,47 @@ exports.updateEmployee = async (req, res) => {
         lon: parseFloat(companyLocation.lon),
       };
     }
+    
+    // Handle company changes
+    const oldCompany = employee.company;
+    if (company !== undefined) {
+      employee.company = company || null;
+      
+      // If company changed, update both old and new company employee arrays
+      if (oldCompany && oldCompany.toString() !== company) {
+        // Remove from old company
+        const Companies = require("../models/Companies");
+        await Companies.findByIdAndUpdate(
+          oldCompany,
+          { $pull: { employees: employee._id } },
+          { new: true }
+        );
+      }
+      
+      // Add to new company if provided
+      if (company) {
+        const Companies = require("../models/Companies");
+        await Companies.findByIdAndUpdate(
+          company,
+          { $addToSet: { employees: employee._id } },
+          { new: true }
+        );
+      }
+    }
+    
+    // Update additional fields
+    if (phone !== undefined) employee.phone = phone;
+    if (position !== undefined) employee.position = position;
 
     // Save the updated employee details
     const updatedEmployee = await employee.save();
 
-    // Return the updated employee and car details
-    const updatedCar = await Transportation.findById(updatedEmployee.car);
-
+    // Populate the employee with car and company details
     await updatedEmployee.populate("car");
-
-    await updatedCar.populate("employeeId");
+    await updatedEmployee.populate("company");
 
     res.json({
       employee: updatedEmployee,
-      car: updatedCar,
     });
   } catch (err) {
     console.error(err);

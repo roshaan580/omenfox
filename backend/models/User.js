@@ -26,6 +26,29 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "company_owner"],
       required: true,
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "companies",
+      required: function() {
+        return this.role === "company_owner";
+      }
+    },
+    firstName: {
+      type: String,
+      required: false,
+    },
+    lastName: {
+      type: String,
+      required: false,
+    },
+    phone: {
+      type: String,
+      required: false,
+    },
+    position: {
+      type: String,
+      required: false,
+    },
     jwtToken: {
       type: String, // Field to store JWT token
       default: function () {

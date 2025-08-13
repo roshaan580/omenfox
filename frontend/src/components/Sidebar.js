@@ -273,27 +273,6 @@ const GreenhouseEmissionsMenu = ({
           >
             Transport Emissions
           </NavLinkItem>
-          <NavLinkItem
-            to="/scenarios"
-            isActive={isActive("/scenarios")}
-            onClick={handleNavigation("/scenarios", true)}
-          >
-            Scenarios
-          </NavLinkItem>
-          <NavLinkItem
-            to="/targets"
-            isActive={isActive("/targets")}
-            onClick={handleNavigation("/targets", true)}
-          >
-            Targets
-          </NavLinkItem>
-          <NavLinkItem
-            to="/analytics"
-            isActive={isActive("/analytics")}
-            onClick={handleNavigation("/analytics", true)}
-          >
-            Analytics
-          </NavLinkItem>
         </div>
       )}
     </div>
@@ -405,7 +384,7 @@ const ManagementMenu = ({
             isActive={isActive("/employees")}
             onClick={handleNavigation("/employees", true)}
           >
-            Employees
+            Employees & Users
           </NavLinkItem>
           <NavLinkItem
             to="/vehicles"
@@ -447,6 +426,27 @@ const FeaturesMenu = ({
 
       {isSidebarOpen && expandedItem === "features" && (
         <div className="submenu">
+          <NavLinkItem
+            to="/scenarios"
+            isActive={isActive("/scenarios")}
+            onClick={handleNavigation("/scenarios", true)}
+          >
+            Scenarios
+          </NavLinkItem>
+          <NavLinkItem
+            to="/targets"
+            isActive={isActive("/targets")}
+            onClick={handleNavigation("/targets", true)}
+          >
+            Targets
+          </NavLinkItem>
+          <NavLinkItem
+            to="/analytics"
+            isActive={isActive("/analytics")}
+            onClick={handleNavigation("/analytics", true)}
+          >
+            Analytics
+          </NavLinkItem>
           <NavLinkItem
             to="/invoices"
             isActive={isActive("/invoices")}

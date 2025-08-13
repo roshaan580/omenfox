@@ -5,11 +5,46 @@ const Transportation = require("../models/Transportation"); // Adjust the path a
 // Get all companies
 exports.getCompanies = async (req, res) => {
   try {
-    const companies = await Companies.find()
-      .populate("employees")
-      .populate("cars");
-    res.json(companies);
+    console.log("Fetching companies from database...");
+    
+    // Get all employees first to see what companies they belong to
+    const allEmployees = await Employee.find().populate("company");
+    console.log("All employees in database:", allEmployees.length);
+    console.log("Employee-Company relationships:", allEmployees.map(e => ({ 
+      id: e._id, 
+      name: `${e.firstName} ${e.lastName}`,
+      companyId: e.company?._id,
+      companyName: e.company?.name || 'No company'
+    })));
+    
+    // Get companies and manually count employees for each
+    const companies = await Companies.find().populate("employees").populate("cars");
+    
+    // For each company, find employees that belong to it
+    const companiesWithEmployeeCounts = await Promise.all(
+      companies.map(async (company) => {
+        // Count employees that have this company ID
+        const employeeCount = await Employee.countDocuments({ company: company._id });
+        const employeesInThisCompany = await Employee.find({ company: company._id });
+        
+        console.log(`Company "${company.name}":`, {
+          storedEmployeesArray: company.employees.length,
+          actualEmployeesInDB: employeeCount,
+          employeeNames: employeesInThisCompany.map(e => `${e.firstName} ${e.lastName}`)
+        });
+        
+        // Return company with actual employee count
+        return {
+          ...company.toObject(),
+          actualEmployeeCount: employeeCount,
+          actualEmployees: employeesInThisCompany
+        };
+      })
+    );
+    
+    res.json(companiesWithEmployeeCounts);
   } catch (err) {
+    console.error("Error in getCompanies:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

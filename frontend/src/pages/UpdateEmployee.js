@@ -3,7 +3,7 @@ import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
 
-const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
+const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) => {
   // Initialize state with properly structured location data
   const [homeAddress, setHomeAddress] = useState({
     address: userData?.homeAddress || "",
@@ -26,6 +26,8 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
   const [carType, setCarType] = useState(userData?.car?.companyCar); // Whether the car is personal or company-owned
   const [email, setEmail] = useState(userData?.email || ""); // Email input
   const [password, setPassword] = useState(userData?.password || ""); // Password input (optional for editing)
+  const [phone, setPhone] = useState(userData?.phone || ""); // Phone input
+  const [company, setCompany] = useState(userData?.company?._id || ""); // Company selection
   const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [isLoading, setIsLoading] = useState(false); // State for loading indicator
   const [updateSuccess, setUpdateSuccess] = useState(false); // State for showing success message
@@ -50,6 +52,8 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
       setLicensePlate(userData?.car?.licensePlate || "");
       setCarType(userData?.car?.companyCar);
       setEmail(userData?.email || "");
+      setPhone(userData?.phone || "");
+      setCompany(userData?.company?._id || "");
       setUpdateSuccess(false);
       setUpdateError("");
     }
@@ -81,6 +85,8 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
       },
       email,
       password,
+      phone,
+      company: company || undefined,
     };
 
     try {
@@ -187,6 +193,32 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate }) => {
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-sm-6 col-12 mb-3">
+            <label className="form-label">Phone</label>
+            <input
+              type="text"
+              className="form-control"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+          <div className="col-sm-6 col-12 mb-3">
+            <label className="form-label">Company</label>
+            <select
+              className="form-select"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+            >
+              <option value="">Select Company</option>
+              {companies.map((comp) => (
+                <option key={comp._id} value={comp._id}>
+                  {comp.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="row">
