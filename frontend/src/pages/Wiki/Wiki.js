@@ -10,13 +10,13 @@ import {
   Spinner,
   Alert,
   Modal,
-  Pagination,
 } from "react-bootstrap";
 import { FaSearch, FaPlus, FaEye, FaEdit, FaTrash, FaBook, FaTag } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { REACT_APP_API_URL } from "../../config";
 import { authenticatedFetch } from "../../utils/axiosConfig";
 import Sidebar from "../../components/Sidebar";
+import TablePagination from "../../components/TablePagination";
 import WikiEditor from "./WikiEditor";
 import WikiViewer from "./WikiViewer";
 import "./Wiki.css";
@@ -33,8 +33,13 @@ const Wiki = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
   const [availableTags, setAvailableTags] = useState([]);
+  
+  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  
   const [showEditor, setShowEditor] = useState(false);
   const [showViewer, setShowViewer] = useState(false);
   const [selectedWiki, setSelectedWiki] = useState(null);
@@ -48,7 +53,7 @@ const Wiki = () => {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 10,
+        limit: itemsPerPage,
       });
 
       if (searchTerm.trim()) {
@@ -61,6 +66,7 @@ const Wiki = () => {
       if (data.success) {
         setWikis(data.data);
         setTotalPages(data.pagination.pages);
+        setTotalRecords(data.pagination.total);
       } else {
         setError(data.message);
       }
@@ -70,7 +76,7 @@ const Wiki = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, API_BASE_URL]);
+  }, [currentPage, itemsPerPage, searchTerm, API_BASE_URL]);
 
   // Fetch all tags for the filter dropdown
   const fetchAllTags = useCallback(async () => {
@@ -168,7 +174,7 @@ const Wiki = () => {
     }, 300); // 300ms delay for debouncing
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, currentPage, fetchWikis]);
+  }, [searchTerm, currentPage, itemsPerPage, fetchWikis]);
 
   // Initial load and tag fetching
   useEffect(() => {
@@ -187,6 +193,16 @@ const Wiki = () => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
     document.body.className = `${newTheme}-theme`;
+  };
+
+  // Handle pagination
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
   };
 
   // Handle search input change
@@ -212,6 +228,11 @@ const Wiki = () => {
   const filteredWikis = selectedTag === "All" 
     ? wikis 
     : wikis.filter(wiki => wiki.tags && wiki.tags.includes(selectedTag));
+
+  // Calculate pagination values for filtered results
+  const filteredTotal = filteredWikis.length;
+  const startIndex = 0; // Since we're showing all filtered results
+  const endIndex = filteredTotal - 1;
 
   // Handle view wiki
   const handleViewWiki = async (wikiId) => {
@@ -475,30 +496,19 @@ const Wiki = () => {
                 ))}
               </Row>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-center mt-4">
-                  <Pagination>
-                    <Pagination.Prev
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                    />
-                    {[...Array(totalPages)].map((_, index) => (
-                      <Pagination.Item
-                        key={index + 1}
-                        active={index + 1 === currentPage}
-                        onClick={() => setCurrentPage(index + 1)}
-                      >
-                        {index + 1}
-                      </Pagination.Item>
-                    ))}
-                    <Pagination.Next
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                    />
-                  </Pagination>
-                </div>
-              )}
+              {/* Custom Table Pagination */}
+              <TablePagination
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalPages={totalPages}
+                recordsPerPage={itemsPerPage}
+                onRecordsPerPageChange={handleItemsPerPageChange}
+                totalRecords={selectedTag === "All" ? totalRecords : filteredTotal}
+                startIndex={selectedTag === "All" ? (currentPage - 1) * itemsPerPage : startIndex}
+                endIndex={selectedTag === "All" ? Math.min(currentPage * itemsPerPage - 1, totalRecords - 1) : endIndex}
+                theme={theme}
+                pageSizeOptions={[5, 10, 15, 25, 50]}
+              />
             </>
           )}
         </div>

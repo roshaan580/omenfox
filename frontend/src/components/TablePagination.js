@@ -83,7 +83,7 @@ const TablePagination = ({
 
   return (
     <div
-      className={`d-flex justify-content-between align-items-center mt-3 flex-wrap ${
+      className={`d-flex justify-content-between align-items-center gap-1 mt-3 flex-wrap ${
         theme === "dark" ? "text-light" : ""
       }`}
     >
