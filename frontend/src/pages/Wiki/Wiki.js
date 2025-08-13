@@ -42,6 +42,60 @@ const Wiki = () => {
 
   const API_BASE_URL = REACT_APP_API_URL || "http://localhost:5000/api";
 
+  // Fetch wikis with improved search
+  const fetchWikis = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 10,
+      });
+
+      if (searchTerm.trim()) {
+        params.append("search", searchTerm.trim());
+      }
+
+      const response = await fetch(`${API_BASE_URL}/wiki?${params}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setWikis(data.data);
+        setTotalPages(data.pagination.pages);
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError("Failed to fetch wiki articles");
+      console.error("Error fetching wikis:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchTerm, API_BASE_URL]);
+
+  // Fetch all tags for the filter dropdown
+  const fetchAllTags = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/wiki?limit=1000`);
+      const data = await response.json();
+      
+      if (data.success) {
+        const allTags = data.data.reduce((tags, wiki) => {
+          if (wiki.tags && wiki.tags.length > 0) {
+            wiki.tags.forEach(tag => {
+              if (!tags.includes(tag)) {
+                tags.push(tag);
+              }
+            });
+          }
+          return tags;
+        }, []);
+        setAvailableTags(["All", ...allTags.sort()]);
+      }
+    } catch (err) {
+      console.error("Error fetching tags:", err);
+    }
+  }, [API_BASE_URL]);
+
   // Authentication and initialization
   useEffect(() => {
     document.body.className = `${theme}-theme`;
@@ -105,7 +159,21 @@ const Wiki = () => {
     };
 
     fetchUserData();
-  }, [navigate, theme, fetchWikis]);
+  }, [navigate, theme]);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchWikis();
+    }, 300); // 300ms delay for debouncing
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, currentPage, fetchWikis]);
+
+  // Initial load and tag fetching
+  useEffect(() => {
+    fetchAllTags();
+  }, [fetchAllTags]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -120,74 +188,6 @@ const Wiki = () => {
     localStorage.setItem("theme", newTheme);
     document.body.className = `${newTheme}-theme`;
   };
-
-  // Fetch wikis with improved search
-  const fetchWikis = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: currentPage,
-        limit: 10,
-      });
-
-      if (searchTerm.trim()) {
-        params.append("search", searchTerm.trim());
-      }
-
-      const response = await fetch(`${API_BASE_URL}/wiki?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setWikis(data.data);
-        setTotalPages(data.pagination.pages);
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      setError("Failed to fetch wiki articles");
-      console.error("Error fetching wikis:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, searchTerm, API_BASE_URL]);
-
-  // Fetch all tags for the filter dropdown
-  const fetchAllTags = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/wiki?limit=1000`);
-      const data = await response.json();
-      
-      if (data.success) {
-        const allTags = data.data.reduce((tags, wiki) => {
-          if (wiki.tags && wiki.tags.length > 0) {
-            wiki.tags.forEach(tag => {
-              if (!tags.includes(tag)) {
-                tags.push(tag);
-              }
-            });
-          }
-          return tags;
-        }, []);
-        setAvailableTags(["All", ...allTags.sort()]);
-      }
-    } catch (err) {
-      console.error("Error fetching tags:", err);
-    }
-  }, [API_BASE_URL]);
-
-  // Debounced search effect
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchWikis();
-    }, 300); // 300ms delay for debouncing
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, currentPage]);
-
-  // Initial load and tag fetching
-  useEffect(() => {
-    fetchAllTags();
-  }, [fetchAllTags]);
 
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -310,6 +310,7 @@ const Wiki = () => {
           {/* Header */}
           <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <h1 className="d-flex align-items-center">
+              <FaBook className="me-2" />
               Wiki Knowledge Base
             </h1>
             {userData && (
@@ -329,7 +330,7 @@ const Wiki = () => {
 
           {/* Search and Tag Filter */}
           <Card className={`bg-${theme} m-0 mb-4`}>
-            <Card.Body className="m-0 p-0">
+            <Card.Body className="p-3">
               <Form onSubmit={handleSearch}>
                 <Row className="g-2">
                   <Col md={8}>
@@ -340,7 +341,7 @@ const Wiki = () => {
                         value={searchTerm}
                         onChange={handleSearchChange}
                       />
-                      <Button variant="outline-secondary" className="m-0" style={{ transform: "none" }} type="submit">
+                      <Button variant="outline-secondary" style={{ transform: "none" }} type="submit">
                         <FaSearch />
                       </Button>
                     </InputGroup>
@@ -388,7 +389,7 @@ const Wiki = () => {
                 {filteredWikis.map((wiki) => (
                   <Col key={wiki._id} lg={6} xl={4} className="mb-4">
                     <Card className={`bg-${theme} h-100 m-0 wiki-card`}>
-                      <Card.Body className="d-flex flex-column m-0 p-lg-3 p-md-4 p-sm-4 p-2">
+                      <Card.Body className="d-flex flex-column">
                         <div className="flex-grow-1">
                           <Card.Title 
                             className="wiki-title mb-3"
@@ -436,27 +437,24 @@ const Wiki = () => {
                           )}
                         </div>
 
-                        <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap mt-auto">
+                        <div className="d-flex justify-content-between align-items-center mt-auto">
                           <Button
                             variant="outline-primary"
                             size="sm"
-                            className="d-flex align-items-center justify-content-center gap-1 m-0"
                             onClick={() => handleViewWiki(wiki._id)}
-                            style={{ padding: "6px 8px" }}
                           >
-                            <FaEye />
+                            <FaEye className="me-1" />
                             Read
                           </Button>
                           
                           {userData &&
                             (userData.role === "admin" ||
                               wiki.author?._id === userData.id) && (
-                              <div className="d-flex flex-wrap gap-2">
+                              <div>
                                 <Button
                                   variant="outline-success"
                                   size="sm"
-                                  className="m-0"
-                                  style={{ padding: "6px" }}
+                                  className="me-2"
                                   onClick={() => handleEditWiki(wiki)}
                                 >
                                   <FaEdit />
@@ -464,8 +462,6 @@ const Wiki = () => {
                                 <Button
                                   variant="outline-danger"
                                   size="sm"
-                                  className="m-0"
-                                  style={{ padding: "6px" }}
                                   onClick={() => handleDeleteWiki(wiki._id)}
                                 >
                                   <FaTrash />
