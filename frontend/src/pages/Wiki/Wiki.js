@@ -105,7 +105,7 @@ const Wiki = () => {
     };
 
     fetchUserData();
-  }, [navigate, theme]);
+  }, [navigate, theme, fetchWikis]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
