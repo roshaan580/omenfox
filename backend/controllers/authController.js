@@ -115,8 +115,22 @@ exports.login = async (req, res) => {
     const employee = await Employee.findOne({ email }).populate("car").populate("company");
 
     if (employee) {
-      // Compare plain text password with stored plain text password (for now)
-      const passwordMatch = employee.password === password;
+      // Check if account is activated
+      if (!employee.isActivated) {
+        return res.status(400).json({ 
+          message: "Account not activated. Please check your email for activation instructions." 
+        });
+      }
+
+      // Check if password exists (should exist for activated accounts)
+      if (!employee.password) {
+        return res.status(400).json({ 
+          message: "Account setup incomplete. Please check your email for activation instructions." 
+        });
+      }
+
+      // Use bcrypt to compare password
+      const passwordMatch = await employee.matchPassword(password);
 
       if (!passwordMatch) {
         console.log("Password does not match for employee");

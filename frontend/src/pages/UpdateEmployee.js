@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
 
 const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) => {
@@ -25,10 +24,7 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
   ); // License plate for the car
   const [carType, setCarType] = useState(userData?.car?.companyCar); // Whether the car is personal or company-owned
   const [email, setEmail] = useState(userData?.email || ""); // Email input
-  const [password, setPassword] = useState(userData?.password || ""); // Password input (optional for editing)
-  const [phone, setPhone] = useState(userData?.phone || ""); // Phone input
   const [company, setCompany] = useState(userData?.company?._id || ""); // Company selection
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [isLoading, setIsLoading] = useState(false); // State for loading indicator
   const [updateSuccess, setUpdateSuccess] = useState(false); // State for showing success message
   const [updateError, setUpdateError] = useState(""); // State for showing error message
@@ -52,7 +48,6 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
       setLicensePlate(userData?.car?.licensePlate || "");
       setCarType(userData?.car?.companyCar);
       setEmail(userData?.email || "");
-      setPhone(userData?.phone || "");
       setCompany(userData?.company?._id || "");
       setUpdateSuccess(false);
       setUpdateError("");
@@ -84,8 +79,6 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
         companyCar: carType,
       },
       email,
-      password,
-      phone,
       company: company || undefined,
     };
 
@@ -170,39 +163,6 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-            />
-          </div>
-          <div className="col-sm-6 col-12 mb-3 position-relative">
-            <label className="form-label">Password</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              className="form-control"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <div
-              className="position-absolute"
-              style={{
-                top: "69%",
-                right: "24px",
-                transform: "translateY(-50%)",
-                cursor: "pointer",
-              }}
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-6 col-12 mb-3">
-            <label className="form-label">Phone</label>
-            <input
-              type="text"
-              className="form-control"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
             />
           </div>
           <div className="col-sm-6 col-12 mb-3">

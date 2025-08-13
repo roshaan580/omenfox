@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
+import { FaCheckCircle, FaTimesCircle, FaInfoCircle, FaEnvelope, FaSpinner } from "react-icons/fa"; // Importing the icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
 import LogoWhite from "../assets/logo-white.png";
 import LogoBlack from "../assets/logo-black.png";
+import toast from "react-hot-toast";
 
 const RegisterPage = ({
   userData,
@@ -31,15 +32,80 @@ const RegisterPage = ({
   ); // License plate for the car
   const [carType, setCarType] = useState(userData?.car?.companyCar); // Whether the car is personal or company-owned
   const [email, setEmail] = useState(userData?.email || ""); // Email input
-  const [password, setPassword] = useState(userData?.password || ""); // Password input (optional for editing)
-  const [phone, setPhone] = useState(userData?.phone || ""); // Phone input
   const [company, setCompany] = useState(userData?.company?._id || ""); // Company selection
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [isLoading, setIsLoading] = useState(false); // State for toggling password visibility
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   // Get theme from localStorage or use light as default
   const theme = localStorage.getItem("theme") || "light";
+
+  // Custom toast component with react-icons
+  const CustomToast = ({ type, message, icon: IconComponent }) => {
+    const getToastStyles = () => {
+      const baseStyles = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '16px 20px',
+        borderRadius: '12px',
+        fontSize: '15px',
+        fontWeight: '500',
+        boxShadow: theme === 'dark' 
+          ? '0 10px 25px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3)' 
+          : '0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)',
+        border: 'none',
+        minWidth: '320px',
+        maxWidth: '450px',
+      };
+
+      if (theme === 'dark') {
+        const darkStyles = {
+          success: { background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)', color: '#ecfdf5' },
+          error: { background: 'linear-gradient(135deg, #991b1b 0%, #dc2626 100%)', color: '#fef2f2' },
+          info: { background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)', color: '#eff6ff' },
+          loading: { background: 'linear-gradient(135deg, #374151 0%, #4b5563 100%)', color: '#f9fafb' },
+          email: { background: 'linear-gradient(135deg, #065f46 0%, #047857 100%)', color: '#ecfdf5' },
+        };
+        return { ...baseStyles, ...darkStyles[type] };
+      } else {
+        const lightStyles = {
+          success: { background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', color: '#065f46', border: '1px solid #a7f3d0' },
+          error: { background: 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)', color: '#991b1b', border: '1px solid #fca5a5' },
+          info: { background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', color: '#1e40af', border: '1px solid #93c5fd' },
+          loading: { background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', color: '#374151', border: '1px solid #d1d5db' },
+          email: { background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', color: '#065f46', border: '1px solid #a7f3d0' },
+        };
+        return { ...baseStyles, ...lightStyles[type] };
+      }
+    };
+
+    return (
+      <div style={getToastStyles()}>
+        <IconComponent size={20} style={{ flexShrink: 0 }} />
+        <span style={{ lineHeight: '1.4' }}>{message}</span>
+      </div>
+    );
+  };
+
+  // Show custom toast
+  const showCustomToast = (type, message, duration = 4000) => {
+    const iconMap = {
+      success: FaCheckCircle,
+      error: FaTimesCircle,
+      info: FaInfoCircle,
+      loading: FaSpinner,
+      email: FaEnvelope,
+    };
+
+    const IconComponent = iconMap[type] || FaInfoCircle;
+
+    toast.custom(
+      <CustomToast type={type} message={message} icon={IconComponent} />,
+      { duration }
+    );
+  };
 
   useEffect(() => {
     if (isModelVisible) {
@@ -59,7 +125,6 @@ const RegisterPage = ({
       setLicensePlate(userData?.car?.licensePlate || "");
       setCarType(userData?.car?.companyCar);
       setEmail(userData?.email || "");
-      setPhone(userData?.phone || "");
       setCompany(userData?.company?._id || "");
     }
   }, [userData, isModelVisible]);
@@ -67,6 +132,7 @@ const RegisterPage = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage("");
 
     /* ---------- build payload ---------- */
     const payload = {
@@ -83,8 +149,6 @@ const RegisterPage = ({
         companyCar: carType,
       },
       email,
-      password,
-      phone,
       company: company || undefined,
     };
 
@@ -107,32 +171,83 @@ const RegisterPage = ({
       /* ---------- error branch ---------- */
       if (!response.ok) {
         const errJSON = await response.json().catch(() => ({}));
-        setError(
-          errJSON?.message ||
-            (isModelVisible ? "Profile update failed!" : "Registration failed!")
-        );
+        const errorMessage = errJSON?.message ||
+          (isModelVisible ? "Profile update failed!" : "Registration failed!");
+        
+        // Show error toast
+        showCustomToast('error', errorMessage, 4000);
+        
+        setError(errorMessage);
         return;
       }
 
       /* ---------- success branch ---------- */
-      await response.json(); // parsed once – ignore body for this flow
+      const responseData = await response.json();
 
       /* === ADMIN FLOW ===================================== */
       if (isAdmin) {
-        onProfileUpdate?.(); // refresh table
+        const successMsg = responseData.message || "Employee registered successfully! Activation email sent.";
+        
+        // Show success toast for admin
+        showCustomToast('success', successMsg, 5000);
+        
+        // Clear form after successful registration
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setCompany("");
+        setCarName("");
+        setLicensePlate("");
+        setCarType(false);
+        setHomeAddress({ address: "", lat: 0, lon: 0 });
+        setCompanyAddress({ address: "", lat: 0, lon: 0 });
+        
+        // Refresh table and close modal after a delay
+        setTimeout(() => {
+          onProfileUpdate?.();
+        }, 2000);
+        
         return; // keep admin session intact
       }
 
       /* === NON‑ADMIN FLOW ================================= */
-      localStorage.removeItem("token");
-      localStorage.removeItem("userObj");
-      localStorage.removeItem("userData");
-
+      // Show success toast with email being sent confirmation
+      showCustomToast('email', 'Registration successful! Activation email is being sent.', 5000);
+      
+      // Show additional info toast
       setTimeout(() => {
-        window.location.href = "/";
-      }, 300);
+        showCustomToast('info', 'Please check your email in a few moments for the activation link.', 6000);
+      }, 1500);
+      
+      // Clear form
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setCompany("");
+      setCarName("");
+      setLicensePlate("");
+      setCarType(false);
+      setHomeAddress({ address: "", lat: 0, lon: 0 });
+      setCompanyAddress({ address: "", lat: 0, lon: 0 });
+      
+      // Redirect to login after showing success message
+      setTimeout(() => {
+        showCustomToast('loading', 'Redirecting to login page...', 2000);
+        
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userObj");
+          localStorage.removeItem("userData");
+          navigate("/");
+        }, 2000);
+      }, 5000);
     } catch (err) {
-      setError("An error occurred. Please try again later.");
+      const errorMessage = "An error occurred. Please try again later.";
+      
+      // Show error toast
+      showCustomToast('error', errorMessage, 5000);
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -168,6 +283,12 @@ const RegisterPage = ({
                   {isModelVisible ? "Edit Profile" : "Employee Registration"}
                 </h2>
               </div>
+              {successMessage && (
+                <div className="alert alert-success" role="alert">
+                  <i className="fas fa-check-circle me-2"></i>
+                  {successMessage}
+                </div>
+              )}
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
@@ -176,7 +297,7 @@ const RegisterPage = ({
               <form onSubmit={handleSubmit}>
                 <div className="row">
                   <div className="col-sm-6 col-12 mb-3">
-                    <label className="form-label">First Name</label>
+                    <label className="form-label">First Name <span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -186,7 +307,7 @@ const RegisterPage = ({
                     />
                   </div>
                   <div className="col-sm-6 col-12 mb-3">
-                    <label className="form-label">Last Name</label>
+                    <label className="form-label">Last Name <span className="text-danger">*</span></label>
                     <input
                       type="text"
                       className="form-control"
@@ -198,45 +319,13 @@ const RegisterPage = ({
                 </div>
                 <div className="row">
                   <div className="col-sm-6 col-12 mb-3">
-                    <label className="form-label">Email</label>
+                    <label className="form-label">Email <span className="text-danger">*</span></label>
                     <input
                       type="email"
                       className="form-control"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                    />
-                  </div>
-                  <div className="col-sm-6 col-12 mb-3 position-relative">
-                    <label className="form-label">Password</label>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      className="form-control"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="cursorPointer position-absolute top-62 end-0 translate-middle-y me-3"
-                    >
-                      {showPassword ? (
-                        <FaEyeSlash size={15} />
-                      ) : (
-                        <FaEye size={15} />
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-sm-6 col-12 mb-3">
-                    <label className="form-label">Phone</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
                   <div className="col-sm-6 col-12 mb-3">

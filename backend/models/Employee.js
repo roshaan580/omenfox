@@ -26,20 +26,24 @@ const employeeSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false, // Not required initially, will be set during activation
       minlength: 6,
+    },
+    isActivated: {
+      type: Boolean,
+      default: false,
+    },
+    activationToken: {
+      type: String,
+      required: false,
+    },
+    activationTokenExpires: {
+      type: Date,
+      required: false,
     },
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "companies",
-      required: false,
-    },
-    phone: {
-      type: String,
-      required: false,
-    },
-    position: {
-      type: String,
       required: false,
     },
     car: {
@@ -61,20 +65,21 @@ const employeeSchema = new mongoose.Schema(
 );
 
 // Password hashing before saving to the database
-// employeeSchema.pre("save", async function (next) {
-//   if (!this.isModified("password")) return next(); // Only hash the password if it's modified
-//   try {
-//     const salt = await bcrypt.genSalt(10);
-//     this.password = await bcrypt.hash(this.password, salt);
-//     next();
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+employeeSchema.pre("save", async function (next) {
+  if (!this.isModified("password") || !this.password) return next(); // Only hash the password if it's modified and exists
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
-// // Password comparison method
-// employeeSchema.methods.matchPassword = async function (enteredPassword) {
-//   return await bcrypt.compare(enteredPassword, this.password);
-// };
+// Password comparison method
+employeeSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 module.exports = mongoose.model("Employee", employeeSchema);

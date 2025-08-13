@@ -10,6 +10,7 @@ import TablePagination from "../components/TablePagination";
 import usePagination from "../hooks/usePagination";
 import ProfileModal from "./UserDashboard/components/modals/ProfileModal";
 import { Modal } from "react-bootstrap";
+import { Toaster } from "react-hot-toast";
 
 const EmployeePage = () => {
   const [employees, setEmployees] = useState([]);
@@ -210,7 +211,24 @@ const EmployeePage = () => {
   };
 
   return (
-    <div className={`dashboard-container bg-${theme}`}>
+    <>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toastOptions={{
+          className: '',
+          duration: 4000,
+          style: {
+            background: theme === 'dark' ? '#1f2937' : '#ffffff',
+            color: theme === 'dark' ? '#f9fafb' : '#111827',
+            border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
+          },
+        }}
+      />
+      <div className={`dashboard-container bg-${theme}`}>
       <Sidebar
         userData={userData}
         theme={theme}
@@ -279,6 +297,7 @@ const EmployeePage = () => {
                   <th>Role</th>
                   <th>Company</th>
                   <th>Home Address</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -296,6 +315,19 @@ const EmployeePage = () => {
                       </td>
                       <td>{employee.company?.name || "N/A"}</td>
                       <td>{employee.homeAddress || "N/A"}</td>
+                      <td>
+                        {employee.isActivated ? (
+                          <span className="badge bg-success">
+                            <i className="fas fa-check-circle me-1"></i>
+                            Activated
+                          </span>
+                        ) : (
+                          <span className="badge bg-warning text-dark">
+                            <i className="fas fa-clock me-1"></i>
+                            Pending Activation
+                          </span>
+                        )}
+                      </td>
                       <td>
                         <div className="d-flex flex-wrap align-items-center justify-content-center gap-2">
                           <button
@@ -316,7 +348,7 @@ const EmployeePage = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="text-center text-muted">
+                    <td colSpan="8" className="text-center text-muted">
                       No employees or users found
                     </td>
                   </tr>
@@ -378,6 +410,7 @@ const EmployeePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

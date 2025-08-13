@@ -1,5 +1,7 @@
 const Employee = require("../models/Employee");
 const Transportation = require("../models/Transportation");
+const crypto = require("crypto");
+const { sendActivationEmail } = require("../services/emailService");
 
 // Get all employees
 exports.getEmployees = async (req, res) => {
@@ -44,12 +46,17 @@ exports.createEmployee = async (req, res) => {
     companyAddress,
     companyLocation,
     company,
-    phone,
     position,
     car,
   } = req.body;
 
   try {
+    // Check if employee with this email already exists
+    const existingEmployee = await Employee.findOne({ email });
+    if (existingEmployee) {
+      return res.status(400).json({ message: "Employee with this email already exists" });
+    }
+
     // First, save the car details to the Transportation model
     const newCar = new Transportation({
       name: car.name,
@@ -61,12 +68,16 @@ exports.createEmployee = async (req, res) => {
     // Save the car and wait for it to be saved before proceeding
     const savedCar = await newCar.save();
 
-    // Now, create the employee and link the car by its ObjectId
+    // Generate activation token
+    const activationToken = crypto.randomBytes(32).toString('hex');
+    const activationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Create the employee without password (will be set during activation)
     const newEmployee = new Employee({
       firstName,
       lastName,
       email,
-      password,
+      // Don't set password here - it will be set during activation
       homeAddress,
       homeLocation: {
         lat: parseFloat(homeLocation.lat),
@@ -79,8 +90,10 @@ exports.createEmployee = async (req, res) => {
       },
       car: savedCar._id, // Save the car's ID in the employee
       company: company || undefined, // Link to company if provided
-      phone: phone || undefined,
       position: position || undefined,
+      activationToken,
+      activationTokenExpires,
+      isActivated: false,
     });
 
     // Save the employee
@@ -100,13 +113,36 @@ exports.createEmployee = async (req, res) => {
       );
     }
 
-    // Return the newly created employee along with the car info
+    // Send activation email asynchronously (don't wait for it)
+    sendActivationEmail(email, firstName, lastName, activationToken)
+      .then((emailResult) => {
+        if (emailResult.success) {
+          console.log(`Activation email sent successfully to ${email}`);
+        } else {
+          console.error("Failed to send activation email:", emailResult.error);
+        }
+      })
+      .catch((emailError) => {
+        console.error("Error sending activation email:", emailError);
+      });
+
+    // Return the newly created employee immediately (don't wait for email)
     res.status(201).json({
-      employee: newEmployee,
+      message: "Employee created successfully. Activation email is being sent.",
+      employee: {
+        _id: newEmployee._id,
+        firstName: newEmployee.firstName,
+        lastName: newEmployee.lastName,
+        email: newEmployee.email,
+        isActivated: newEmployee.isActivated,
+      },
       car: savedCar,
     });
   } catch (err) {
     console.error(err);
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Employee with this email already exists" });
+    }
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -123,7 +159,6 @@ exports.updateEmployee = async (req, res) => {
     companyAddress,
     companyLocation,
     company,
-    phone,
     position,
     car,
   } = req.body;
@@ -208,7 +243,6 @@ exports.updateEmployee = async (req, res) => {
     }
     
     // Update additional fields
-    if (phone !== undefined) employee.phone = phone;
     if (position !== undefined) employee.position = position;
 
     // Save the updated employee details
@@ -220,6 +254,83 @@ exports.updateEmployee = async (req, res) => {
 
     res.json({
       employee: updatedEmployee,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Verify activation token
+exports.verifyActivationToken = async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    const employee = await Employee.findOne({
+      activationToken: token,
+      activationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!employee) {
+      return res.status(400).json({ 
+        message: "Invalid or expired activation token" 
+      });
+    }
+
+    res.json({
+      valid: true,
+      employee: {
+        _id: employee._id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        email: employee.email,
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Set password during activation
+exports.setPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ 
+        message: "Password must be at least 6 characters long" 
+      });
+    }
+
+    const employee = await Employee.findOne({
+      activationToken: token,
+      activationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!employee) {
+      return res.status(400).json({ 
+        message: "Invalid or expired activation token" 
+      });
+    }
+
+    // Set password and activate account
+    employee.password = password;
+    employee.isActivated = true;
+    employee.activationToken = undefined;
+    employee.activationTokenExpires = undefined;
+
+    await employee.save();
+
+    res.json({
+      message: "Password set successfully. Account activated.",
+      employee: {
+        _id: employee._id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        email: employee.email,
+        isActivated: employee.isActivated,
+      }
     });
   } catch (err) {
     console.error(err);

@@ -8,7 +8,8 @@ import Companies from "./pages/Companies";
 import TransportEmissions from "./pages/TransportEmissions/TransportEmissions.js";
 import TravelAndCommuteEmissions from "./pages/TravelAndCommuteEmissions/TravelAndCommuteEmissions.js";
 import Emissions from "./pages/Emissions/Emissions.js";
-import Registration from "./pages/Registration";
+import StandaloneRegistration from "./pages/StandaloneRegistration";
+import SetPassword from "./pages/SetPassword";
 import EmissionTypesPage from "./pages/EmissionTypes";
 import EnergyEmissions from "./pages/EnergyEmissions/EnergyEmissions.js";
 import VehiclePage from "./pages/Vehicles";
@@ -43,7 +44,8 @@ const App = () => {
       <Routes>
         {/* Public routes - no authentication required */}
         <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Registration />} />
+        <Route path="/register" element={<StandaloneRegistration />} />
+        <Route path="/set-password" element={<SetPassword />} />
 
         {/* Admin-only routes */}
         <Route

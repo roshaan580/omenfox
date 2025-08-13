@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { REACT_APP_API_URL } from "../config";
@@ -12,7 +12,9 @@ const LoginPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Toggle password visibility
   const togglePassword = () => {
@@ -21,6 +23,19 @@ const LoginPage = () => {
 
   // Get theme from localStorage
   const theme = localStorage.getItem("theme") || "light";
+
+  // Handle messages from navigation state (e.g., from SetPassword component)
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      if (location.state?.email) {
+        setEmail(location.state.email);
+        setPassword(""); // Clear password field
+      }
+      // Clear the state to prevent showing the message on refresh
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,6 +116,11 @@ const LoginPage = () => {
                 />
                 <h2 className="card-title">Login</h2>
               </div>
+              {successMessage && (
+                <div className="alert alert-success" role="alert">
+                  {successMessage}
+                </div>
+              )}
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
@@ -117,27 +137,29 @@ const LoginPage = () => {
                     required
                   />
                 </div>
-                <div className="mb-3 position-relative">
+                <div className="mb-3">
                   <label className="form-label">Password</label>
-                  <input
-                    type={passwordVisible ? "text" : "password"}
-                    className="form-control"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  {password && (
-                    <span
-                      onClick={togglePassword}
-                      className="cursorPointer position-absolute top-62 end-0 translate-middle-y me-3"
-                    >
-                      {passwordVisible ? (
-                        <FaEyeSlash size={15} />
-                      ) : (
-                        <FaEye size={15} />
-                      )}
-                    </span>
-                  )}
+                  <div className="position-relative">
+                    <input
+                      type={passwordVisible ? "text" : "password"}
+                      className="form-control"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    {password && (
+                      <span
+                        onClick={togglePassword}
+                        className="cursorPointer position-absolute top-50 end-0 translate-middle-y me-3"
+                      >
+                        {passwordVisible ? (
+                          <FaEyeSlash size={15} />
+                        ) : (
+                          <FaEye size={15} />
+                        )}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="text-center mt-3">
                   <p>

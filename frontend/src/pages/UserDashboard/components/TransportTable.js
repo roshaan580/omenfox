@@ -420,7 +420,7 @@ const TransportTable = ({ records = [], theme = "light" }) => {
               })
             ) : (
               <tr>
-                <td colSpan="8" className="text-center">
+                <td colSpan="9" className="text-center">
                   No records found.
                 </td>
               </tr>

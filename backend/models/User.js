@@ -41,14 +41,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    phone: {
-      type: String,
-      required: false,
-    },
-    position: {
-      type: String,
-      required: false,
-    },
     jwtToken: {
       type: String, // Field to store JWT token
       default: function () {
