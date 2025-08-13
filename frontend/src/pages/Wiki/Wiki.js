@@ -349,8 +349,8 @@ const Wiki = () => {
           </div>
 
           {/* Search and Tag Filter */}
-          <Card className={`bg-${theme} m-0 mb-4`}>
-            <Card.Body className="p-3">
+          <Card className={`bg-${theme} m-0 p-lg-3 p-md-3 p-sm-3 p-3 mb-4`}>
+            <Card.Body className="m-0 p-0">
               <Form onSubmit={handleSearch}>
                 <Row className="g-2">
                   <Col md={8}>
@@ -361,7 +361,7 @@ const Wiki = () => {
                         value={searchTerm}
                         onChange={handleSearchChange}
                       />
-                      <Button variant="outline-secondary" style={{ transform: "none" }} type="submit">
+                      <Button variant="outline-secondary" className="m-0" style={{ transform: "none" }} type="submit">
                         <FaSearch />
                       </Button>
                     </InputGroup>
@@ -370,7 +370,7 @@ const Wiki = () => {
                     <Form.Select
                       value={selectedTag}
                       onChange={(e) => handleTagFilter(e.target.value)}
-                      style={{ cursor: "pointer"}}
+                      style={{ cursor: "pointer" }}
                     >
                       {availableTags.map((tag) => (
                         <option key={tag} value={tag}>
@@ -409,7 +409,7 @@ const Wiki = () => {
                 {filteredWikis.map((wiki) => (
                   <Col key={wiki._id} lg={6} xl={4} className="mb-4">
                     <Card className={`bg-${theme} h-100 m-0 wiki-card`}>
-                      <Card.Body className="d-flex flex-column">
+                      <Card.Body className="d-flex flex-column m-0 p-lg-3 p-md-4 p-sm-4 p-2">
                         <div className="flex-grow-1">
                           <Card.Title 
                             className="wiki-title mb-3"
@@ -434,25 +434,27 @@ const Wiki = () => {
                           </div>
 
                           {wiki.tags && wiki.tags.length > 0 && (
-                            <div className="mb-3">
-                              <FaTag className="me-2 text-muted" />
-                              {wiki.tags.slice(0, 3).map((tag, index) => (
-                                <Badge
-                                  key={index}
-                                  bg="light"
-                                  text="dark"
-                                  className="me-1 mb-1"
-                                  style={{ cursor: "pointer" }}
-                                  onClick={() => handleTagFilter(tag)}
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {wiki.tags.length > 3 && (
-                                <Badge bg="light" text="dark" className="me-1">
-                                  +{wiki.tags.length - 3}
-                                </Badge>
-                              )}
+                            <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+                              <FaTag style={{minWidth: "16px"}} className="text-muted" />
+                              <div>
+                                {wiki.tags.slice(0, 3).map((tag, index) => (
+                                  <Badge
+                                    key={index}
+                                    bg="light"
+                                    text="dark"
+                                    className="me-1 mb-1"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => handleTagFilter(tag)}
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {wiki.tags.length > 3 && (
+                                  <Badge bg="light" text="dark" className="me-1">
+                                    +{wiki.tags.length - 3}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -463,7 +465,7 @@ const Wiki = () => {
                             size="sm"
                             className="d-flex align-items-center justify-content-center gap-1 m-0"
                             onClick={() => handleViewWiki(wiki._id)}
-                            style={{ padding: "6px 8px" }}
+                            style={{ padding: "4px 8px" }}
                           >
                             <FaEye />
                             Read
