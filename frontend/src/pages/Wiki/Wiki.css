@@ -1,0 +1,298 @@
+.wiki-container {
+  padding: 20px;
+}
+
+.wiki-card {
+  transition: all 0.3s ease-in-out;
+  cursor: default;
+}
+
+.wiki-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.wiki-title {
+  transition: color 0.2s ease-in-out;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.wiki-title:hover {
+  text-decoration: underline;
+}
+
+.wiki-card .card-body {
+  padding: 1.5rem;
+}
+
+.wiki-card .card-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.wiki-card .badge {
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.wiki-card .badge:hover {
+  transform: scale(1.05);
+}
+
+.wiki-content {
+  line-height: 1.6;
+  font-size: 16px;
+  white-space: pre-wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .wiki-container {
+    padding: 10px;
+  }
+  
+  .wiki-card .card-body {
+    padding: 1rem;
+  }
+}
+
+/* Light theme styles */
+.light-theme .wiki-card {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  color: #212529;
+}
+
+.light-theme .wiki-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.light-theme .wiki-title {
+  color: #198754;
+}
+
+.light-theme .wiki-title:hover {
+  color: #157347;
+}
+
+.light-theme .wiki-meta-info {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.light-theme .wiki-content {
+  color: #212529;
+}
+
+/* Dark theme styles */
+.dark-theme .wiki-card {
+  background-color: #272b30;
+  border: 1px solid #343a40;
+  color: #e9ecef;
+}
+
+.dark-theme .wiki-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .wiki-title {
+  color: #34d399;
+}
+
+.dark-theme .wiki-title:hover {
+  color: #4ade80;
+}
+
+.dark-theme .wiki-meta-info {
+  background-color: #2c3034;
+  border: 1px solid #495057;
+}
+
+.dark-theme .wiki-content {
+  color: #e9ecef;
+}
+
+.dark-theme .text-muted {
+  color: #adb5bd !important;
+}
+
+/* Badge styles for both themes */
+.light-theme .badge.bg-light {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+  border: 1px solid #dee2e6;
+}
+
+.dark-theme .badge.bg-light {
+  background-color: #495057 !important;
+  color: #f8f9fa !important;
+  border: 1px solid #6c757d;
+}
+
+/* Animation for loading states */
+.wiki-loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar for wiki content */
+.wiki-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.light-theme .wiki-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.light-theme .wiki-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.light-theme .wiki-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.dark-theme .wiki-content::-webkit-scrollbar-track {
+  background: #1a1a1a63;
+  border-radius: 4px;
+}
+
+.dark-theme .wiki-content::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.dark-theme .wiki-content::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Print styles */
+@media print {
+  .wiki-container .btn,
+  .wiki-container .pagination {
+    display: none !important;
+  }
+  
+  .wiki-card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .wiki-content {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+}
+
+/* Ensure proper spacing and alignment */
+.wiki-card .d-flex.justify-content-between {
+  margin-top: auto;
+}
+
+.wiki-card .flex-grow-1 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Button styling consistency with main theme */
+.light-theme .btn-outline-primary {
+  color: #198754 !important;
+  border-color: #198754 !important;
+}
+
+.light-theme .btn-outline-primary:hover {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .btn-outline-primary {
+  color: #34d399 !important;
+  border-color: #34d399 !important;
+}
+
+.dark-theme .btn-outline-primary:hover {
+  background-color: #34d399 !important;
+  border-color: #34d399 !important;
+  color: #1a202c !important;
+}
+
+/* Form control styling in modals */
+.light-theme .modal-content .form-control,
+.light-theme .modal-content .form-select {
+  background-color: #ffffff;
+  color: #212529;
+  border-color: #ced4da;
+}
+
+.light-theme .modal-content .form-control:focus,
+.light-theme .modal-content .form-select:focus {
+  border-color: #198754;
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}
+
+.dark-theme .modal-content .form-control,
+.dark-theme .modal-content .form-select {
+  background-color: #343a40;
+  color: #f8f9fa;
+  border-color: #495057;
+}
+
+.dark-theme .modal-content .form-control:focus,
+.dark-theme .modal-content .form-select:focus {
+  background-color: #343a40;
+  color: #f8f9fa;
+  border-color: #34d399;
+  box-shadow: 0 0 0 0.25rem rgba(52, 211, 153, 0.25);
+}
+
+.dark-theme .modal-content .form-control::placeholder {
+  color: #adb5bd;
+}
+
+/* Ensure consistent card heights */
+.wiki-card {
+  height: 100%;
+}
+
+.wiki-card .card-body {
+  height: 100%;
+}
+
+/* Tag interaction improvements */
+.wiki-card .badge {
+  transition: all 0.2s ease-in-out;
+}
+
+.wiki-card .badge:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+/* Improve readability */
+.wiki-card .card-text {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+/* Ensure proper button spacing */
+.wiki-card .btn + .btn {
+  margin-left: 0.5rem;
+}

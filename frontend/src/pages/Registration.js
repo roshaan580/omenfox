@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { JWT_EMPLOYEE_SECRET, JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
+import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importing the eye icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
-import DynamicSelect from "../components/DynamicSelect";
 import LogoWhite from "../assets/logo-white.png";
 import LogoBlack from "../assets/logo-black.png";
 

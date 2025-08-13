@@ -28,6 +28,7 @@ const scenarioRoutes = require("./routes/scenarioRoutes");
 const targetRoutes = require("./routes/targetRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const generalEmissionRoutes = require("./routes/generalEmissionRoutes");
+const wikiRoutes = require("./routes/wikiRoutes");
 
 const energyEmissionRoutes = require("./routes/energyEmissions");
 const transportEmissionRoutes = require("./routes/transportEmission");
@@ -80,6 +81,7 @@ app.use("/api/rdw", rdwProxyRoutes);
 app.use("/api/scenarios", scenarioRoutes);
 app.use("/api/targets", targetRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/wiki", wikiRoutes);
 
 app.use("/api/energy-emissions", energyEmissionRoutes);
 app.use("/api/transport-emissions", transportEmissionRoutes);

@@ -27,6 +27,7 @@ import MobileCombustionPage from "./pages/MobileCombustion/MobileCombustion.js";
 import StationaryCombustionPage from "./pages/StationaryCombustion/StationaryCombustion.js";
 import PurchasedGoodsPage from "./pages/PurchasedGoods/PurchasedGoods.js";
 import FreightTransportPage from "./pages/FreightTransport/FreightTransport.js";
+import WikiPage from "./pages/Wiki/Wiki.js";
 import { AdminRoute, EmployeeRoute } from "./utils/RouteProtection";
 import "./assets/style.css";
 
@@ -227,6 +228,14 @@ const App = () => {
           element={
             <AdminRoute>
               <AnalyticsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/wiki"
+          element={
+            <AdminRoute>
+              <WikiPage />
             </AdminRoute>
           }
         />

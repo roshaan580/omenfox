@@ -468,6 +468,13 @@ const FeaturesMenu = ({
           >
             Yearly Reports
           </NavLinkItem>
+          <NavLinkItem
+            to="/wiki"
+            isActive={isActive("/wiki")}
+            onClick={handleNavigation("/wiki", true)}
+          >
+            Wiki
+          </NavLinkItem>
         </div>
       )}
     </div>
