@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { JWT_ADMIN_SECRET, REACT_APP_API_URL } from "../config";
+import { REACT_APP_API_URL } from "../config";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Registration from "./Registration";
 import { FaUserPlus } from "react-icons/fa"; // Import FaPlusCircle here
@@ -44,19 +44,11 @@ const EmployeePage = () => {
   const fetchEmployees = async () => {
     try {
       const [employeesResponse, companiesResponse] = await Promise.all([
-        fetch(`${REACT_APP_API_URL}/employees`, {
+        authenticatedFetch(`${REACT_APP_API_URL}/employees`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
-          },
         }),
-        fetch(`${REACT_APP_API_URL}/companies`, {
+        authenticatedFetch(`${REACT_APP_API_URL}/companies`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
-          },
         }),
       ]);
 
@@ -90,12 +82,8 @@ const EmployeePage = () => {
   const deleteEmployee = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        const response = await fetch(`${REACT_APP_API_URL}/employees/${id}`, {
+        const response = await authenticatedFetch(`${REACT_APP_API_URL}/employees/${id}`, {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${JWT_ADMIN_SECRET}`,
-          },
         });
 
         if (response.ok) {

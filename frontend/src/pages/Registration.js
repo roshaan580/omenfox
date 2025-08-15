@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
+import { REACT_APP_API_URL } from "../config";
 import { FaCheckCircle, FaTimesCircle, FaInfoCircle, FaEnvelope, FaSpinner } from "react-icons/fa"; // Importing the icons
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
 import LogoWhite from "../assets/logo-white.png";
@@ -155,16 +155,35 @@ const RegisterPage = ({
     try {
       setIsLoading(true);
 
-      const url = isModelVisible
-        ? `${REACT_APP_API_URL}/employees/${userData?._id}` // edit
-        : `${REACT_APP_API_URL}/employees`; // new
+      let url, headers;
+      
+      if (isModelVisible) {
+        // Edit existing employee
+        url = `${REACT_APP_API_URL}/employees/${userData?._id}`;
+        const token = localStorage.getItem("token");
+        headers = {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+      } else if (isAdmin) {
+        // Admin creating new employee
+        url = `${REACT_APP_API_URL}/employees`;
+        const token = localStorage.getItem("token");
+        headers = {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+      } else {
+        // Public registration
+        url = `${REACT_APP_API_URL}/employees/register`;
+        headers = {
+          "Content-Type": "application/json",
+        };
+      }
 
       const response = await fetch(url, {
         method: isModelVisible ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`,
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -216,7 +235,7 @@ const RegisterPage = ({
       
       // Show additional info toast
       setTimeout(() => {
-        showCustomToast('info', 'Please check your email in a few moments for the activation link.', 6000);
+        showCustomToast('info', 'Please check your email in a few moments for the activation link.', 5000);
       }, 1500);
       
       // Clear form

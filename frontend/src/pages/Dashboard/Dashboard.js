@@ -123,17 +123,10 @@ const DashboardPage = () => {
     const fetchStats = async () => {
       localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
-      const token = localStorage.getItem("token");
-
       const fetchData = async (url, errorMessage) => {
         try {
           const response = await authenticatedFetch(url, {
             method: "GET",
-            headers: {
-              ...(JWT_ADMIN_SECRET && !token
-                ? { Authorization: `Bearer ${JWT_ADMIN_SECRET}` }
-                : {}),
-            },
           });
           const data = await response.json();
           return data;

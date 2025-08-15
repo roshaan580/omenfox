@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { REACT_APP_API_URL } from "../../config";
+import { authenticatedFetch } from "../../utils/axiosConfig";
 
 // Components
 import Sidebar from "../../components/Sidebar";
@@ -27,6 +29,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [employeeId] = useState(id ?? null);
   const [userData, setUserData] = useState(null);
+  const [companies, setCompanies] = useState([]);
 
   // Initialize hooks
   const transportData = useTransportData(employeeId);
@@ -89,6 +92,24 @@ const DashboardPage = () => {
     closeModal,
   } = uiState;
 
+  // Fetch companies data
+  const fetchCompanies = useCallback(async () => {
+    try {
+      const response = await authenticatedFetch(`${REACT_APP_API_URL}/companies`, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const companiesData = await response.json();
+        setCompanies(companiesData);
+      } else {
+        console.error("Failed to fetch companies");
+      }
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+    }
+  }, []);
+
   // Load additional resources when tab changes
   useEffect(() => {
     if (
@@ -113,7 +134,7 @@ const DashboardPage = () => {
     }
   }, [filterType, activeTab, filterTransportationData]);
 
-  // Fetch user data on component mount
+  // Fetch user data and companies on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -131,6 +152,8 @@ const DashboardPage = () => {
 
         if (token && userObj) {
           setUserData(userObj);
+          // Fetch companies after user data is set
+          await fetchCompanies();
         } else {
           navigate("/");
         }
@@ -140,7 +163,7 @@ const DashboardPage = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, fetchCompanies]);
 
   // Handle transportation form changes
   const handleTransportationChange = useCallback(
@@ -362,6 +385,7 @@ const DashboardPage = () => {
             onClose={() => setIsProfileModalVisible(false)}
             userData={userData}
             onUpdate={handleProfileUpdate}
+            companies={companies}
           />
         </div>
       </div>

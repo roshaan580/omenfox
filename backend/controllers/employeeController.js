@@ -7,18 +7,29 @@ const { sendActivationEmail } = require("../services/emailService");
 exports.getEmployees = async (req, res) => {
   try {
     console.log("Fetching employees from database...");
+    
+    // First try to get employees without populate to see if basic query works
+    const employeesBasic = await Employee.find();
+    console.log("Found employees (basic):", employeesBasic.length);
+    
+    // Now try with populate
     const employees = await Employee.find().populate("car").populate("company");
-    console.log("Found employees:", employees.length);
-    console.log("Employee sample:", employees.slice(0, 2).map(e => ({ 
-      id: e._id, 
-      name: `${e.firstName} ${e.lastName}`,
-      email: e.email,
-      company: e.company?.name || 'No company'
-    })));
+    console.log("Found employees (with populate):", employees.length);
+    
+    if (employees.length > 0) {
+      console.log("Employee sample:", employees.slice(0, 2).map(e => ({ 
+        id: e._id, 
+        name: `${e.firstName} ${e.lastName}`,
+        email: e.email,
+        company: e.company?.name || 'No company'
+      })));
+    }
+    
     res.json(employees);
   } catch (err) {
     console.error("Error in getEmployees:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error stack:", err.stack);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 

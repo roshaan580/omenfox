@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { JWT_EMPLOYEE_SECRET, REACT_APP_API_URL } from "../config";
+import { REACT_APP_API_URL } from "../config";
+import { authenticatedFetch } from "../utils/axiosConfig";
 import LocationPicker from "../components/LocationPicker"; // Import LocationPicker
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) => {
   // Initialize state with properly structured location data
@@ -25,6 +27,11 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
   const [carType, setCarType] = useState(userData?.car?.companyCar); // Whether the car is personal or company-owned
   const [email, setEmail] = useState(userData?.email || ""); // Email input
   const [company, setCompany] = useState(userData?.company?._id || ""); // Company selection
+  const [password, setPassword] = useState(""); // Password input
+  const [confirmPassword, setConfirmPassword] = useState(""); // Confirm password input
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle password visibility
+  const [passwordChanged, setPasswordChanged] = useState(false); // Track if password was changed
   const [isLoading, setIsLoading] = useState(false); // State for loading indicator
   const [updateSuccess, setUpdateSuccess] = useState(false); // State for showing success message
   const [updateError, setUpdateError] = useState(""); // State for showing error message
@@ -49,15 +56,48 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
       setCarType(userData?.car?.companyCar);
       setEmail(userData?.email || "");
       setCompany(userData?.company?._id || "");
+      // Reset password fields
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordChanged(false);
+      setShowPassword(false);
+      setShowConfirmPassword(false);
       setUpdateSuccess(false);
       setUpdateError("");
     }
   }, [userData, isModelVisible]);
 
+  const handlePasswordChange = (newPassword) => {
+    setPassword(newPassword);
+    setPasswordChanged(newPassword.length > 0);
+    if (newPassword.length === 0) {
+      setConfirmPassword("");
+    }
+  };
+
+  const validateForm = () => {
+    if (passwordChanged) {
+      if (password.length < 6) {
+        setUpdateError("Password must be at least 6 characters long");
+        return false;
+      }
+      if (password !== confirmPassword) {
+        setUpdateError("Passwords do not match");
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdateSuccess(false);
     setUpdateError("");
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
 
     const data = {
       firstName,
@@ -82,15 +122,19 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
       company: company || undefined,
     };
 
+    // Only include password if it was changed
+    if (passwordChanged && password.trim()) {
+      data.password = password;
+    }
+
     try {
       setIsLoading(true);
       const url = `${REACT_APP_API_URL}/employees/${userData?._id}`;
 
-      const response = await fetch(url, {
+      const response = await authenticatedFetch(url, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_EMPLOYEE_SECRET}`,
         },
         body: JSON.stringify(data),
       });
@@ -101,6 +145,12 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
           onUpdate(responseData?.employee);
         }
         setUpdateSuccess(true);
+        // Reset password fields after successful update
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordChanged(false);
+        setShowPassword(false);
+        setShowConfirmPassword(false);
       } else {
         const errorData = await response.json();
         console.error("Profile update failed!", errorData);
@@ -180,6 +230,73 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
             </select>
           </div>
         </div>
+        
+        {/* Password Section */}
+        <div className="row">
+          <div className="col-sm-6 col-12 mb-3">
+            <label className="form-label">
+              Password 
+              <small className="text-muted ms-2">
+                {userData?.password ? "(Leave blank to keep current password)" : "(No password set)"}
+              </small>
+            </label>
+              <div className="input-group position-relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control z-2"
+                  value={password}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  placeholder="Enter new password"
+                  minLength="6"
+                  required
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="position-absolute z-3"
+                  style={{
+                    top: "50%",
+                    right: "15px",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+            </div>
+            {password && password.length < 6 && (
+              <small className="text-danger">Password must be at least 6 characters long</small>
+            )}
+          </div>
+          <div className="col-sm-6 col-12 mb-3">
+            <label className="form-label">Confirm Password</label>
+            <div className="position-relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className="form-control"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                disabled={!passwordChanged}
+              />
+                <span
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="position-absolute z-3"
+                  style={{
+                    top: "50%",
+                    right: "15px",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+            </div>
+            {passwordChanged && password !== confirmPassword && (
+              <small className="text-danger">Passwords do not match</small>
+            )}
+          </div>
+        </div>
+        
         <div className="row">
           <div className="col-sm-6 col-12 mb-4">
             <LocationPicker

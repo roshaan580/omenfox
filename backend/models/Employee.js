@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 const employeeSchema = new mongoose.Schema(
   {
@@ -52,13 +51,7 @@ const employeeSchema = new mongoose.Schema(
     },
     jwtToken: {
       type: String, // Field to store JWT token
-      default: function () {
-        return jwt.sign(
-          { userId: this._id, role: this.role },
-          process.env.JWT_EMPLOYEE_SECRET,
-          { expiresIn: "15d" }
-        );
-      },
+      required: false,
     },
   },
   { timestamps: true }
