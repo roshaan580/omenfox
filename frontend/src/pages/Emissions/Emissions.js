@@ -85,7 +85,6 @@ const EmissionsPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found in Emissions page, redirecting to login");
           navigate("/");
           return;
         }
@@ -132,8 +131,6 @@ const EmissionsPage = () => {
   useEffect(() => {
     const fetchEmissions = async () => {
       try {
-        console.log("Fetching emissions data from all sources...");
-        // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
         // Use Promise.all to fetch data from multiple endpoints simultaneously
@@ -189,14 +186,6 @@ const EmissionsPage = () => {
           transportRecordsRes.ok ? transportRecordsRes.json() : [],
         ]);
 
-        console.log("General emissions data:", generalEmissionsData);
-        console.log("Transport emissions data:", transportEmissionsData);
-        console.log("Energy emissions data:", energyEmissionsData);
-        console.log("Transport records data:", transportRecordsData);
-        console.log("Employees data:", employeesData);
-        console.log("Emission types data:", typesData);
-
-        // Process and combine all emission data
         const allEmissions = [
           ...generalEmissionsData,
           // Transform transport emissions to match the general format
@@ -310,12 +299,6 @@ const EmissionsPage = () => {
         co2Equivalent: parseFloat(emissionRecord.co2Equivalent || 0),
       };
 
-      // Log the data being sent
-      console.log(
-        "Sending emission data:",
-        JSON.stringify(formattedData, null, 2)
-      );
-
       // Send data to the backend API
       const response = await authenticatedFetch(
         `${REACT_APP_API_URL}/general-emissions`,
@@ -341,9 +324,6 @@ const EmissionsPage = () => {
       }
 
       const newEmission = await response.json();
-      console.log("Emission record created successfully:", newEmission);
-
-      // Add the new record to state instead of reloading
       setEmissionRecords([newEmission.emissionRecord, ...emissionRecords]);
       setFilteredRecords([newEmission.emissionRecord, ...filteredRecords]);
 
@@ -384,9 +364,6 @@ const EmissionsPage = () => {
         co2Equivalent: parseFloat(emissionRecord.co2Equivalent || 0),
       };
 
-      console.log("Updating emission record:", emissionRecord._id);
-      console.log("With data:", JSON.stringify(formattedData, null, 2));
-
       // Send updated data to the backend API
       const response = await authenticatedFetch(
         `${REACT_APP_API_URL}/general-emissions/${emissionRecord._id}`,
@@ -412,7 +389,6 @@ const EmissionsPage = () => {
       }
 
       const updatedEmission = await response.json();
-      console.log("Emission record updated successfully:", updatedEmission);
 
       // Update the record in state instead of reloading
       const updatedRecords = emissionRecords.map((record) =>
@@ -455,7 +431,6 @@ const EmissionsPage = () => {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
-      console.log("Emission record deleted successfully");
       setShowDeleteConfirm(false);
 
       // Remove the deleted record from the state
@@ -510,52 +485,40 @@ const EmissionsPage = () => {
       setEmissionsByMonth(monthlyData);
       setEmissionsByType(typeData);
       setTotalEmissions(total);
-
-      // Log the total emissions found
-      console.log(`Total emissions calculated: ${total} kg CO2`);
     }
   }, [emissionRecords]);
 
   // Apply filters
   const applyFilters = () => {
     let filtered = [...emissionRecords];
-    console.log("Manual filter application triggered");
-    console.log("Initial records count:", filtered.length);
 
     if (filters.startDate) {
       filtered = filtered.filter(
         (record) => new Date(record.date) >= new Date(filters.startDate)
       );
-      console.log("After startDate filter:", filtered.length);
     }
 
     if (filters.endDate) {
       filtered = filtered.filter(
         (record) => new Date(record.date) <= new Date(filters.endDate)
       );
-      console.log("After endDate filter:", filtered.length);
     }
 
     if (filters.employees && filters.employees.length > 0) {
-      console.log("Selected employees:", filters.employees);
       filtered = filtered.filter((record) =>
         filters.employees.some((emp) => emp.value === record.employee?._id)
       );
-      console.log("After employees filter:", filtered.length);
     }
 
     if (filters.emissionTypes && filters.emissionTypes.length > 0) {
-      console.log("Selected emission types:", filters.emissionTypes);
       filtered = filtered.filter((record) =>
         filters.emissionTypes.some(
           (type) => type.value === record.emissionType?._id
         )
       );
-      console.log("After emission types filter:", filtered.length);
     }
 
     setFilteredRecords(filtered);
-    console.log("Final filtered records:", filtered.length);
   };
 
   // Initialize filtered records when emission records change

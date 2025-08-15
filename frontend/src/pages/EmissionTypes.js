@@ -87,9 +87,6 @@ const EmissionTypesPage = () => {
     const fetchEmissionTypes = async () => {
       setLoading(true);
       try {
-        console.log("Fetching emission types...");
-        console.log("API URL:", `${REACT_APP_API_URL}/emission-types`);
-
         const response = await fetch(`${REACT_APP_API_URL}/emission-types`, {
           method: "GET",
           headers: {
@@ -108,7 +105,6 @@ const EmissionTypesPage = () => {
         }
 
         const data = await response.json();
-        console.log("Emission types data:", data);
         setEmissionTypes(data);
       } catch (error) {
         console.error("Error fetching emission types:", error);

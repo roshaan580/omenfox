@@ -144,26 +144,13 @@ const getEmissionRecordById = async (req, res) => {
 const getEmissionRecords = async (req, res) => {
   try {
     const { employeeId, companyId, global } = req.query;
-    console.log(
-      "Getting emission records. User:",
-      req.user ? req.user._id : "No authenticated user"
-    );
-    console.log("Query params:", { employeeId, companyId, global });
-
-    // Force global access if there's no authenticated user
     const forceGlobal = !req.user || global === "true";
 
     // Handle global parameter or when no user is authenticated
     if (forceGlobal) {
-      console.log("Global emissions access granted - retrieving all records");
-
       const records = await EmissionRecord.find({})
         .populate("employee")
         .populate("transportation");
-
-      console.log(
-        `Found ${records.length} emission records with global access`
-      );
       return res.status(200).json(records);
     }
 
@@ -171,10 +158,8 @@ const getEmissionRecords = async (req, res) => {
     let query = {};
 
     if (employeeId && mongoose.Types.ObjectId.isValid(employeeId)) {
-      // If specific employee ID is provided, fetch their records
       query.employee = employeeId;
     } else if (req.user && req.user._id) {
-      // If no specific employee ID, default to the authenticated user
       query.employee = req.user._id;
     }
 
@@ -182,14 +167,9 @@ const getEmissionRecords = async (req, res) => {
       query["employee.company"] = companyId;
     }
 
-    console.log("Applying filters:", query);
     const records = await EmissionRecord.find(query)
       .populate("employee")
       .populate("transportation");
-
-    console.log(
-      `Found ${records.length} emission records with filtered access`
-    );
     res.status(200).json(records);
   } catch (error) {
     console.error("Error fetching emission records:", error);

@@ -23,9 +23,6 @@ const CarsSelect = ({
 
   const carOptions = carsState.map(formatCarData);
 
-  console.log("CarsSelect - Selected:", selectedCars);
-  console.log("CarsSelect - Options:", carOptions);
-
   // Create custom styles for theming the select component
   const customStyles = {
     control: (provided) => ({

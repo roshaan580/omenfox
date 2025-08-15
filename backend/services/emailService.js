@@ -74,7 +74,6 @@ const sendActivationEmail = async (email, firstName, lastName, activationToken) 
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`Activation email sent to ${email}`);
     return { success: true };
   } catch (error) {
     console.error("Error sending activation email:", error);
@@ -135,7 +134,6 @@ const sendPasswordResetEmail = async (email, firstName, lastName, resetToken) =>
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`Password reset email sent to ${email}`);
     return { success: true };
   } catch (error) {
     console.error("Error sending password reset email:", error);

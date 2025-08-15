@@ -150,9 +150,6 @@ export const saveTransportationRecord = async (formData) => {
       recurring: formData.recurring || false,
     };
 
-    // Log the data being sent for debugging
-    console.log("Sending data:", cleanedData);
-
     const token = localStorage.getItem("token");
     const response = await fetch(
       `${REACT_APP_API_URL}/employeeTransportations`,
@@ -175,7 +172,6 @@ export const saveTransportationRecord = async (formData) => {
       );
     }
 
-    console.log("Transportation record saved successfully!");
     return responseData;
   } catch (error) {
     console.error("Error saving transportation record:", error);
@@ -183,11 +179,6 @@ export const saveTransportationRecord = async (formData) => {
   }
 };
 
-/**
- * Saves a new work transportation record
- * @param {Object} formData - Work transportation data to save
- * @returns {Promise<Object>} Response data or error
- */
 export const saveWorkTransportationRecord = async (formData) => {
   try {
     const token = localStorage.getItem("token");
@@ -207,7 +198,6 @@ export const saveWorkTransportationRecord = async (formData) => {
       throw new Error("Failed to save work transportation record.");
     }
 
-    console.log("Work transportation record saved!");
     return await response.json();
   } catch (error) {
     console.error("Error saving work transportation record:", error);

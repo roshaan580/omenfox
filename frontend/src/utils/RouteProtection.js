@@ -23,7 +23,6 @@ const verifyToken = async () => {
         data.message === "Invalid token" ||
         data.message === "Token verification failed: jwt expired"
       ) {
-        console.log("Token expired, redirecting to login");
         // Clear all auth data
         localStorage.removeItem("token");
         localStorage.removeItem("userObj");
@@ -40,10 +39,6 @@ const verifyToken = async () => {
   }
 };
 
-/**
- * AdminRoute - Protects routes that should only be accessible by admins
- * Redirects employees to their dashboard
- */
 export const AdminRoute = ({ children }) => {
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(true);
@@ -88,9 +83,6 @@ export const AdminRoute = ({ children }) => {
       // User is admin, allow access
       return children;
     } else {
-      // User is not admin, redirect to employee dashboard
-      console.log("Non-admin tried to access admin route, redirecting");
-      // Add a flag to prevent infinite loops
       return (
         <Navigate
           to="/user-dashboard"
@@ -109,10 +101,6 @@ export const AdminRoute = ({ children }) => {
   }
 };
 
-/**
- * EmployeeRoute - Protects routes that should only be accessible by employees
- * Redirects admins to their dashboard
- */
 export const EmployeeRoute = ({ children }) => {
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(true);
@@ -183,8 +171,6 @@ export const EmployeeRoute = ({ children }) => {
     // User is employee, allow access
     return children;
   } else {
-    // User is not employee, redirect to admin dashboard
-    console.log("Non-employee tried to access employee route, redirecting");
     return (
       <Navigate
         to="/dashboard"
@@ -195,10 +181,6 @@ export const EmployeeRoute = ({ children }) => {
   }
 };
 
-/**
- * AuthRoute - Ensures user is authenticated but doesn't enforce role
- * Used for routes that both admin and employees can access
- */
 export const AuthRoute = ({ children }) => {
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(true);

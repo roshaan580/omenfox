@@ -56,7 +56,6 @@ const FreightTransportPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found in Freight Transport page, redirecting to login");
           navigate("/");
           return;
         }
@@ -104,8 +103,6 @@ const FreightTransportPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Fetching freight transport data...");
-        
         // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 

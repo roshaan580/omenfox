@@ -125,9 +125,6 @@ const EnergyEmissions = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log(
-            "No token found in Energy Emissions page, redirecting to login"
-          );
           navigate("/");
           return;
         }
@@ -209,8 +206,6 @@ const EnergyEmissions = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log("Fetching energy emissions data...");
-        // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
         // Use Promise.all to fetch data from multiple endpoints simultaneously
@@ -231,9 +226,6 @@ const EnergyEmissions = () => {
           energyEmissionsRes.json(),
           employeesRes.json(),
         ]);
-
-        console.log("Energy emissions data:", energyEmissionsData);
-        console.log("Employees data:", employeesData);
 
         // Safely parse energySources
         const parsedData = energyEmissionsData.map((record) => {
@@ -372,9 +364,6 @@ const EnergyEmissions = () => {
 
   // Edit modal handler
   const handleEdit = (record) => {
-    console.log("Editing record:", record);
-
-    // Get the user ID using our helper function
     const userId = user?._id || user?.id || getUserId();
 
     if (!userId) {
@@ -384,7 +373,6 @@ const EnergyEmissions = () => {
 
     // Check for employee information in the record
     const employeeId = record.employee?._id || record.employee || "";
-    console.log("Setting employee ID for edit:", employeeId);
 
     setEmissionRecord({
       userId: userId,
@@ -433,7 +421,6 @@ const EnergyEmissions = () => {
   // Submit new record
   const handleAddSubmit = async (e) => {
     e.preventDefault();
-    console.log("Adding new record...", emissionRecord);
 
     try {
       // Get user ID using our helper function
@@ -463,8 +450,6 @@ const EnergyEmissions = () => {
         ), // Convert each object to a string
       };
 
-      console.log("Submission payload:", formattedEmissionRecord);
-
       const response = await authenticatedFetch(
         `${REACT_APP_API_URL}/energy-emissions`,
         {
@@ -480,9 +465,6 @@ const EnergyEmissions = () => {
       }
 
       const result = await response.json();
-      console.log("Energy Emission record added successfully!", result);
-
-      // Get the actual emission record from the response
       const emissionData = result.emission || result;
 
       // Update local state instead of reloading
@@ -509,8 +491,6 @@ const EnergyEmissions = () => {
   // Update record
   const handleUpdateSubmit = async (e, isUpdate = true) => {
     e.preventDefault();
-    console.log("Updating record...", emissionRecord);
-
     try {
       // Get user ID using our helper function
       const userId =
@@ -539,8 +519,6 @@ const EnergyEmissions = () => {
         ), // Convert each object to a string
       };
 
-      console.log("Update payload:", formattedEmissionRecord);
-
       const response = await authenticatedFetch(
         `${REACT_APP_API_URL}/energy-emissions/${emissionRecord._id}`,
         {
@@ -556,8 +534,6 @@ const EnergyEmissions = () => {
       }
 
       const result = await response.json();
-      console.log("Energy Emission record updated successfully!", result);
-
       // Get the actual emission record from the response
       const emissionData = result.emission || result;
 
@@ -601,7 +577,6 @@ const EnergyEmissions = () => {
   // Delete the emission record
   const handleDelete = async () => {
     try {
-      console.log("Deleting record ID:", deleteRecordId);
       const response = await authenticatedFetch(
         `${REACT_APP_API_URL}/energy-emissions/${deleteRecordId}`,
         {
@@ -615,8 +590,6 @@ const EnergyEmissions = () => {
           `Error ${response.status}: ${response.statusText}. ${errorText}`
         );
       }
-
-      console.log("Energy Emission record deleted successfully!");
 
       // Update local state instead of reloading
       setEnergyRecords(
@@ -637,8 +610,6 @@ const EnergyEmissions = () => {
   // Apply filters
   const applyFilters = () => {
     let filtered = [...energyRecords];
-    console.log("Manual filter application triggered");
-    console.log("Initial records count:", filtered.length);
 
     if (filters.startDate) {
       filtered = filtered.filter(
@@ -646,7 +617,6 @@ const EnergyEmissions = () => {
           new Date(record.startDate || record.date) >=
           new Date(filters.startDate)
       );
-      console.log("After startDate filter:", filtered.length);
     }
 
     if (filters.endDate) {
@@ -654,19 +624,15 @@ const EnergyEmissions = () => {
         (record) =>
           new Date(record.startDate || record.date) <= new Date(filters.endDate)
       );
-      console.log("After endDate filter:", filtered.length);
     }
 
     if (filters.employees && filters.employees.length > 0) {
-      console.log("Selected employees:", filters.employees);
       filtered = filtered.filter((record) =>
         filters.employees.some((emp) => emp.value === record.employee?._id)
       );
-      console.log("After employees filter:", filtered.length);
     }
 
     if (filters.energyTypes && filters.energyTypes.length > 0) {
-      console.log("Selected energy types:", filters.energyTypes);
       filtered = filtered.filter(
         (record) =>
           record.energySources &&
@@ -675,11 +641,9 @@ const EnergyEmissions = () => {
             filters.energyTypes.some((type) => type.value === source.type)
           )
       );
-      console.log("After energy types filter:", filtered.length);
     }
 
     setFilteredRecords(filtered);
-    console.log("Final filtered records:", filtered.length);
   };
 
   // Reset filters

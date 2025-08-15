@@ -61,9 +61,7 @@ const ProductsPage = () => {
 
         // If we have both token and valid user object with ID
         if (token && userObj && userObj._id) {
-          console.log("Valid user data found:", userObj.role || "unknown role");
           setUserData(userObj);
-
           // Set user ID in form data
           setFormData((prev) => ({
             ...prev,
@@ -74,12 +72,6 @@ const ProductsPage = () => {
 
         // If we have token but no user object, try to get userData from the server
         if (token) {
-          console.log(
-            "Token exists but user data incomplete, attempting to retrieve from server..."
-          );
-
-          // In the future, you could add an API call to refresh user data here
-          // For now, use a default user ID to prevent errors
           const defaultUserId = "6624c7ab8a89c9f76ded3d9e"; // Replace with your test user ID
 
           setUserData({ _id: defaultUserId, role: "admin" });
@@ -87,7 +79,7 @@ const ProductsPage = () => {
             ...prev,
             user: defaultUserId,
           }));
-          return; // Exit with default user set
+          return;
         }
 
         // If we reach here, no valid authentication exists
@@ -110,8 +102,6 @@ const ProductsPage = () => {
       try {
         const token = localStorage.getItem("token") || JWT_ADMIN_SECRET;
         const productsData = await fetchProducts(token);
-
-        console.log("Products fetched:", productsData);
         setProducts(productsData);
         setError(null);
       } catch (error) {
@@ -186,11 +176,7 @@ const ProductsPage = () => {
         productData.user = "6624c7ab8a89c9f76ded3d9e"; // Development fallback
       }
 
-      console.log("Sending product data:", productData);
-
       const newProduct = await addProduct(productData, token);
-      console.log("Product added successfully:", newProduct);
-
       // Update the products list and close the modal
       setProducts((prev) => [...prev, newProduct]);
       setError(null);
@@ -229,8 +215,6 @@ const ProductsPage = () => {
         productData,
         token
       );
-      console.log("Product updated successfully:", updatedProduct);
-
       // Update the products list and close the modal
       setProducts((prev) =>
         prev.map((p) => (p._id === selectedProduct._id ? updatedProduct : p))
@@ -256,8 +240,6 @@ const ProductsPage = () => {
     try {
       const token = localStorage.getItem("token") || JWT_ADMIN_SECRET;
       await deleteProduct(id, token);
-
-      console.log("Product deleted successfully");
       setProducts((prev) => prev.filter((p) => p._id !== id));
       setError(null);
     } catch (error) {

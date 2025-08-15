@@ -26,7 +26,6 @@ const PurchasedGoodsPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found in Purchased Goods page, redirecting to login");
           navigate("/");
           return;
         }
@@ -74,9 +73,6 @@ const PurchasedGoodsPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Fetching purchased goods data...");
-        
-        // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
         const response = await authenticatedFetch(`${REACT_APP_API_URL}/products`, {

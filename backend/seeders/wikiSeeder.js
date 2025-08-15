@@ -238,30 +238,19 @@ Common Challenges
 
 const seedWikiData = async () => {
   try {
-    // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("Connected to MongoDB");
-
-    // Find an admin user to assign as author
     const adminUser = await User.findOne({ role: "admin" });
     if (!adminUser) {
-      console.log("No admin user found. Please create an admin user first.");
       process.exit(1);
     }
 
-    // Clear existing wiki data
     await Wiki.deleteMany({});
-    console.log("Cleared existing wiki data");
-
-    // Insert sample wiki data
     const wikiArticles = sampleWikiData.map(article => ({
       ...article,
       author: adminUser._id,
     }));
 
     await Wiki.insertMany(wikiArticles);
-    console.log(`Successfully seeded ${wikiArticles.length} wiki articles`);
-
     process.exit(0);
   } catch (error) {
     console.error("Error seeding wiki data:", error);

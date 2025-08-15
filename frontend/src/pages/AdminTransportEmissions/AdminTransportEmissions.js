@@ -76,7 +76,6 @@ const AdminTransportEmissions = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found, redirecting to login");
           navigate("/");
           return;
         }
@@ -105,8 +104,6 @@ const AdminTransportEmissions = () => {
     const fetchEmissions = async () => {
       try {
         setIsLoading(true);
-        console.log("Fetching admin transport emissions data...");
-
         const response = await fetch(
           `${REACT_APP_API_URL}/transport-emissions/admin/all`,
           {
@@ -123,7 +120,6 @@ const AdminTransportEmissions = () => {
         }
 
         const data = await response.json();
-        console.log("Admin Transport Emissions:", data);
         setTransportEmissions(data);
       } catch (error) {
         console.error("Error fetching admin transport emissions:", error);

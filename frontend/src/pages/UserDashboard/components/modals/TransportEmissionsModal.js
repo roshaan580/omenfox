@@ -80,13 +80,6 @@ const TransportEmissionsModal = ({
         );
       }
 
-      console.log(
-        `Transport Records record ${
-          isEdit ? "updated" : "added"
-        } successfully!`,
-        responseData
-      );
-
       // Call success callback with the new/updated record
       onSubmitSuccess(responseData, isEdit);
     } catch (error) {

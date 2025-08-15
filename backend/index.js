@@ -102,8 +102,6 @@ mongoose.connection.once("open", () => {
 mongoose
   .connect(dotEnv.MONGO_URI)
   .then(() => {
-    console.log("Database connected");
-    // Start the server only after successful connection
     app.listen(dotEnv.PORT || 5000, () => {
       console.log(`Server is running on port ${dotEnv.PORT || 5000}`);
     });

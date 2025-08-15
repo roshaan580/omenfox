@@ -73,7 +73,6 @@ export const addResourceEmission = async (resourceData, employeeId) => {
     );
 
     if (response.status === 201) {
-      console.log("Resource added successfully!");
       return response.data;
     } else {
       throw new Error("Failed to add resource.");
@@ -84,13 +83,6 @@ export const addResourceEmission = async (resourceData, employeeId) => {
   }
 };
 
-/**
- * Updates an existing resource emission record
- * @param {string} resourceId - ID of the resource to update
- * @param {Object} resourceData - Updated resource data
- * @param {number} conversionFactor - Conversion factor for CO2 calculation
- * @returns {Promise<Object>} Response data
- */
 export const updateResourceEmission = async (
   resourceId,
   resourceData,
@@ -112,7 +104,6 @@ export const updateResourceEmission = async (
     );
 
     if (response.status === 200) {
-      console.log("Resource updated successfully!");
       return response.data;
     } else {
       throw new Error("Failed to update resource.");
@@ -140,7 +131,6 @@ export const deleteResourceEmission = async (resourceId) => {
     );
 
     if (response.status === 200) {
-      console.log("Resource deleted successfully!");
       return response.data;
     } else {
       throw new Error("Failed to delete resource.");

@@ -55,13 +55,11 @@ const useTransportData = (employeeId) => {
   // Create a memoized function to load transportation data that can be exported
   const loadTransportationData = useCallback(async () => {
     try {
-      console.log("Loading transportation data...");
       const { filteredRecords, allRecords } = await fetchTransportationRecords(
         employeeId
       );
       setEmployeeTransListing(filteredRecords);
       setGlobalTransportationData(allRecords);
-      console.log("Transportation data loaded successfully!");
       return { filteredRecords, allRecords };
     } catch (error) {
       console.error("Error loading transportation data:", error);
@@ -72,12 +70,10 @@ const useTransportData = (employeeId) => {
   // Create a memoized function to load work transportation data that can be exported
   const loadWorkTransportationData = useCallback(async () => {
     try {
-      console.log("Loading work transportation data...");
       const { filteredRecords, allRecords } =
         await fetchWorkTransportationRecords(employeeId);
       setWorkTransportationData(filteredRecords);
       setGlobalWorkTransportationData(allRecords);
-      console.log("Work transportation data loaded successfully!");
       return { filteredRecords, allRecords };
     } catch (error) {
       console.error("Error loading work transportation data:", error);
@@ -88,10 +84,8 @@ const useTransportData = (employeeId) => {
   // Fetch transportation modes
   const loadTransportModes = useCallback(async () => {
     try {
-      console.log("Loading transport modes...");
       const data = await fetchTransportationModes();
       setTransport(data);
-      console.log("Transport modes loaded successfully!");
       return data;
     } catch (error) {
       console.error("Error loading transport modes:", error);

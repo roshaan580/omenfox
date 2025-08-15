@@ -50,10 +50,6 @@ const FilterPanel = ({
               modalData={{ employees: filters.employees }}
               employeesState={employeesState}
               handleEmployeeChange={(selectedOptions) => {
-                console.log(
-                  "Emissions: Employee selection changed to:",
-                  selectedOptions
-                );
                 setFilters({
                   ...filters,
                   employees: selectedOptions,
@@ -67,10 +63,6 @@ const FilterPanel = ({
               modalData={{ cars: filters.transportations }}
               carsState={carsState}
               handleCarChange={(selectedOptions) => {
-                console.log(
-                  "Emissions: Transportation selection changed to:",
-                  selectedOptions
-                );
                 setFilters({
                   ...filters,
                   transportations: selectedOptions,

@@ -58,7 +58,6 @@ const CompanyPage = () => {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        console.log("Fetching companies...");
         const response = await fetch(`${REACT_APP_API_URL}/companies`, {
           method: "GET",
           headers: {
@@ -67,15 +66,11 @@ const CompanyPage = () => {
           },
         });
         
-        console.log("Companies response status:", response.status);
-        
         if (!response.ok) {
           throw new Error(`Failed to fetch companies: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log("Companies data:", data);
-        console.log("First company employees:", data[0]?.employees);
         
         setCompanies(data);
         setIsLoading(false);
@@ -454,19 +449,8 @@ const CompanyPage = () => {
         }
       }).filter(Boolean); // Remove any null values
 
-      // Update the company data with formatted employees and cars
       updatedData.employees = formattedEmployees;
       updatedData.cars = formattedCars;
-
-      console.log("Formatted company data for edit:", {
-        companyName: updatedData.name,
-        originalEmployees: employeesToUse,
-        formattedEmployees: formattedEmployees,
-        originalCars: carsToUse,
-        formattedCars: formattedCars
-      });
-
-      // Set the edit data and open the modal
       setEditCompanyData(updatedData);
       setShowEditModal(true);
     } catch (error) {

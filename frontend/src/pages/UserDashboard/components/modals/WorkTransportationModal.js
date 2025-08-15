@@ -39,7 +39,6 @@ const WorkTransportationModal = ({
 
       // Submit the record
       await saveWorkTransportationRecord(formData);
-      console.log("Work transportation record saved!");
       if (onSubmitSuccess) onSubmitSuccess();
     } catch (error) {
       console.error("Error saving work transportation record:", error);

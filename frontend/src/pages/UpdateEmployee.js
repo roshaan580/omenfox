@@ -101,7 +101,6 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
           onUpdate(responseData?.employee);
         }
         setUpdateSuccess(true);
-        console.log("Profile updated successfully!");
       } else {
         const errorData = await response.json();
         console.error("Profile update failed!", errorData);

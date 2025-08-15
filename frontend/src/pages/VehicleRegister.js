@@ -46,7 +46,6 @@ const VehicleRegisterPage = ({
 
   const userObj = JSON.parse(localStorage.getItem("userObj") || "{}");
   const userId = userObj?._id;
-  console.log("User ID:", userId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

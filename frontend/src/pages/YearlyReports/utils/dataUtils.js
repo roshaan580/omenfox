@@ -131,8 +131,6 @@ export const fetchOrGenerateReport = async (year, userId) => {
 export const loadReportById = async (reportId) => {
   try {
     const token = localStorage.getItem("token");
-    console.log(`Loading report with ID: ${reportId}`);
-
     const response = await fetch(
       `${REACT_APP_API_URL}/yearly-reports/${reportId}`,
       {
@@ -168,7 +166,6 @@ export const loadReportById = async (reportId) => {
 // Function to delete a report
 export const deleteReportById = async (reportId) => {
   try {
-    console.log("Attempting to delete report with ID:", reportId);
     const token = localStorage.getItem("token") || JWT_ADMIN_SECRET;
 
     const response = await fetch(
@@ -182,13 +179,9 @@ export const deleteReportById = async (reportId) => {
       }
     );
 
-    console.log("Delete response status:", response.status);
-
     let errorMessage = "";
     try {
-      // Try to parse response as JSON
       const responseData = await response.json();
-      console.log("Delete response data:", responseData);
 
       if (!response.ok) {
         errorMessage =

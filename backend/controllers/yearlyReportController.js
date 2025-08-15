@@ -20,7 +20,6 @@ exports.generateReport = async (req, res) => {
     // If userId wasn't provided in the body, try to get it from the auth token
     if (!userIdToUse && req.user && req.user._id) {
       userIdToUse = req.user._id;
-      console.log("Using userId from auth token:", userIdToUse);
     }
 
     if (!userIdToUse) {
@@ -333,10 +332,6 @@ exports.getAllReports = async (req, res) => {
 exports.getReportById = async (req, res) => {
   try {
     const { id } = req.params;
-
-    console.log("Attempting to fetch report with ID:", id);
-
-    // Try to find by MongoDB ID or reportId
     let report = null;
 
     // Check if it's a valid MongoDB ObjectId
@@ -348,11 +343,9 @@ exports.getReportById = async (req, res) => {
     }
 
     if (!report) {
-      console.log("Report not found:", id);
       return res.status(404).json({ message: "Report not found" });
     }
 
-    console.log("Report found successfully:", report._id, report.reportId);
     res.status(200).json(report);
   } catch (error) {
     console.error("Error fetching yearly report:", error);
@@ -401,9 +394,6 @@ exports.getReportByYear = async (req, res) => {
 exports.deleteReport = async (req, res) => {
   try {
     const { id } = req.params;
-
-    console.log("Attempting to delete report with ID:", id);
-
     // Try to find by MongoDB ID or reportId
     let report = null;
 
@@ -416,11 +406,8 @@ exports.deleteReport = async (req, res) => {
     }
 
     if (!report) {
-      console.log("Report not found for deletion:", id);
       return res.status(404).json({ message: "Report not found" });
     }
-
-    console.log("Report deleted successfully:", report._id, report.reportId);
     res.status(200).json({ message: "Report deleted successfully" });
   } catch (error) {
     console.error("Error deleting yearly report:", error);

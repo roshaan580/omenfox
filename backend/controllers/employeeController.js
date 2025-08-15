@@ -6,15 +6,6 @@ const { sendActivationEmail } = require("../services/emailService");
 // Get all employees
 exports.getEmployees = async (req, res) => {
   try {
-    console.log("Fetching employees from database...");
-    const employees = await Employee.find().populate("car").populate("company");
-    console.log("Found employees:", employees.length);
-    console.log("Employee sample:", employees.slice(0, 2).map(e => ({ 
-      id: e._id, 
-      name: `${e.firstName} ${e.lastName}`,
-      email: e.email,
-      company: e.company?.name || 'No company'
-    })));
     res.json(employees);
   } catch (err) {
     console.error("Error in getEmployees:", err);

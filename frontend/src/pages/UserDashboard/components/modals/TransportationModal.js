@@ -112,7 +112,7 @@ const TransportationModal = ({
         ...formData,
         vehicleId: selectedVehicle?._id,
       });
-      console.log("Transportation record saved successfully!");
+
       if (onSubmitSuccess) onSubmitSuccess();
     } catch (error) {
       console.error("Error saving transportation record:", error);

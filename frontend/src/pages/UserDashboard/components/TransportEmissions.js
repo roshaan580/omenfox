@@ -132,8 +132,6 @@ const TransportEmissions = ({ activeTab }) => {
     }
 
     try {
-      console.log("Fetching transport emissions for user ID:", userId);
-
       const response = await fetch(
         `${REACT_APP_API_URL}/transport-emissions/${userId}`,
         {
@@ -151,7 +149,6 @@ const TransportEmissions = ({ activeTab }) => {
 
       const data = await response.json();
       setTransportRecords(data);
-      console.log("Transport Emission Records:", data);
     } catch (error) {
       console.error("Error fetching transport emissions:", error);
       setError(`Failed to load transport emissions: ${error.message}`);
@@ -202,7 +199,6 @@ const TransportEmissions = ({ activeTab }) => {
     }
 
     try {
-      console.log("Deleting record ID:", deleteRecordId);
       setIsLoading(true);
 
       const response = await fetch(
@@ -219,8 +215,6 @@ const TransportEmissions = ({ activeTab }) => {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.message || "Failed to delete record");
-
-      console.log("Transport Emission record deleted successfully!");
       setShowDeleteConfirm(false);
 
       // Remove the deleted record from state instead of reloading

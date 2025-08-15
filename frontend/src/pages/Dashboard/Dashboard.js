@@ -68,7 +68,6 @@ const DashboardPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found, redirecting to login");
           navigate("/");
           return;
         }
@@ -122,16 +121,12 @@ const DashboardPage = () => {
     };
 
     const fetchStats = async () => {
-      console.log("Fetching dashboard stats...");
-      // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
       localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
       const token = localStorage.getItem("token");
 
       const fetchData = async (url, errorMessage) => {
         try {
-          // Add a specific Authorization header with JWT_ADMIN_SECRET as fallback
-          console.log(`Fetching: ${url}`);
           const response = await authenticatedFetch(url, {
             method: "GET",
             headers: {
@@ -140,15 +135,7 @@ const DashboardPage = () => {
                 : {}),
             },
           });
-          console.log(
-            `Response for ${url.split("/").pop()}: Status ${response.status}`
-          );
           const data = await response.json();
-          console.log(
-            `Got data for ${url.split("/").pop()}: ${
-              Array.isArray(data) ? data.length + " items" : "Object"
-            }`
-          );
           return data;
         } catch (error) {
           console.error(`${errorMessage}:`, error);
@@ -193,26 +180,14 @@ const DashboardPage = () => {
           ),
         ]);
 
-        // Extract only the data we need by index
         const emissionsData = responses[2];
         const redutionOverTime = responses[4];
         const emissionsByDate = responses[5];
         const emissionsByCategory = responses[6];
         const emissionsTrend = responses[7];
 
-        console.log("API Responses:", {
-          redutionOverTime,
-          emissionsTrend,
-          emissionsByCategory,
-          emissionsData,
-        });
-
-        // Special handling for emissions count
         if (Array.isArray(emissionsData)) {
-          console.log(`Setting emissions count to ${emissionsData.length}`);
           setEmissionsCount(emissionsData.length);
-
-          // Calculate total emissions
           const totalEmissions = emissionsData.reduce(
             (sum, record) => sum + parseFloat(record.co2Used || 0),
             0

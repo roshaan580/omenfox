@@ -110,7 +110,6 @@ const Wiki = () => {
       try {
         const storedToken = localStorage.getItem("token");
         if (!storedToken) {
-          console.log("No token found, redirecting to login");
           navigate("/");
           return;
         }

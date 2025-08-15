@@ -27,8 +27,6 @@ const AddTravelEmissionModal = ({
       className="custom-scrollbar"
       size="lg"
       onEntered={() => {
-        console.log("Add modal fully shown - triggering map refresh");
-        // Trigger a window resize event to force the map to render correctly
         setTimeout(() => {
           window.dispatchEvent(new Event("resize"));
         }, 100);

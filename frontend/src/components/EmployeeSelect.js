@@ -26,10 +26,6 @@ const EmployeeSelect = ({
     .filter(Boolean);
 
   const employeeOptions = employeesState.map(formatEmployeeData);
-
-  console.log("EmployeeSelect - Selected:", selectedEmployees);
-  console.log("EmployeeSelect - Options:", employeeOptions);
-
   const customStyles = {
     control: (provided) => ({
       ...provided,

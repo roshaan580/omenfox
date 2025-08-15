@@ -57,27 +57,19 @@ const LoginPage = () => {
       }
 
       const data = await response?.json();
-      console.log("Login successful:", data);
-
-      // Clear any old authentication data first
       localStorage.removeItem("token");
       localStorage.removeItem("userObj");
       localStorage.removeItem("userData");
 
       // Store user data consistently
       if (data?.user) {
-        // Ensure we store the full user object
         localStorage.setItem("userObj", JSON.stringify(data.user));
-
-        // For backward compatibility
         localStorage.setItem("userData", JSON.stringify(data.user));
       }
 
       // Always store the token if provided
       if (data?.jwtToken) {
         localStorage.setItem("token", data.jwtToken);
-
-        // Also set the token for axios calls
         axios.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${data.jwtToken}`;
@@ -89,7 +81,6 @@ const LoginPage = () => {
       } else if (data?.role === "employee") {
         navigate("/user-dashboard");
       } else {
-        // Default navigation if role is not specified
         navigate("/dashboard");
       }
     } catch (error) {

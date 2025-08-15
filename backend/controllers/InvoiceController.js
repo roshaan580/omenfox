@@ -124,13 +124,8 @@ Guidelines:
 
     try {
       metadata = JSON.parse(aiResponse);
-      console.log(
-        "Extracted invoice metadata:",
-        JSON.stringify(metadata, null, 2)
-      );
     } catch (parseError) {
       console.error("Error parsing JSON from API response:", parseError);
-      // Fallback to defaults
       metadata = {
         invoiceDate: new Date().toISOString().split("T")[0], // Today's date as default
         invoiceNumber: `AUTO-${Date.now()}`,
@@ -237,16 +232,10 @@ async function calculateEmissions(invoiceText, invoiceType) {
       );
     }
 
-    console.log("Making OpenAI API call for emissions calculation...");
-
-    // Create a hash of the invoice text to enable caching in the future
-    // This ensures that identical documents get processed consistently
     const invoiceHash = require("crypto")
       .createHash("md5")
       .update(invoiceText)
       .digest("hex");
-
-    console.log(`Processing invoice with hash: ${invoiceHash}`);
 
     // Define standard emission factors that will be used consistently
     const STANDARD_EMISSION_FACTORS = {
@@ -302,10 +291,6 @@ Return a JSON object with the following structure:
     try {
       consumptionData = JSON.parse(
         extractionResponse.data.choices[0].message.content
-      );
-      console.log(
-        "Extracted consumption data:",
-        JSON.stringify(consumptionData, null, 2)
       );
     } catch (parseError) {
       console.error("Error parsing consumption data JSON:", parseError);
@@ -403,7 +388,6 @@ Make sure the calculations shown exactly match the data provided.`,
     );
 
     const aiAnalysis = analysisResponse.data.choices[0].message.content;
-    console.log("Generated analysis report for invoice");
 
     // Get primary consumption and unit for backward compatibility
     let consumption = "";
@@ -420,12 +404,6 @@ Make sure the calculations shown exactly match the data provided.`,
         emissionFactor = `${STANDARD_EMISSION_FACTORS[primaryType]} kg CO₂/${consumptionUnit}`;
       }
     }
-
-    console.log(
-      `Final calculation - Total: ${totalEmissions} kg CO₂, Types: ${JSON.stringify(
-        emissionBreakdown
-      )}`
-    );
 
     return {
       emissions: totalEmissions,
@@ -717,7 +695,6 @@ exports.uploadInvoice = async (req, res) => {
         let metadata;
         try {
           metadata = await extractInvoiceMetadata(extractedText);
-          console.log("Extracted metadata:", metadata);
         } catch (metadataError) {
           console.error("Metadata extraction error:", metadataError);
           // Use fallback metadata if extraction fails
@@ -767,9 +744,6 @@ exports.uploadInvoice = async (req, res) => {
           emissionsData = await calculateEmissions(extractedText, type);
         } catch (emissionsError) {
           console.error("Emissions calculation error:", emissionsError);
-
-          // Instead of failing, use mock data
-          console.log("Using mock emissions data due to API error");
           emissionsData = generateMockEmissionsData(type);
 
           // Add warning message to the analysis
@@ -777,10 +751,7 @@ exports.uploadInvoice = async (req, res) => {
             `WARNING: OpenAI API error (${emissionsError.message})\n\n` +
             emissionsData.analysis;
         }
-
-        // Log to ensure we have a valid user ID
-        console.log("Creating invoice for user ID:", req.user._id);
-
+        
         // Convert Map to Object for storage
         const emissionBreakdownObj = {};
         if (emissionsData.emissionBreakdown) {

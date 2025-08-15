@@ -111,13 +111,11 @@ const EmployeePage = () => {
 
   // Edit employee function
   const editEmployee = (user) => {
-    console.log("Edit employee", user);
-    setModalVisible(user); // Set the selected employee to be edited
+    setModalVisible(user);
   };
 
   // Register employee function
   const regEmployee = (e) => {
-    console.log("Reg employee");
     setIsRegModel(e);
   };
 

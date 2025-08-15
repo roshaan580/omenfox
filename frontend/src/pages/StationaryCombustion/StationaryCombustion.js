@@ -64,7 +64,6 @@ const StationaryCombustionPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found in Stationary Combustion page, redirecting to login");
           navigate("/");
           return;
         }
@@ -112,9 +111,6 @@ const StationaryCombustionPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Fetching stationary combustion data...");
-        
-        // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 
         const response = await authenticatedFetch(`${REACT_APP_API_URL}/stationary-combustion?global=true`, {

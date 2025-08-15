@@ -53,7 +53,6 @@ const AdminTransport = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found, redirecting to login");
           navigate("/");
           return;
         }
@@ -82,7 +81,6 @@ const AdminTransport = () => {
     const fetchTransportData = async () => {
       try {
         setIsLoading(true);
-        console.log("Fetching admin transport data...");
 
         const response = await fetch(
           `${REACT_APP_API_URL}/employeeTransportations`,
@@ -100,9 +98,6 @@ const AdminTransport = () => {
         }
 
         const data = await response.json();
-        console.log("Admin Transport Data:", data);
-
-        // Make sure we get the records from the correct property - adjust based on API response
         const records = data.data || data;
 
         setTransportRecords(records);

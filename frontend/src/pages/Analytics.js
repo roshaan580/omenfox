@@ -125,15 +125,12 @@ const AnalyticsPage = () => {
   // Apply filters to emissions data
   const applyFilters = () => {
     let filteredData = [...emissions];
-    console.log("Original data count:", filteredData.length);
 
-    // Filter by date range
     if (filters.startDate) {
       const startDate = new Date(filters.startDate);
       filteredData = filteredData.filter(
         (item) => new Date(item.date) >= startDate
       );
-      console.log("After start date filter:", filteredData.length);
     }
 
     if (filters.endDate) {
@@ -143,7 +140,6 @@ const AnalyticsPage = () => {
       filteredData = filteredData.filter(
         (item) => new Date(item.date) < endDate
       );
-      console.log("After end date filter:", filteredData.length);
     }
 
     // Filter by employees
@@ -159,7 +155,6 @@ const AnalyticsPage = () => {
         }
         return false;
       });
-      console.log("After employee filter:", filteredData.length);
     }
 
     // Filter by transportation types
@@ -177,7 +172,6 @@ const AnalyticsPage = () => {
         }
         return false;
       });
-      console.log("After transportation filter:", filteredData.length);
     }
 
     // Filter by min emissions
@@ -189,7 +183,6 @@ const AnalyticsPage = () => {
           const value = parseFloat(item.emissionsKg || item.co2Used || 0);
           return value >= minValue;
         });
-        console.log("After min emissions filter:", filteredData.length);
       }
     }
 
@@ -202,7 +195,6 @@ const AnalyticsPage = () => {
           const value = parseFloat(item.emissionsKg || item.co2Used || 0);
           return value <= maxValue;
         });
-        console.log("After max emissions filter:", filteredData.length);
       }
     }
 
@@ -237,7 +229,6 @@ const AnalyticsPage = () => {
 
   // Handle employee select change
   const handleEmployeeChange = (selectedOptions) => {
-    console.log("Employee selection changed to:", selectedOptions);
     setFilters({
       ...filters,
       employees: selectedOptions || [],
@@ -246,7 +237,6 @@ const AnalyticsPage = () => {
 
   // Handle transportation select change
   const handleTransportationChange = (selectedOptions) => {
-    console.log("Transportation selection changed to:", selectedOptions);
     setFilters({
       ...filters,
       transportations: selectedOptions || [],

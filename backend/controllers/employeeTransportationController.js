@@ -22,8 +22,7 @@ exports.getTransportationRecords = async (req, res) => {
 // Create a new transportation record
 exports.createTransportationRecord = async (req, res) => {
   try {
-    console.log("Received data:", req.body); // Log received data
-
+    
     const {
       transportationMode,
       beginLocation,
@@ -86,8 +85,6 @@ exports.createTransportationRecord = async (req, res) => {
 
     // Save the record
     const savedRecord = await transportationRecord.save();
-    console.log("Saved record:", savedRecord);
-
     res.status(201).json({
       message: "Transportation record added successfully!",
       data: savedRecord,

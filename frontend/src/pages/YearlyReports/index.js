@@ -103,7 +103,6 @@ const YearlyReportsPage = () => {
 
         // Set the user data
         if (token && userObj && (userObj._id || userObj.id)) {
-          console.log("User data found:", userObj._id || userObj.id);
           setUserData({
             _id: userObj._id || userObj.id,
             role: userObj.role || "admin", // Default to admin if no role specified

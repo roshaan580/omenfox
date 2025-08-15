@@ -57,7 +57,6 @@ const MobileCombustionPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found in Mobile Combustion page, redirecting to login");
           navigate("/");
           return;
         }
@@ -105,8 +104,6 @@ const MobileCombustionPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Fetching mobile combustion data...");
-        
         // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
 

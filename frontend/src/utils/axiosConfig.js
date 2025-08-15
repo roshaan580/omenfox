@@ -19,7 +19,6 @@ api.interceptors.response.use(
           error.response.data.message ===
             "Token verification failed: jwt expired"))
     ) {
-      console.log("Authentication error detected");
       localStorage.setItem("auth_error", "true");
       localStorage.removeItem("token");
 
@@ -84,7 +83,6 @@ export const authenticatedFetch = async (url, options = {}) => {
           isTokenExpired = true;
 
           if (token && JWT_ADMIN_SECRET && token !== JWT_ADMIN_SECRET) {
-            console.log("Retrying with admin secret");
             const adminHeaders = {
               "Content-Type": "application/json",
               Authorization: `Bearer ${JWT_ADMIN_SECRET}`,

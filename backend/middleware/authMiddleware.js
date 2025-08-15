@@ -32,7 +32,6 @@ const authMiddleware = (req, res, next) => {
     // Check if the token matches the JWT_ADMIN_SECRET directly
     // This is a special case for when someone is using the admin secret directly
     if (token === dotEnv.JWT_ADMIN_SECRET) {
-      console.log("Using JWT_ADMIN_SECRET directly as token");
       req.user = {
         _id: "admin", // Special ID for admin
         role: "admin",
@@ -69,12 +68,6 @@ authMiddleware.required = (req, res, next) => {
       _id: decoded.id || decoded._id, // Use either format depending on what's in the token
       ...decoded,
     };
-    console.log(
-      "Token verified for user:",
-      req.user._id,
-      "role:",
-      decoded.role
-    );
     next();
   } catch (err) {
     console.error("Invalid token:", err.message);
@@ -82,7 +75,6 @@ authMiddleware.required = (req, res, next) => {
     // Check if the token equals the JWT_ADMIN_SECRET itself
     // This is an escape hatch for admin access
     if (token === dotEnv.JWT_ADMIN_SECRET) {
-      console.log("Using JWT_ADMIN_SECRET directly as token");
       req.user = {
         _id: "admin", // Special ID for admin
         role: "admin",

@@ -54,7 +54,6 @@ const AdminUserTransport = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("No token found, redirecting to login");
           navigate("/");
           return;
         }
@@ -83,8 +82,6 @@ const AdminUserTransport = () => {
     const fetchTransportData = async () => {
       try {
         setIsLoading(true);
-        console.log("Fetching admin user transport data...");
-
         const response = await fetch(
           `${REACT_APP_API_URL}/employeeTransportations`,
           {
@@ -101,9 +98,6 @@ const AdminUserTransport = () => {
         }
 
         const data = await response.json();
-        console.log("Admin User Transport Data:", data);
-
-        // Make sure we get the records from the correct property
         const records = data.data || data;
 
         setTransportData(records);

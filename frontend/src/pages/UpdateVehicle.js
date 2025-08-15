@@ -64,7 +64,6 @@ const UpdateVehicle = ({ userData, isModelVisible, onUpdate }) => {
       if (response.ok) {
         const responseData = await response.json();
         onUpdate(responseData?.vehicle);
-        console.log("Vehicle updated successfully!");
       } else {
         const errorData = await response.json();
         if (errorData.message && errorData.message.includes("duplicate")) {

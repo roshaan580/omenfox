@@ -88,9 +88,6 @@ const TravelAndCommuteEmissionsPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log(
-            "No token found in Travel & Commute page, redirecting to login"
-          );
           navigate("/");
           return;
         }
@@ -137,11 +134,7 @@ const TravelAndCommuteEmissionsPage = () => {
   useEffect(() => {
     const fetchEmissions = async () => {
       try {
-        console.log("Fetching travel & commute emissions data...");
-        // Store JWT_ADMIN_SECRET in localStorage for axiosConfig to use
         localStorage.setItem("JWT_ADMIN_SECRET", JWT_ADMIN_SECRET);
-
-        // Use Promise.all with authenticatedFetch instead
         const [emissionsRes, employeesRes, carsRes] = await Promise.all([
           authenticatedFetch(`${REACT_APP_API_URL}/emissions?global=true`, {
             method: "GET",
@@ -170,19 +163,11 @@ const TravelAndCommuteEmissionsPage = () => {
           }),
         ]);
 
-        console.log("Emissions API response status:", emissionsRes.status);
-        console.log("Employees API response status:", employeesRes.status);
-        console.log("Transportations API response status:", carsRes.status);
-
         const [emissionsData, employeesData, carsData] = await Promise.all([
           emissionsRes.json(),
           employeesRes.json(),
           carsRes.json(),
         ]);
-
-        console.log("Emissions data length:", emissionsData.length);
-        console.log("Employees data length:", employeesData.length);
-        console.log("Cars data length:", carsData.length);
 
         // Filter out company vehicles - only show personal vehicles in Travel & Commute section
         const filteredEmissions = emissionsData.filter(emission => {
@@ -196,8 +181,6 @@ const TravelAndCommuteEmissionsPage = () => {
           return !vehicle || vehicle.vehicleUseFor !== "Company";
         });
 
-        console.log(`Filtered out ${emissionsData.length - filteredEmissions.length} company vehicle records`);
-        
         setEmissionRecords(filteredEmissions);
         setEmployeesState(employeesData);
         setCarsState(carsData);
@@ -288,7 +271,6 @@ const TravelAndCommuteEmissionsPage = () => {
   };
 
   const handleStartLocationChange = (location) => {
-    console.log("Start location changed:", location);
     // Make sure address is properly set
     if (location && !location.address && location.lat && location.lon) {
       // If we have coordinates but no address, try to fetch the address
@@ -318,7 +300,6 @@ const TravelAndCommuteEmissionsPage = () => {
   };
 
   const handleEndLocationChange = (location) => {
-    console.log("End location changed:", location);
     // Make sure address is properly set
     if (location && !location.address && location.lat && location.lon) {
       // If we have coordinates but no address, try to fetch the address
@@ -387,7 +368,6 @@ const TravelAndCommuteEmissionsPage = () => {
       licensePlate: "",
     });
 
-    console.log("Opening Add New Record modal");
     setShowAddModal(true);
   };
 
@@ -409,7 +389,6 @@ const TravelAndCommuteEmissionsPage = () => {
         },
       });
 
-      console.log("Emission record created successfully!");
       window.location.reload();
     } catch (error) {
       console.error("Error submitting record:", error);
@@ -458,7 +437,6 @@ const TravelAndCommuteEmissionsPage = () => {
         }
       );
 
-      console.log("Emission record updated successfully!");
       window.location.reload();
     } catch (error) {
       console.error("Error submitting updated record:", error);
@@ -487,7 +465,6 @@ const TravelAndCommuteEmissionsPage = () => {
         }
       );
 
-      console.log("Emission record deleted successfully!");
       window.location.reload();
     } catch (error) {
       console.error("Error deleting record:", error);
@@ -543,46 +520,36 @@ const TravelAndCommuteEmissionsPage = () => {
   // Apply filters
   const applyFilters = () => {
     let filtered = [...emissionRecords];
-    console.log("Manual filter application triggered");
-    console.log("Initial records count:", filtered.length);
 
     if (filters.startDate) {
       filtered = filtered.filter(
         (record) => new Date(record.date) >= new Date(filters.startDate)
       );
-      console.log("After startDate filter:", filtered.length);
     }
 
     if (filters.endDate) {
       filtered = filtered.filter(
         (record) => new Date(record.date) <= new Date(filters.endDate)
       );
-      console.log("After endDate filter:", filtered.length);
     }
 
     if (filters.employees && filters.employees.length > 0) {
-      console.log("Selected employees:", filters.employees);
       filtered = filtered.filter((record) =>
         filters.employees.some((emp) => emp.value === record.employee?._id)
       );
-      console.log("After employees filter:", filtered.length);
     }
 
     if (filters.transportations && filters.transportations.length > 0) {
-      console.log("Selected transportations:", filters.transportations);
       filtered = filtered.filter((record) =>
         filters.transportations.some(
           (trans) => trans.value === record.transportation?._id
         )
       );
-      console.log("After transportations filter:", filtered.length);
     }
 
     setFilteredRecords(filtered);
-    console.log("Final filtered records:", filtered.length);
   };
 
-  // Initialize filtered records when emission records change
   useEffect(() => {
     setFilteredRecords(emissionRecords);
   }, [emissionRecords]);

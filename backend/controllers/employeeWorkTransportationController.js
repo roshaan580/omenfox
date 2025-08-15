@@ -31,7 +31,6 @@ exports.createWorkTransportationRecord = async (req, res) => {
       employeeId,
       date,
     } = req.body;
-    console.log(date, "test");
 
     // Validation: Ensure required fields are present
     if (

@@ -46,8 +46,6 @@ export const fetchVehicles = async () => {
  */
 export const toggleVehicleFavorite = async (vehicleId) => {
   try {
-    console.log(`Attempting to toggle favorite for vehicle ${vehicleId}`);
-
     const response = await fetch(
       `${REACT_APP_API_URL}/vehicles/${vehicleId}/favorite`,
       {
@@ -59,9 +57,6 @@ export const toggleVehicleFavorite = async (vehicleId) => {
       }
     );
 
-    // Log response status for debugging
-    console.log(`Response status: ${response.status}`);
-
     // Parse response even if not ok to see error details
     const data = await response.json();
 
@@ -71,8 +66,6 @@ export const toggleVehicleFavorite = async (vehicleId) => {
         `Failed to mark favorite: ${data.message || response.statusText}`
       );
     }
-
-    console.log("Favorite updated successfully:", data);
     return data;
   } catch (err) {
     console.error("Error marking favorite:", err);
