@@ -6,18 +6,17 @@ const createTransporter = () => {
     service: "gmail",
     host: "smtp.gmail.com",
     port: 587,
-    secure: false, // Use TLS
+    secure: false,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    // Add connection pooling and timeout settings for better performance
     pool: true,
     maxConnections: 5,
     maxMessages: 100,
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 5000, // 5 seconds
-    socketTimeout: 10000, // 10 seconds
+    connectionTimeout: 10000,
+    greetingTimeout: 5000,
+    socketTimeout: 10000,
   });
 };
 
