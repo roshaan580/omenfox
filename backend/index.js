@@ -82,7 +82,6 @@ app.use("/api/scenarios", scenarioRoutes);
 app.use("/api/targets", targetRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/wiki", wikiRoutes);
-
 app.use("/api/energy-emissions", energyEmissionRoutes);
 app.use("/api/transport-emissions", transportEmissionRoutes);
 
