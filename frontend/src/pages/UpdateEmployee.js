@@ -248,7 +248,6 @@ const UpdateEmployee = ({ userData, isModelVisible, onUpdate, companies = [] }) 
                   onChange={(e) => handlePasswordChange(e.target.value)}
                   placeholder="Enter new password"
                   minLength="6"
-                  required
                 />
                 <span
                   onClick={() => setShowPassword(!showPassword)}
