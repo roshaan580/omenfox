@@ -6,24 +6,7 @@ const { sendActivationEmail } = require("../services/emailService");
 // Get all employees
 exports.getEmployees = async (req, res) => {
   try {
-    console.log("Fetching employees from database...");
-    
-    // First try to get employees without populate to see if basic query works
-    const employeesBasic = await Employee.find();
-    console.log("Found employees (basic):", employeesBasic.length);
-    
-    // Now try with populate
     const employees = await Employee.find().populate("car").populate("company");
-    console.log("Found employees (with populate):", employees.length);
-    
-    if (employees.length > 0) {
-      console.log("Employee sample:", employees.slice(0, 2).map(e => ({ 
-        id: e._id, 
-        name: `${e.firstName} ${e.lastName}`,
-        email: e.email,
-        company: e.company?.name || 'No company'
-      })));
-    }
     
     res.json(employees);
   } catch (err) {
@@ -126,19 +109,9 @@ exports.createEmployee = async (req, res) => {
 
     // Determine registration context
     const registrationContext = req.user ? 'admin' : 'public';
-    console.log(`[REGISTRATION] Context: ${registrationContext}, Email: ${email}`);
-
-    // Send activation email and wait for result
-    console.log(`[REGISTRATION] Attempting to send activation email...`);
     const emailResult = await sendActivationEmail(email, firstName, lastName, activationToken, registrationContext);
     
-    if (emailResult.success) {
-      console.log(`[REGISTRATION] Activation email sent successfully to ${email}`, {
-        messageId: emailResult.messageId,
-        requestId: emailResult.requestId,
-        context: registrationContext
-      });
-      
+    if (emailResult.success) {      
       // Return success response
       res.status(201).json({
         message: "Employee created successfully. Activation email sent.",
