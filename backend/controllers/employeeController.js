@@ -126,29 +126,15 @@ exports.createEmployee = async (req, res) => {
 
     // Send activation email asynchronously (don't wait for it)
     sendActivationEmail(email, firstName, lastName, activationToken)
-      .then((emailResult) => {
-        if (emailResult.success) {
-          console.log(`Activation email sent successfully to ${email}`);
-        } else {
-          console.error("Failed to send activation email:", emailResult.error);
-        }
-      })
-      .catch((emailError) => {
-        console.error("Error sending activation email:", emailError);
-      });
+  .then((emailResult) => {
+    console.log(`Email sent successfully`);
+  })
+  .catch((emailError) => {
+    console.error("Error sending email:", emailError);
+  });
 
-    // Return the newly created employee immediately (don't wait for email)
-    res.status(201).json({
-      message: "Employee created successfully. Activation email is being sent.",
-      employee: {
-        _id: newEmployee._id,
-        firstName: newEmployee.firstName,
-        lastName: newEmployee.lastName,
-        email: newEmployee.email,
-        isActivated: newEmployee.isActivated,
-      },
-      car: savedCar,
-    });
+// Response sent immediately regardless of email status
+res.status(201).json({ message: "Email is being sent" });
   } catch (err) {
     console.error(err);
     if (err.code === 11000) {
