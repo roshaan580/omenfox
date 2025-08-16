@@ -1,7 +1,31 @@
 const nodemailer = require("nodemailer");
 
+// Validate email configuration on startup
+const validateEmailConfig = () => {
+  console.log('[EMAIL-CONFIG] Validating email configuration...');
+  
+  if (!process.env.EMAIL_USER) {
+    console.error('[EMAIL-CONFIG] ERROR: EMAIL_USER environment variable is not set');
+    return false;
+  }
+  
+  if (!process.env.EMAIL_PASS) {
+    console.error('[EMAIL-CONFIG] ERROR: EMAIL_PASS environment variable is not set');
+    return false;
+  }
+  
+  console.log('[EMAIL-CONFIG] Email configuration validated successfully');
+  console.log(`[EMAIL-CONFIG] EMAIL_USER: ${process.env.EMAIL_USER}`);
+  console.log(`[EMAIL-CONFIG] EMAIL_PASS: ${process.env.EMAIL_PASS ? '***SET***' : 'NOT SET'}`);
+  return true;
+};
+
 // Create transporter with optimized settings
 const createTransporter = () => {
+  if (!validateEmailConfig()) {
+    throw new Error('Email configuration is invalid');
+  }
+  
   return nodemailer.createTransport({
     service: "gmail",
     host: "smtp.gmail.com",
@@ -21,11 +45,27 @@ const createTransporter = () => {
 };
 
 // Send account activation email
-const sendActivationEmail = async (email, firstName, lastName, activationToken) => {
+const sendActivationEmail = async (email, firstName, lastName, activationToken, context = 'unknown') => {
+  const requestId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+  
+  console.log(`[EMAIL-${requestId}] Starting email send process`);
+  console.log(`[EMAIL-${requestId}] Context: ${context}`);
+  console.log(`[EMAIL-${requestId}] Recipient: ${email}`);
+  console.log(`[EMAIL-${requestId}] Environment check - EMAIL_USER: ${process.env.EMAIL_USER ? 'SET' : 'NOT SET'}`);
+  console.log(`[EMAIL-${requestId}] Environment check - EMAIL_PASS: ${process.env.EMAIL_PASS ? 'SET' : 'NOT SET'}`);
+  console.log(`[EMAIL-${requestId}] Environment check - FRONTEND_URL: ${process.env.FRONTEND_URL || 'NOT SET (using default)'}`);
+  
   try {
+    console.log(`[EMAIL-${requestId}] Creating transporter...`);
     const transporter = createTransporter();
     
+    // Test the connection
+    console.log(`[EMAIL-${requestId}] Testing SMTP connection...`);
+    await transporter.verify();
+    console.log(`[EMAIL-${requestId}] SMTP connection verified successfully`);
+    
     const activationLink = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/set-password?token=${activationToken}`;
+    console.log(`[EMAIL-${requestId}] Activation link generated: ${activationLink}`);
     
     const mailOptions = {
       from: `"Ensums" <${process.env.EMAIL_USER}>`,
@@ -72,11 +112,33 @@ const sendActivationEmail = async (email, firstName, lastName, activationToken) 
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    return { success: true };
+    console.log(`[EMAIL-${requestId}] Sending email...`);
+    console.log(`[EMAIL-${requestId}] Mail options:`, {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
+    
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`[EMAIL-${requestId}] Email sent successfully!`);
+    console.log(`[EMAIL-${requestId}] Send result:`, {
+      messageId: result.messageId,
+      response: result.response,
+      accepted: result.accepted,
+      rejected: result.rejected
+    });
+    
+    return { success: true, messageId: result.messageId, requestId };
   } catch (error) {
-    console.error("Error sending activation email:", error);
-    return { success: false, error: error.message };
+    console.error(`[EMAIL-${requestId}] Error sending activation email:`, error);
+    console.error(`[EMAIL-${requestId}] Error details:`, {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
+    return { success: false, error: error.message, requestId };
   }
 };
 
@@ -143,4 +205,5 @@ const sendPasswordResetEmail = async (email, firstName, lastName, resetToken) =>
 module.exports = {
   sendActivationEmail,
   sendPasswordResetEmail,
+  validateEmailConfig,
 };

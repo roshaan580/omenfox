@@ -124,17 +124,63 @@ exports.createEmployee = async (req, res) => {
       );
     }
 
-    // Send activation email asynchronously (don't wait for it)
-    sendActivationEmail(email, firstName, lastName, activationToken)
-  .then((emailResult) => {
-    console.log(`Email sent successfully`);
-  })
-  .catch((emailError) => {
-    console.error("Error sending email:", emailError);
-  });
+    // Determine registration context
+    const registrationContext = req.user ? 'admin' : 'public';
+    console.log(`[REGISTRATION] Context: ${registrationContext}, Email: ${email}`);
 
-// Response sent immediately regardless of email status
-res.status(201).json({ message: "Email is being sent" });
+    // Send activation email and wait for result
+    console.log(`[REGISTRATION] Attempting to send activation email...`);
+    const emailResult = await sendActivationEmail(email, firstName, lastName, activationToken, registrationContext);
+    
+    if (emailResult.success) {
+      console.log(`[REGISTRATION] Activation email sent successfully to ${email}`, {
+        messageId: emailResult.messageId,
+        requestId: emailResult.requestId,
+        context: registrationContext
+      });
+      
+      // Return success response
+      res.status(201).json({
+        message: "Employee created successfully. Activation email sent.",
+        employee: {
+          _id: newEmployee._id,
+          firstName: newEmployee.firstName,
+          lastName: newEmployee.lastName,
+          email: newEmployee.email,
+          isActivated: newEmployee.isActivated,
+        },
+        car: savedCar,
+        emailStatus: {
+          sent: true,
+          messageId: emailResult.messageId,
+          requestId: emailResult.requestId
+        }
+      });
+    } else {
+      console.error(`[REGISTRATION] Failed to send activation email to ${email}:`, {
+        error: emailResult.error,
+        requestId: emailResult.requestId,
+        context: registrationContext
+      });
+      
+      // Return error response
+      res.status(500).json({
+        message: "Employee created but failed to send activation email. Please contact support.",
+        employee: {
+          _id: newEmployee._id,
+          firstName: newEmployee.firstName,
+          lastName: newEmployee.lastName,
+          email: newEmployee.email,
+          isActivated: newEmployee.isActivated,
+        },
+        car: savedCar,
+        emailStatus: {
+          sent: false,
+          error: emailResult.error,
+          requestId: emailResult.requestId
+        }
+      });
+    }
   } catch (err) {
     console.error(err);
     if (err.code === 11000) {
